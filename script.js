@@ -1,33 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Hide loading screen and show main content after 2 seconds
-    setTimeout(function() {
-        document.getElementById('loading-screen').style.display = 'none';
-        document.getElementById('main-content').style.display = 'block';
-    }, 2000);
+    // Hide loading screen and show main content after maintenance is over
+    // For now, keep it hidden
+    // setTimeout(function() {
+    //     document.getElementById('loading-screen').style.display = 'none';
+    //     document.getElementById('main-content').style.display = 'block';
+    // }, 5000); // Uncomment this to show main content after 5 seconds
 
-    const form = document.getElementById('wellnessForm');
-    form.addEventListener('submit', async function(event) {
-        event.preventDefault(); // Prevent default form submission behavior
-
-        const formData = new FormData(form);
-        const wellnessData = Object.fromEntries(formData);
-
-        // Send data to your backend or process it locally
-        console.log(wellnessData);
-
-        // Example: Send data to backend
-        // fetch('/processData', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify(wellnessData)
-        // })
-        // .then(response => response.json())
-        // .then(data => console.log(data))
-        // .catch(error => console.error('Error:', error));
-
-        // Optionally, display a success message to the user
-        alert("Form submitted successfully!");
-    });
+    // Handle audio playback
+    const audio = document.getElementById('maintenanceAudio');
+    audio.volume = 0.5; // Adjust volume as needed
 });
