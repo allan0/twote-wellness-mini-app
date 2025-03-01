@@ -1,110 +1,89 @@
 body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Poppins', sans-serif;
-    background: linear-gradient(135deg, #1A1A1A, #2F2F2F);
-    color: #FFFFFF;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  overflow: hidden;
 }
 
-.container {
-    text-align: center;
-    padding: 20px;
-    max-width: 600px;
-    width: 100%;
+#background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
 }
 
-h1 {
-    color: #FFD700;
-    font-size: 2.5em;
-    font-weight: 600;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+#game {
+  padding: 20px;
+  text-align: center;
 }
 
-.subtitle {
-    color: #FFFACD;
-    font-size: 1.2em;
-    margin-bottom: 20px;
+#points {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-shadow: 0 0 10px #ffd700;
 }
 
-.game-info {
-    display: flex;
-    justify-content: space-around;
-    margin: 20px 0;
+#tasks button {
+  display: inline-block;
+  margin: 10px;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  color: #fff;
+  cursor: pointer;
 }
 
-.game-info p {
-    color: #FFFACD;
-    font-size: 1.2em;
+#tasks button svg {
+  width: 30px;
+  height: 30px;
+  vertical-align: middle;
+  margin-right: 10px;
 }
 
-.game-info span {
-    color: #FFD occurrence700;
-    font-weight: bold;
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
 }
 
-canvas {
-    border: 3px solid #DAA520;
-    background-color: rgba(26, 26, 26, 0.8);
-    width: 100%;
-    max-width: 400px;
-    height: 400px;
-    border-radius: 15px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+#tasks button:hover svg {
+  animation: pulse 2s infinite;
 }
 
-.actions {
-    margin: 20px 0;
+#leaderboard {
+  margin: 20px 0;
+  font-size: 18px;
 }
 
-button {
-    background-color: #DAA520;
-    color: #1A1A1A;
-    border: none;
-    padding: 10px 20px;
-    font-size: 1.1em;
-    font-weight: 600;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: transform 0.2s, background-color 0.3s;
-    margin: 0 10px;
+#refer, #social {
+  margin: 10px;
+  padding: 10px 20px;
+  background: #ffd700;
+  border: none;
+  border-radius: 10px;
+  color: #4b0082;
+  font-weight: bold;
+  cursor: pointer;
 }
 
-button:hover {
-    background-color: #FFD700;
-    transform: scale(1.05);
+.welcome {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  z-index: 10;
 }
 
-#rankings {
-    margin-top: 20px;
+.welcome svg {
+  width: 50px;
+  height: 50px;
 }
 
-#rankings h2 {
-    color: #FFD700;
-    font-size: 1.5em;
-}
-
-#ranking-list {
-    list-style: none;
-    padding: 0;
-}
-
-#ranking-list li {
-    color: #FFFACD;
-    font-size: 1.1em;
-    margin: 5px 0;
-    background: rgba(255, 250, 205, 0.1);
-    padding: 5px;
-    border-radius: 5px;
-}
-
-/* Mobile responsiveness */
-@media (max-width: 480px) {
-    h1 { font-size: 1.8em; }
-    .subtitle, .game-info p, #ranking-list li { font-size: 1em; }
-    canvas { max-width: 300px; height: 300px; }
-    button { padding: 8px 15px; font-size: 0.9em; }
+.hidden {
+  display: none;
 }
