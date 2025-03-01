@@ -3,19 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wellness Mini App - Under Maintenance</title>
-    <link rel="stylesheet" href="style.css">
+    <title>TWOTE</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Maintenance Screen -->
-    <div id="maintenance-screen" class="maintenance-screen">
-        <h1 style="color: #FFD700;">Under Maintenance</h1>
-        <p>Tap the gold coin to collect points!</p>
-        <div id="coin" class="coin"></div>
-        <p id="score">Score: 0</p>
-        <audio id="coinSound" src="coin-sound.mp3" type="audio/mp3"></audio>
+    <div class="container">
+        <h1>The way of third eye/h1>
+        <p>Tap the golden coins to earn wellness points!</p>
+        <div id="game-info">
+            <p>Score: <span id="score">0</span></p>
+            <p>Coming Soon: Full Wellness Mini App</p>
+        </div>
+        <canvas id="gameCanvas"></canvas>
+        <div id="rankings">
+            <h2>Rankings</h2>
+            <ul id="ranking-list">
+                <li>1. Golden Yogi - 500</li>
+                <li>2. Zen Master - 450</li>
+                <li>3. Calm Collector - 300</li>
+            </ul>
+        </div>
     </div>
-
     <script src="script.js"></script>
 </body>
 </html>
