@@ -1,15 +1,32 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Way of the Third Eye</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div id="welcome" class="hidden"></div>
+  <div id="welcome" class="welcome hidden"></div>
   <div id="game">
-    <svg id="background"></svg>
-    <div id="tasks"></div>
+    <svg id="background" width="100%" height="100%">
+      <defs>
+        <linearGradient id="cosmic" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#4b0082" />
+          <stop offset="100%" style="stop-color:#191970" />
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#cosmic)" />
+      <circle cx="50" cy="50" r="5" fill="white" opacity="0.8">
+        <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
+      </circle>
+      <circle cx="150" cy="100" r="3" fill="white" opacity="0.6">
+        <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3s" repeatCount="indefinite" />
+      </circle>
+    </svg>
     <div id="points">Inner Light: <span id="light">0</span></div>
+    <div id="tasks"></div>
     <div id="leaderboard"></div>
     <button id="refer">Refer a Friend</button>
     <button id="social">Visit Social</button>
