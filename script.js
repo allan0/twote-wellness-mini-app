@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const form = document.getElementById('wellnessForm');
     form.addEventListener('submit', async function(event) {
-        event.preventDefault();
+        event.preventDefault(); // Prevent default form submission behavior
+
         const formData = new FormData(form);
         const wellnessData = Object.fromEntries(formData);
 
@@ -15,15 +16,18 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log(wellnessData);
 
         // Example: Send data to backend
-        fetch('/processData', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(wellnessData)
-        })
-        .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error('Error:', error));
+        // fetch('/processData', {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json'
+        //     },
+        //     body: JSON.stringify(wellnessData)
+        // })
+        // .then(response => response.json())
+        // .then(data => console.log(data))
+        // .catch(error => console.error('Error:', error));
+
+        // Optionally, display a success message to the user
+        alert("Form submitted successfully!");
     });
 });
