@@ -1,39 +1,20 @@
-.svg-loader {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.loader-svg {
-    fill: none;
-    stroke-width: 8;
-    stroke-linecap: round;
-}
-
-.bg {
-    stroke: #ccc;
-}
-
-.animate {
-    stroke: #3498db;
-    stroke-dasharray: 283;
-    stroke-dashoffset: 283;
-    animation: dash 1.5s linear infinite;
-}
-
-@keyframes dash {
-    from {
-        stroke-dashoffset: 283;
-    }
-    to {
-        stroke-dashoffset: 0;
-    }
-}
-
-.loading-screen {
+.maintenance-screen {
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     height: 100vh;
+    background-color: #2c3e50; /* Darkish blue background */
+}
+
+.coin {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #FFD700; /* Gold color */
+    cursor: pointer;
+}
+
+.coin:hover {
+    transform: scale(1.1);
 }
