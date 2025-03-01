@@ -3,20 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TWOTE</title>
+    <title>The way of third eye</title>
     <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1>The way of third eye </h1>
-        <p>Tap the golden coins to earn wellness points!</p>
-        <div id="game-info">
+        <h1>TWOTE</h1>
+        <p class="subtitle">Collect golden coins for wellness points!</p>
+        <div class="game-info">
             <p>Score: <span id="score">0</span></p>
-            <p>Coming Soon: Full Wellness Mini App</p>
+            <p>Combo: x<span id="combo">1</span></p>
         </div>
         <canvas id="gameCanvas"></canvas>
+        <div class="actions">
+            <button id="refer-btn">Refer a Friend</button>
+            <button id="socials-btn">Visit Our Socials</button>
+        </div>
         <div id="rankings">
-            <h2>Rankings</h2>
+            <h2>Top Collectors</h2>
             <ul id="ranking-list">
                 <li>1. Golden Yogi - 500</li>
                 <li>2. Zen Master - 450</li>
