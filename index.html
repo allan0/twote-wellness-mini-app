@@ -3,30 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wellness Mini App</title>
+    <title>Wellness Mini App - Under Maintenance</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
     <!-- Loading Screen -->
     <div id="loading-screen" class="loading-screen">
-        <h1>Loading Wellness App...</h1>
+        <h1>Under Maintenance...</h1>
+        <svg class="svg-loader" viewBox="0 0 100 100">
+            <circle class="loader-svg bg" cx="50" cy="50" r="45"></circle>
+            <circle class="loader-svg animate" cx="50" cy="50" r="45"></circle>
+        </svg>
+        <audio id="maintenanceAudio" autoplay loop>
+            <source src="maintenance.mp3" type="audio/mp3">
+            Your browser does not support the audio element.
+        </audio>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content (Hidden) -->
     <div id="main-content" style="display: none;">
-        <h1>Wellness Tracker</h1>
-        <form id="wellnessForm">
-            <label for="sleepHours">Sleep Hours:</label><br>
-            <input type="number" id="sleepHours" name="sleepHours"><br>
-            <label for="waterIntake">Water Intake (liters):</label><br>
-            <input type="number" id="waterIntake" name="waterIntake"><br>
-            <label for="fastingLast">Last Fasting Date:</label><br>
-            <input type="date" id="fastingLast" name="fastingLast"><br>
-            <label for="quitSmoking">Want to Quit Smoking?</label><br>
-            <input type="checkbox" id="quitSmoking" name="quitSmoking"><br>
-            <button id="submitBtn" class="golden-button">Submit</button>
-        </form>
+        <!-- Your existing content here -->
     </div>
 
     <script src="script.js"></script>
