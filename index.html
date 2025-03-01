@@ -5,25 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wellness Mini App - Under Maintenance</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loading-screen" class="loading-screen">
-        <h1>Under Maintenance...</h1>
-        <svg class="svg-loader" viewBox="0 0 100 100">
-            <circle class="loader-svg bg" cx="50" cy="50" r="45"></circle>
-            <circle class="loader-svg animate" cx="50" cy="50" r="45"></circle>
-        </svg>
-        <audio id="maintenanceAudio" autoplay loop>
-            <source src="maintenance.mp3" type="audio/mp3">
-            Your browser does not support the audio element.
-        </audio>
-    </div>
-
-    <!-- Main Content (Hidden) -->
-    <div id="main-content" style="display: none;">
-        <!-- Your existing content here -->
+    <!-- Maintenance Screen -->
+    <div id="maintenance-screen" class="maintenance-screen">
+        <h1 style="color: #FFD700;">Under Maintenance</h1>
+        <p>Tap the gold coin to collect points!</p>
+        <div id="coin" class="coin"></div>
+        <p id="score">Score: 0</p>
+        <audio id="coinSound" src="coin-sound.mp3" type="audio/mp3"></audio>
     </div>
 
     <script src="script.js"></script>
