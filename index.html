@@ -3,57 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The World of the Third Eye</title>
+  <title>The Way of the Third Eye</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    /* Additional styles for loading screen and logo integration */
-    #loading-screen {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #191400; /* Cosmic background color */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    #loading-logo {
-      width: 200px; /* Adjust as needed */
-      height: auto;
-      animation: spin 2s linear infinite; /* Spin effect */
-    }
-
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-  </style>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
 </head>
 <body>
-
-  <div id="loading-screen">
-    <img id="loading-logo" src="logo.png" alt="Loading Logo">
+  <div id="loading-screen" class="loading-screen">
+    <img src="logo.png" alt="Third Eye Logo" class="logo-breathing">
   </div>
-
   <div id="welcome" class="welcome hidden"></div>
   <div id="game">
     <svg id="background" width="100%" height="100%">
       <defs>
         <linearGradient id="cosmic" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#4b3600" />
-          <stop offset="100%" style="stop-color:#191400" />
+          <stop offset="0%" style="stop-color:#d4a017" /> <!-- Gold from logo -->
+          <stop offset="100%" style="stop-color:#8b4513" /> <!-- Darker gold/beige -->
         </linearGradient>
       </defs>
       <rect width="100%" height="100%" fill="url(#cosmic)" />
-      <circle cx="50" cy="50" r="5" fill="#ffaa00" opacity="0.8">
+      <circle cx="50" cy="50" r="5" fill="#ffd700" opacity="0.8">
         <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
       </circle>
-      <circle cx="150" cy="100" r="3" fill="#ffaa00" opacity="0.6">
+      <circle cx="150" cy="100" r="3" fill="#ffd700" opacity="0.6">
         <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3s" repeatCount="indefinite" />
       </circle>
     </svg>
@@ -63,7 +34,6 @@
     <button id="refer">Refer a Friend</button>
     <button id="social">Visit Social</button>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
