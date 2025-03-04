@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setTimeout(() => {
     document.getElementById("loading-screen").classList.add("hidden");
     initializeApp();
-  }, 3000); // Show loading screen for 3 seconds
+  }, 30); // Show loading screen for 3 seconds
 });
 
 function initializeApp() {
@@ -43,7 +43,7 @@ function initializeApp() {
       svg: `<svg width="30" height="30" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#ffd700" stroke-width="5"><animate attributeName="r" values="40;45;40" dur="2s" repeatCount="indefinite" /></circle></svg>`,
       action: () => {
         webApp.showAlert("Breathe deeply for 30 seconds...");
-        setTimeout(() => addLight(10), 30000);
+        setTimeout(() => addLight(10), 300);
       }
     },
     {
