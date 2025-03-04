@@ -7,11 +7,11 @@ const username = webApp.initDataUnsafe?.user?.username || "Traveler";
 const welcomeDiv = document.getElementById("welcome");
 welcomeDiv.innerHTML = `
   <svg width="50" height="50" viewBox="0 0 100 100">
-    <path d="M50 10 L60 40 L90 40 L65 60 L75 90 L50 70 L25 90 L35 60 L10 40 L40 40 Z" fill="none" stroke="#ffd700" stroke-width="3">
+    <path d="M50 10 L60 40 L90 40 L65 60 L75 90 L50 70 L25 90 L35 60 L10 40 L40 40 Z" fill="none" stroke="#ffaa00" stroke-width="3">
       <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="5s" repeatCount="indefinite" />
     </path>
   </svg>
-  <p>Welcome, ${username}, to The Way of the Third Eye.<br>Awaken your inner light!</p>
+  <p>Welcome, ${username}, to The World of the Third Eye.<br>Awaken your inner light!</p>
 `;
 welcomeDiv.classList.remove("hidden");
 setTimeout(() => welcomeDiv.classList.add("hidden"), 3000);
@@ -31,7 +31,7 @@ function addLight(points) {
 const tasks = [
   {
     name: "Breathe",
-    svg: `<svg width="30" height="30" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#ffd700" stroke-width="5"><animate attributeName="r" values="40;45;40" dur="2s" repeatCount="indefinite" /></circle></svg>`,
+    svg: `<svg width="30" height="30" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#ffaa00" stroke-width="5"><animate attributeName="r" values="40;45;40" dur="2s" repeatCount="indefinite" /></circle></svg>`,
     action: () => {
       webApp.showAlert("Breathe deeply for 30 seconds...");
       setTimeout(() => addLight(10), 30000);
@@ -39,7 +39,7 @@ const tasks = [
   },
   {
     name: "Reflect",
-    svg: `<svg width="30" height="30" viewBox="0 0 100 100"><path d="M30 70 Q50 30 70 70" fill="none" stroke="#ffd700" stroke-width="5"><animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" /></path></svg>`,
+    svg: `<svg width="30" height="30" viewBox="0 0 100 100"><path d="M30 70 Q50 30 70 70" fill="none" stroke="#ffaa00" stroke-width="5"><animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" /></path></svg>`,
     action: () => {
       const reflection = prompt("Type a positive thought:");
       if (reflection) addLight(20);
@@ -81,8 +81,15 @@ function updateLeaderboard() {
   leaderboard.sort((a, b) => b.points - a.points);
   leaderboard = leaderboard.slice(0, 10);
   localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-  leaderboardDiv.innerHTML = "<h3>Leaderboard</h3>" + leaderboard.map((entry, i) => 
+  leaderboardDiv.innerHTML = "<h3>Leaderboard</h3>" + leaderboard.map((entry, i) =>
     `<p>${i + 1}. ${entry.name} - ${entry.points}</p>`).join("");
 }
 
 updateLeaderboard();
+
+// Remove loading screen after a delay (e.g., 3 seconds)
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loading-screen').style.display = 'none';
+  }, 3000);
+});
