@@ -3,25 +3,56 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Way of the Third Eye</title>
+  <title>The World of the Third Eye</title>
   <link rel="stylesheet" href="styles.css">
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    /* Additional styles for loading screen and logo integration */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #191970; /* Cosmic background color */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    #loading-logo {
+      width: 200px; /* Adjust as needed */
+      height: auto;
+      animation: spin 2s linear infinite; /* Spin effect */
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
+
+  <div id="loading-screen">
+    <img id="loading-logo" src="logo.png" alt="Loading Logo">
+  </div>
+
   <div id="welcome" class="welcome hidden"></div>
   <div id="game">
     <svg id="background" width="100%" height="100%">
       <defs>
         <linearGradient id="cosmic" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" style="stop-color:#4b0082" />
-          <stop offset="100%" style="stop-color:#191970" />
+          <stop offset="0%" style="stop-color:#4b3600" />
+          <stop offset="100%" style="stop-color:#191400" />
         </linearGradient>
       </defs>
       <rect width="100%" height="100%" fill="url(#cosmic)" />
-      <circle cx="50" cy="50" r="5" fill="white" opacity="0.8">
+      <circle cx="50" cy="50" r="5" fill="#ffaa00" opacity="0.8">
         <animate attributeName="opacity" values="0.8;0.2;0.8" dur="2s" repeatCount="indefinite" />
       </circle>
-      <circle cx="150" cy="100" r="3" fill="white" opacity="0.6">
+      <circle cx="150" cy="100" r="3" fill="#ffaa00" opacity="0.6">
         <animate attributeName="opacity" values="0.6;0.1;0.6" dur="3s" repeatCount="indefinite" />
       </circle>
     </svg>
@@ -31,6 +62,103 @@
     <button id="refer">Refer a Friend</button>
     <button id="social">Visit Social</button>
   </div>
-  <script src="script.js"></script>
+
+  <script>
+    // Telegram WebApp setup
+    const webApp = window.Telegram.WebApp;
+    webApp.ready();
+    const username = webApp.initDataUnsafe?.user?.username || "Traveler";
+
+    // Welcome message
+    const welcomeDiv = document.getElementById("welcome");
+    welcomeDiv.innerHTML = `
+      <svg width="50" height="50" viewBox="0 0 100 100">
+        <path d="M50 10 L60 40 L90 40 L65 60 L75 90 L50 70 L25 90 L35 60 L10 40 L40 40 Z" fill="none" stroke="#ffd700" stroke-width="3">
+          <animateTransform attributeName="transform" type="rotate" from="0 50 50" to="360 50 50" dur="5s" repeatCount="indefinite" />
+        </path>
+      </svg>
+      <p>Welcome, ${username}, to The World of the Third Eye.<br>Awaken your inner light!</p>
+    `;
+    welcomeDiv.classList.remove("hidden");
+    setTimeout(() => welcomeDiv.classList.add("hidden"), 3000);
+
+    // Points system
+    let innerLight = localStorage.getItem("innerLight") || 0;
+    document.getElementById("light").textContent = innerLight;
+
+    function addLight(points) {
+      innerLight = parseInt(innerLight) + points;
+      localStorage.setItem("innerLight", innerLight);
+      document.getElementById("light").textContent = innerLight;
+      updateLeaderboard();
+    }
+
+    // Tasks
+    const tasks = [
+      {
+        name: "Breathe",
+        svg: `<svg width="30" height="30" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="#ffaa00" stroke-width="5"><animate attributeName="r" values="40;45;40" dur="2s" repeatCount="indefinite" /></circle></svg>`,
+        action: () => {
+          webApp.showAlert("Breathe deeply for 30 seconds...");
+          setTimeout(() => addLight(10), 30000);
+        }
+      },
+      {
+        name: "Reflect",
+        svg: `<svg width="30" height="30" viewBox="0 0 100 100"><path d="M30 70 Q50 30 70 70" fill="none" stroke="#ffaa00" stroke-width="5"><animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite" /></path></svg>`,
+        action: () => {
+          const reflection = prompt("Type a positive thought:");
+          if (reflection) addLight(20);
+        }
+      }
+    ];
+
+    const tasksDiv = document.getElementById("tasks");
+    tasks.forEach(task => {
+      const btn = document.createElement("button");
+      btn.innerHTML = `${task.svg}${task.name}`;
+      btn.onclick = task.action;
+      tasksDiv.appendChild(btn);
+    });
+
+    // Social features
+    document.getElementById("refer").onclick = () => {
+      const refLink = `https://t.me/yourthird eyebot?start=${webApp.initDataUnsafe.user.id}`;
+      webApp.showPopup({ message: `Share this link: ${refLink}`, buttons: [{ type: "copy", text: "Copy Link" }] });
+      // Simulate referral success (in reality, track via bot)
+      setTimeout(() => {
+        webApp.showAlert("Friend joined! +30 Inner Light");
+        addLight(30);
+      }, 5000);
+    };
+
+    document.getElementById("social").onclick = () => {
+      webApp.openLink("https://twitter.com/yoursocial");
+      addLight(25);
+    };
+
+    // Leaderboard (simplified local version)
+    const leaderboardDiv = document.getElementById("leaderboard");
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [{ name: username, points: innerLight }];
+
+    function updateLeaderboard() {
+      leaderboard = leaderboard.filter(entry => entry.name !== username);
+      leaderboard.push({ name: username, points: innerLight });
+      leaderboard.sort((a, b) => b.points - a.points);
+      leaderboard = leaderboard.slice(0, 10);
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+      leaderboardDiv.innerHTML = "<h3>Leaderboard</h3>" + leaderboard.map((entry, i) =>
+        `<p>${i + 1}. ${entry.name} - ${entry.points}</p>`).join("");
+    }
+
+    updateLeaderboard();
+
+    // Remove loading screen after a delay (e.g., 3 seconds)
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.display = 'none';
+      }, 3000);
+    });
+  </script>
 </body>
 </html>
