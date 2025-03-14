@@ -20,27 +20,6 @@
             min-height: 100vh;
         }
 
-        /* Logo Styles */
-        #logo {
-            width: 200px;
-            height: auto;
-        }
-
-        /* Loading Screen */
-        #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #F5F5DC;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
         /* Content Area Styles */
         .container {
             width: 90%;
@@ -107,11 +86,6 @@
 </head>
 <body>
 
-<div id="loadingScreen">
-    <img id="logo" src="A-Quantum.jpg" alt="Third Eye Logo">
-    <p>Loading...</p>
-</div>
-
 <div class="container">
     <h1>Welcome to the World of Third Eye</h1>
 
@@ -173,24 +147,15 @@
         document.getElementById(sectionId).style.display = 'block';
     }
 
-    //Loading Screen
-
     document.addEventListener("DOMContentLoaded", function() {
-        // Hide all sections initially
-        showSection('');
-
-        // Simulate loading time
-        setTimeout(function() {
-            document.getElementById('loadingScreen').style.display = 'none';
-
-            // Check if birthdate is already saved (e.g., in localStorage)
-            if (localStorage.getItem('birthdate')) {
-                showSection('wellnessManager');
-            } else {
-                showSection('horoscopeForm');
-            }
-        }, 3000); // 3 seconds
+        // Check if birthdate is already saved (e.g., in localStorage)
+        if (localStorage.getItem('birthdate')) {
+            showSection('wellnessManager');
+        } else {
+            showSection('horoscopeForm');
+        }
     });
+
 
     // Function to save horoscope and show wellness manager
     function saveHoroscope() {
