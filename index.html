@@ -8,7 +8,7 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: sans-serif;
+            font-family: 'Nunito', sans-serif; /* Playful Font */
             background-color: #F5F5DC; /* Beige background */
             color: #6B451D; /* Brown text */
             margin: 0;
@@ -16,6 +16,11 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+        }
+
+        /* Ensure Nunito font is applied everywhere */
+        h1, h2, h3, h4, p, a, label, button, input {
+            font-family: 'Nunito', sans-serif;
         }
 
         /* Container Styles */
@@ -133,6 +138,9 @@
             display: none;
         }
     </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -157,27 +165,18 @@
         <h2>Wellness Manager</h2>
         <h3>66-Day Challenge</h3>
         <div id="dailyChallenges">
-            <div class="challenge-card">
-                <h4>Day 1: Meditation</h4>
-                <p>Spend 5 minutes meditating.</p>
-                <button class="btn btn-custom" onclick="completeChallenge(1)">Mark as Complete</button>
-            </div>
-            <div class="challenge-card">
-                <h4>Day 1: Yoga</h4>
-                <p>Do a sun salutation.</p>
-                <button class="btn btn-custom" onclick="completeChallenge(2)">Mark as Complete</button>
-            </div>
+            <!-- Challenges will be generated here -->
         </div>
     </div>
 
     <div id="tasksPage">
         <h2>Tasks</h2>
         <ul>
-            <li><a href="#">Join Telegram Channel</a></li>
-            <li><a href="#">Join Telegram Group</a></li>
-            <li><a href="#">Follow on Twitter/X</a></li>
-            <li><a href="#">Follow on Instagram</a></li>
-            <li><a href="#">Subscribe on YouTube</a></li>
+            <li><a href="#" onclick="joinLink('Telegram Channel')">Join Telegram Channel</a></li>
+            <li><a href="#" onclick="joinLink('Telegram Group')">Join Telegram Group</a></li>
+            <li><a href="#" onclick="joinLink('Twitter/X')">Follow on Twitter/X</a></li>
+            <li><a href="#" onclick="joinLink('Instagram')">Follow on Instagram</a></li>
+            <li><a href="#" onclick="joinLink('YouTube')">Subscribe on YouTube</a></li>
         </ul>
     </div>
 
@@ -228,13 +227,6 @@
     const friendsHub = document.getElementById('friendsHub');
     const leaderboardPage = document.getElementById('leaderboardPage');
 
-    // Energy Level
-    let energyLevel = 0;
-    const energyValue = document.getElementById('energyValue');
-
-    // Referral Code
-    let referralCode = "";
-
     // Show Section Function
     function showSection(sectionId) {
         const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
@@ -244,11 +236,13 @@
         document.getElementById(sectionId).style.display = 'block';
     }
 
-    //Initial Load
+     // Initial Load
     document.addEventListener("DOMContentLoaded", function() {
         // Check if birthdate is already saved (e.g., in localStorage)
         if (localStorage.getItem('birthdate')) {
             showSection('wellnessManager');
+            loadChallenges();
+            updateEnergyLevel(); // Load and update the energy level after showing the wellness manager
         } else {
             showSection('horoscopeForm');
         }
@@ -260,23 +254,132 @@
         if (birthdate) {
             localStorage.setItem('birthdate', birthdate);
             showSection('wellnessManager');
+            loadChallenges();
+            updateEnergyLevel(); // Load and update the energy level after showing the wellness manager
         } else {
             alert('Please enter your birthdate.');
         }
     }
 
-    // Complete Challenge Function
-    function completeChallenge(challengeId) {
-        energyLevel += 10; // Increase energy level
-        if (energyLevel > 100) energyLevel = 100;
-        energyValue.innerText = energyLevel;
-        alert('Challenge Complete! Energy Level: ' + energyLevel + '%');
+    // Tasks Page Function
+    function joinLink(platform) {
+        let link = "#";
+        switch (platform) {
+            case 'Telegram Channel':
+                link = 'https://t.me/yourchannel';
+                break;
+            case 'Telegram Group':
+                link = 'https://t.me/yourgroup';
+                break;
+            case 'Twitter/X':
+                link = 'https://twitter.com/yourtwitter';
+                break;
+            case 'Instagram':
+                link = 'https://instagram.com/yourinstagram';
+                break;
+            case 'YouTube':
+                link = 'https://youtube.com/youryoutube';
+                break;
+        }
+        window.open(link, '_blank');
     }
+
+    // Energy Level
+    let energyLevel = localStorage.getItem('energyLevel') || 0;
+    const energyValue = document.getElementById('energyValue');
+
+    // Function to update energy level display
+    function updateEnergyLevel() {
+        energyLevel = localStorage.getItem('energyLevel') || 0;
+        energyValue.innerText = energyLevel;
+    }
+
+    // Load Challenges from localStorage or initialize
+    function loadChallenges() {
+        let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+        if (challenges.length === 0) {
+            challenges = initializeChallenges();
+            localStorage.setItem('challenges', JSON.stringify(challenges));
+        }
+        displayChallenges(challenges);
+        updateEnergyLevel(); // Update the energy level after loading challenges
+    }
+
+    // Initialize 66-Day Challenge
+    function initializeChallenges() {
+        const challenges = [];
+        for (let i = 1; i <= 66; i++) {
+            challenges.push({
+                day: i,
+                meditationCompleted: false,
+                yogaCompleted: false
+            });
+        }
+        return challenges;
+    }
+
+    // Display Challenges
+    function displayChallenges(challenges) {
+        const dailyChallengesDiv = document.getElementById('dailyChallenges');
+        dailyChallengesDiv.innerHTML = ''; // Clear existing challenges
+
+        challenges.forEach((challenge) => {
+            const challengeCard = document.createElement('div');
+            challengeCard.className = 'challenge-card';
+            challengeCard.innerHTML = `
+                <h4>Day ${challenge.day}:</h4>
+                <p>Meditation: Spend 5 minutes meditating.</p>
+                <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
+                    ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
+                </button>
+                <p>Yoga: Do a sun salutation.</p>
+                <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'yoga')" ${challenge.yogaCompleted ? 'disabled' : ''}>
+                    ${challenge.yogaCompleted ? 'Completed' : 'Mark as Complete'}
+                </button>
+            `;
+            dailyChallengesDiv.appendChild(challengeCard);
+        });
+    }
+
+    // Complete Challenge Function
+    function completeChallenge(day, activity) {
+        let challenges = JSON.parse(localStorage.getItem('challenges'));
+        const challengeIndex = challenges.findIndex(c => c.day === day);
+
+        if (challengeIndex !== -1) {
+            if (activity === 'meditation') {
+                challenges[challengeIndex].meditationCompleted = true;
+            } else if (activity === 'yoga') {
+                challenges[challengeIndex].yogaCompleted = true;
+            }
+
+            localStorage.setItem('challenges', JSON.stringify(challenges));
+            updateEnergyLevel(); // Update the energy level after completing a challenge
+            loadChallenges(); // Reload challenges to update the display
+        }
+    }
+
+    // Referral Code
+    let referralCode = "";
 
     // Generate Referral Code Function
     function generateReferralCode() {
         referralCode = Math.random().toString(36).substring(7).toUpperCase();
         document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
+    }
+
+    // Energy Level
+    function updateEnergyLevel() {
+        let challenges = JSON.parse(localStorage.getItem('challenges'));
+        let completedCount = 0;
+        challenges.forEach(challenge => {
+            if (challenge.meditationCompleted) completedCount++;
+            if (challenge.yogaCompleted) completedCount++;
+        });
+
+        energyLevel = Math.round((completedCount / (66 * 2)) * 100);
+        localStorage.setItem('energyLevel', energyLevel);
+        energyValue.innerText = energyLevel;
     }
 </script>
 
