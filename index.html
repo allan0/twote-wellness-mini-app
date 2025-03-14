@@ -15,17 +15,30 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
             min-height: 100vh;
         }
 
-        /* Content Area Styles */
+        /* Container Styles */
         .container {
             width: 90%;
             max-width: 800px;
             padding: 20px;
             text-align: center;
+        }
+
+        /* Header Styles */
+        #header {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+        }
+
+        #energyLevel {
+            background-color: #D2B48C; /* Tan */
+            color: #6B451D; /* Brown */
+            border-radius: 5px;
+            padding: 5px 10px;
+            margin-bottom: 10px;
         }
 
         /* Button Styles */
@@ -78,16 +91,58 @@
             margin: 10px 0;
         }
 
-        /*Binaural Beats Pause Button*/
-        #audioControls {
-            margin-top: 10px;
+        /* Footer Styles */
+        #footer {
+            width: 100%;
+            background-color: #D2B48C; /* Tan */
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        #footer a {
+            color: #6B451D; /* Brown */
+            text-decoration: none;
+        }
+
+        /* Tasks Page Styles */
+        #tasksPage {
+            display: none;
+        }
+
+        #tasksPage ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #tasksPage li {
+            margin: 10px 0;
+        }
+
+        /* Friends Hub Styles */
+        #friendsHub {
+            display: none;
+        }
+
+        /* Leaderboard Styles */
+        #leaderboardPage {
+            display: none;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Welcome to the World of Third Eye</h1>
+    <div id="header">
+        <h1>The World of Third Eye</h1>
+        <div id="energyLevel">
+            Energy Level: <span id="energyValue">0</span>%
+        </div>
+    </div>
 
     <div id="horoscopeForm">
         <h2>Enter Your Birthdate</h2>
@@ -100,30 +155,61 @@
 
     <div id="wellnessManager">
         <h2>Wellness Manager</h2>
-        <div class="challenge-card">
-            <h3>Today's Meditation Challenge</h3>
-            <p>Spend 15 minutes in quiet contemplation.</p>
-            <button class="btn btn-custom">Mark as Complete</button>
-        </div>
-
-        <div class="challenge-card">
-            <h3>Today's Yoga Challenge</h3>
-            <p>Perform a 20-minute restorative yoga session.</p>
-            <button class="btn btn-custom">Mark as Complete</button>
+        <h3>66-Day Challenge</h3>
+        <div id="dailyChallenges">
+            <div class="challenge-card">
+                <h4>Day 1: Meditation</h4>
+                <p>Spend 5 minutes meditating.</p>
+                <button class="btn btn-custom" onclick="completeChallenge(1)">Mark as Complete</button>
+            </div>
+            <div class="challenge-card">
+                <h4>Day 1: Yoga</h4>
+                <p>Do a sun salutation.</p>
+                <button class="btn btn-custom" onclick="completeChallenge(2)">Mark as Complete</button>
+            </div>
         </div>
     </div>
 
-     <div id="audioControls">
-         <audio id="binauralBeats" src="binaural_beats.mp3" loop></audio>
-         <button class="btn btn-custom" onclick="toggleAudio()">Play/Pause Binaural Beats</button>
-     </div>
+    <div id="tasksPage">
+        <h2>Tasks</h2>
+        <ul>
+            <li><a href="#">Join Telegram Channel</a></li>
+            <li><a href="#">Join Telegram Group</a></li>
+            <li><a href="#">Follow on Twitter/X</a></li>
+            <li><a href="#">Follow on Instagram</a></li>
+            <li><a href="#">Subscribe on YouTube</a></li>
+        </ul>
+    </div>
 
+    <div id="friendsHub">
+        <h2>Friends Hub</h2>
+        <p>Refer friends and earn rewards!</p>
+        <button class="btn btn-custom" onclick="generateReferralCode()">Generate Referral Code</button>
+        <p id="referralCode"></p>
+    </div>
+
+    <div id="leaderboardPage">
+        <h2>Leaderboard</h2>
+        <p>Top mindful masters!</p>
+        <ol id="leaderboardList"></ol>
+    </div>
+
+    <div id="audioControls">
+        <audio id="binauralBeats" src="binaural_beats.mp3" loop></audio>
+        <button class="btn btn-custom" onclick="toggleAudio()">Play/Pause Binaural Beats</button>
+    </div>
+
+    <div id="footer">
+        <a href="#" onclick="showSection('wellnessManager')">Home</a>
+        <a href="#" onclick="showSection('tasksPage')">Tasks</a>
+        <a href="#" onclick="showSection('friendsHub')">Referrals</a>
+        <a href="#" onclick="showSection('leaderboardPage')">Leaderboard</a>
+    </div>
 </div>
 
 <script>
-    //Binaural Beats
+    // Binaural Beats
     var audio = document.getElementById("binauralBeats");
-
     function toggleAudio() {
         if (audio.paused) {
             audio.play();
@@ -134,19 +220,31 @@
 
     // Telegram Web App init
     Telegram.WebApp.ready();
-    //Horoscope Form
+
+    // Sections
     const horoscopeForm = document.getElementById('horoscopeForm');
     const wellnessManager = document.getElementById('wellnessManager');
+    const tasksPage = document.getElementById('tasksPage');
+    const friendsHub = document.getElementById('friendsHub');
+    const leaderboardPage = document.getElementById('leaderboardPage');
 
-    // Function to show/hide sections
+    // Energy Level
+    let energyLevel = 0;
+    const energyValue = document.getElementById('energyValue');
+
+    // Referral Code
+    let referralCode = "";
+
+    // Show Section Function
     function showSection(sectionId) {
-        const sections = ['horoscopeForm', 'wellnessManager'];
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
         sections.forEach(id => {
             document.getElementById(id).style.display = 'none';
         });
         document.getElementById(sectionId).style.display = 'block';
     }
 
+    //Initial Load
     document.addEventListener("DOMContentLoaded", function() {
         // Check if birthdate is already saved (e.g., in localStorage)
         if (localStorage.getItem('birthdate')) {
@@ -156,8 +254,7 @@
         }
     });
 
-
-    // Function to save horoscope and show wellness manager
+    // Save Horoscope Function
     function saveHoroscope() {
         const birthdate = document.getElementById('birthdate').value;
         if (birthdate) {
@@ -166,6 +263,20 @@
         } else {
             alert('Please enter your birthdate.');
         }
+    }
+
+    // Complete Challenge Function
+    function completeChallenge(challengeId) {
+        energyLevel += 10; // Increase energy level
+        if (energyLevel > 100) energyLevel = 100;
+        energyValue.innerText = energyLevel;
+        alert('Challenge Complete! Energy Level: ' + energyLevel + '%');
+    }
+
+    // Generate Referral Code Function
+    function generateReferralCode() {
+        referralCode = Math.random().toString(36).substring(7).toUpperCase();
+        document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
     }
 </script>
 
