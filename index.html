@@ -96,11 +96,11 @@
         #dailyChallenges {
             min-height: 50vh;
             overflow-y: auto;
-            padding-bottom: 60px; /* Avoid overlap with footer */
+            padding-bottom: 60px;
         }
 
         .challenge-card {
-            background-color: #FFF8DC; /* Cornsilk */
+            background-color: #FFF8DC;
             border: 1px solid #BDB76B;
             border-radius: 8px;
             padding: 15px;
@@ -111,7 +111,7 @@
 
         #footer {
             width: 100%;
-            background-color: #D2B48C; /* Tan */
+            background-color: #D2B48C;
             padding: 10px;
             text-align: center;
             position: fixed;
@@ -134,7 +134,7 @@
             border-radius: 5px;
         }
 
-        #tasksPage {
+        #tasksPage, #friendsHub, #leaderboardPage {
             display: none;
         }
 
@@ -145,10 +145,6 @@
 
         #tasksPage li {
             margin: 10px 0;
-        }
-
-        #friendsHub, #leaderboardPage {
-            display: none;
         }
     </style>
 </head>
@@ -209,72 +205,7 @@
     </div>
 
     <script>
-        // Telegram Web App init
-        if (typeof window.Telegram !== 'undefined') {
-            window.Telegram.WebApp.ready();
-        }
-
-        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
-
-        function showSection(sectionId) {
-            sections.forEach(id => document.getElementById(id).style.display = 'none');
-            const section = document.getElementById(sectionId);
-            section.style.display = 'block';
-            if (sectionId === 'wellnessManager') {
-                loadChallenges();
-            }
-        }
-
-        document.addEventListener("DOMContentLoaded", function() {
-            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.onEvent('viewportChanged', loadChallenges);
-                console.log("Telegram WebApp initialized");
-                if (localStorage.getItem('birthdate')) {
-                    showSection('wellnessManager');
-                } else {
-                    showSection('horoscopeForm');
-                }
-            } else {
-                console.warn("Running in browser mode - Telegram WebApp not detected.");
-                if (localStorage.getItem('birthdate')) {
-                    showSection('wellnessManager');
-                } else {
-                    showSection('horoscopeForm');
-                }
-            }
-        });
-
-        function saveHoroscope() {
-            const birthdate = document.getElementById('birthdate').value;
-            if (birthdate) {
-                localStorage.setItem('birthdate', birthdate);
-                showSection('wellnessManager');
-            } else {
-                alert('Please enter your birthdate.');
-            }
-        }
-
-        function joinLink(platform) {
-            const links = {
-                'Telegram Channel': 'https://t.me/yourchannel',
-                'Telegram Group': 'https://t.me/yourgroup',
-                'Twitter/X': 'https://twitter.com/yourtwitter',
-                'Instagram': 'https://instagram.com/yourinstagram',
-                'YouTube': 'https://youtube.com/youryoutube'
-            };
-            window.open(links[platform] || '#', '_blank');
-        }
-
-        const energyValue = document.getElementById('energyValue');
-        function updateEnergyLevel() {
-            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
-            localStorage.setItem('energyLevel', energyLevel);
-            energyValue.innerText = energyLevel;
-        }
-
+        // Define dailyGoals globally to ensure accessibility
         const dailyGoals = [
             {
                 goal: "Wealth and Abundance",
@@ -344,22 +275,97 @@
             }
         ];
 
+        console.log("Daily goals defined:", dailyGoals); // Debug to confirm array exists
+
+        // Telegram Web App init
+        if (typeof window.Telegram !== 'undefined') {
+            window.Telegram.WebApp.ready();
+        }
+
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
+
+        function showSection(sectionId) {
+            sections.forEach(id => document.getElementById(id).style.display = 'none');
+            const section = document.getElementById(sectionId);
+            section.style.display = 'block';
+            if (sectionId === 'wellnessManager') {
+                loadChallenges();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.onEvent('viewportChanged', loadChallenges);
+                console.log("Telegram WebApp initialized");
+                if (localStorage.getItem('birthdate')) {
+                    showSection('wellnessManager');
+                } else {
+                    showSection('horoscopeForm');
+                }
+            } else {
+                console.warn("Running in browser mode - Telegram WebApp not detected.");
+                if (localStorage.getItem('birthdate')) {
+                    showSection('wellnessManager');
+                } else {
+                    showSection('horoscopeForm');
+                }
+            }
+        });
+
+        function saveHoroscope() {
+            const birthdate = document.getElementById('birthdate').value;
+            if (birthdate) {
+                localStorage.setItem('birthdate', birthdate);
+                showSection('wellnessManager');
+            } else {
+                alert('Please enter your birthdate.');
+            }
+        }
+
+        function joinLink(platform) {
+            const links = {
+                'Telegram Channel': 'https://t.me/yourchannel',
+                'Telegram Group': 'https://t.me/yourgroup',
+                'Twitter/X': 'https://twitter.com/yourtwitter',
+                'Instagram': 'https://instagram.com/yourinstagram',
+                'YouTube': 'https://youtube.com/youryoutube'
+            };
+            window.open(links[platform] || '#', '_blank');
+        }
+
+        const energyValue = document.getElementById('energyValue');
+        function updateEnergyLevel() {
+            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
+            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
+            localStorage.setItem('energyLevel', energyLevel);
+            energyValue.innerText = energyLevel;
+        }
+
         function initializeChallenges() {
-            return Array.from({ length: 66 }, (_, i) => {
+            console.log("Initializing challenges with dailyGoals:", dailyGoals);
+            const challenges = Array.from({ length: 66 }, (_, i) => {
                 const goalIndex = i % dailyGoals.length;
                 const goalData = dailyGoals[goalIndex];
+                if (!goalData) {
+                    console.error("Goal data undefined at index", goalIndex);
+                    return null;
+                }
                 return {
                     day: i + 1,
-                    goal: goalData.goal,
-                    meditation: goalData.meditation,
-                    task1: goalData.task1,
-                    task2: goalData.task2,
+                    goal: goalData.goal || "Unknown Goal",
+                    meditation: goalData.meditation || "Meditation not set",
+                    task1: goalData.task1 || "Task 1 not set",
+                    task2: goalData.task2 || "Task 2 not set",
                     meditationCompleted: false,
                     task1Completed: false,
                     task2Completed: false,
-                    audioSrc: '' // Placeholder; update with actual audio paths later
+                    audioSrc: '' // Placeholder for audio files
                 };
-            });
+            }).filter(challenge => challenge !== null);
+            console.log("Initialized challenges:", challenges);
+            return challenges;
         }
 
         function loadChallenges() {
@@ -367,9 +373,11 @@
                 window.Telegram.WebApp.ready();
             }
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            console.log("Loaded challenges:", challenges);
-            if (challenges.length === 0) {
-                console.log("Initializing challenges...");
+            console.log("Loaded challenges from localStorage:", challenges);
+
+            // Check if challenges are valid; reinitialize if empty or corrupted
+            if (!challenges || challenges.length === 0 || challenges.some(c => !c.goal || c.goal === "undefined")) {
+                console.log("Challenges invalid or empty, reinitializing...");
                 challenges = initializeChallenges();
                 localStorage.setItem('challenges', JSON.stringify(challenges));
             }
@@ -378,9 +386,17 @@
 
         function displayChallenges(challenges) {
             const dailyChallengesDiv = document.getElementById('dailyChallenges');
+            if (!dailyChallengesDiv) {
+                console.error("dailyChallenges div not found!");
+                return;
+            }
             dailyChallengesDiv.innerHTML = '';
             console.log("Displaying challenges:", challenges);
             challenges.forEach(challenge => {
+                if (!challenge || typeof challenge.goal === 'undefined') {
+                    console.error("Invalid challenge object:", challenge);
+                    return;
+                }
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
                 card.innerHTML = `
