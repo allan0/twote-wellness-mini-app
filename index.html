@@ -1,16 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>The World of Third Eye</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The World of Third Eye</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
-            font-family: 'Nunito', sans-serif; /* Playful Font */
-            background-color: #F5F5DC; /* Beige background */
-            color: #6B451D; /* Brown text */
+            font-family: 'Nunito', sans-serif;
+            background-color: #F5F5DC; /* Beige */
+            color: #6B451D; /* Brown */
             margin: 0;
             padding: 0;
             display: flex;
@@ -18,12 +22,10 @@
             min-height: 100vh;
         }
 
-        /* Ensure Nunito font is applied everywhere */
         h1, h2, h3, h4, p, a, label, button, input {
             font-family: 'Nunito', sans-serif;
         }
 
-        /* Container Styles */
         .container {
             width: 90%;
             max-width: 800px;
@@ -31,7 +33,6 @@
             text-align: center;
         }
 
-        /* Header Styles */
         #header {
             width: 100%;
             text-align: center;
@@ -40,13 +41,12 @@
 
         #energyLevel {
             background-color: #D2B48C; /* Tan */
-            color: #6B451D; /* Brown */
+            color: #6B451D;
             border-radius: 5px;
             padding: 5px 10px;
             margin-bottom: 10px;
         }
 
-        /* Button Styles */
         .btn-custom {
             background-color: #BDB76B; /* Dark Khaki */
             color: #FFFFFF;
@@ -59,6 +59,12 @@
 
         .btn-custom:hover {
             background-color: #8B864E; /* Darker Khaki */
+        }
+
+        .btn-custom:disabled {
+            background-color: #8FBC8F; /* SeaGreen */
+            color: #FFFFFF;
+            cursor: not-allowed;
         }
 
         #horoscopeForm {
@@ -82,7 +88,6 @@
             box-sizing: border-box;
         }
 
-        /* Wellness Manager Styles */
         #wellnessManager {
             display: none;
             margin-top: 20px;
@@ -93,10 +98,10 @@
             border: 1px solid #BDB76B;
             border-radius: 8px;
             padding: 15px;
-            margin: 10px 0;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        /* Footer Styles */
         #footer {
             width: 100%;
             background-color: #D2B48C; /* Tan */
@@ -110,11 +115,18 @@
         }
 
         #footer a {
-            color: #6B451D; /* Brown */
+            color: #6B451D;
             text-decoration: none;
+            padding: 10px;
+            display: inline-block;
         }
 
-        /* Tasks Page Styles */
+        #footer a:hover {
+            background-color: #BDB76B;
+            color: #FFFFFF;
+            border-radius: 5px;
+        }
+
         #tasksPage {
             display: none;
         }
@@ -128,260 +140,203 @@
             margin: 10px 0;
         }
 
-        /* Friends Hub Styles */
-        #friendsHub {
-            display: none;
-        }
-
-        /* Leaderboard Styles */
-        #leaderboardPage {
+        #friendsHub, #leaderboardPage {
             display: none;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div class="container">
+        <div id="header">
+            <h1>The World of Third Eye</h1>
+            <div id="energyLevel">
+                Energy Level: <span id="energyValue">0</span>%
+            </div>
+        </div>
 
-<div class="container">
-    <div id="header">
-        <h1>The World of Third Eye</h1>
-        <div id="energyLevel">
-            Energy Level: <span id="energyValue">0</span>%
+        <div id="horoscopeForm">
+            <h2>Enter Your Birthdate</h2>
+            <div class="form-group">
+                <label for="birthdate">Birthdate:</label>
+                <input type="date" id="birthdate" name="birthdate">
+            </div>
+            <button class="btn btn-custom" onclick="saveHoroscope()">Save & Continue</button>
+        </div>
+
+        <div id="wellnessManager">
+            <h2>Wellness Manager</h2>
+            <h3>66-Day Challenge</h3>
+            <div id="dailyChallenges"></div>
+        </div>
+
+        <div id="tasksPage">
+            <h2>Tasks</h2>
+            <ul>
+                <li><a href="#" class="btn btn-custom" onclick="joinLink('Telegram Channel')"><i class="fab fa-telegram-plane"></i> Join Telegram Channel</a></li>
+                <li><a href="#" class="btn btn-custom" onclick="joinLink('Telegram Group')"><i class="fab fa-telegram-plane"></i> Join Telegram Group</a></li>
+                <li><a href="#" class="btn btn-custom" onclick="joinLink('Twitter/X')"><i class="fab fa-twitter"></i> Follow on Twitter/X</a></li>
+                <li><a href="#" class="btn btn-custom" onclick="joinLink('Instagram')"><i class="fab fa-instagram"></i> Follow on Instagram</a></li>
+                <li><a href="#" class="btn btn-custom" onclick="joinLink('YouTube')"><i class="fab fa-youtube"></i> Subscribe on YouTube</a></li>
+            </ul>
+        </div>
+
+        <div id="friendsHub">
+            <h2>Friends Hub</h2>
+            <p>Refer friends and earn rewards!</p>
+            <button class="btn btn-custom" onclick="generateReferralCode()"><i class="fas fa-share"></i> Generate Referral Code</button>
+            <p id="referralCode"></p>
+        </div>
+
+        <div id="leaderboardPage">
+            <h2>Leaderboard</h2>
+            <p>Top mindful masters!</p>
+            <ol id="leaderboardList"></ol>
+        </div>
+
+        <div id="audioControls">
+            <audio id="binauralBeats" src="binaural_beats.mp3" loop></audio>
+            <button class="btn btn-custom" onclick="toggleAudio()"><i class="fas fa-play"></i> Play Binaural Beats</button>
+        </div>
+
+        <div id="footer">
+            <a href="#" onclick="showSection('wellnessManager')">Home</a>
+            <a href="#" onclick="showSection('tasksPage')">Tasks</a>
+            <a href="#" onclick="showSection('friendsHub')">Referrals</a>
+            <a href="#" onclick="showSection('leaderboardPage')">Leaderboard</a>
         </div>
     </div>
 
-    <div id="horoscopeForm">
-        <h2>Enter Your Birthdate</h2>
-        <div class="form-group">
-            <label for="birthdate">Birthdate:</label>
-            <input type="date" id="birthdate" name="birthdate">
-        </div>
-        <button class="btn btn-custom" onclick="saveHoroscope()">Save & Continue</button>
-    </div>
-
-    <div id="wellnessManager">
-        <h2>Wellness Manager</h2>
-        <h3>66-Day Challenge</h3>
-        <div id="dailyChallenges">
-            <!-- Challenges will be generated here -->
-        </div>
-    </div>
-
-    <div id="tasksPage">
-        <h2>Tasks</h2>
-        <ul>
-            <li><a href="#" onclick="joinLink('Telegram Channel')">Join Telegram Channel</a></li>
-            <li><a href="#" onclick="joinLink('Telegram Group')">Join Telegram Group</a></li>
-            <li><a href="#" onclick="joinLink('Twitter/X')">Follow on Twitter/X</a></li>
-            <li><a href="#" onclick="joinLink('Instagram')">Follow on Instagram</a></li>
-            <li><a href="#" onclick="joinLink('YouTube')">Subscribe on YouTube</a></li>
-        </ul>
-    </div>
-
-    <div id="friendsHub">
-        <h2>Friends Hub</h2>
-        <p>Refer friends and earn rewards!</p>
-        <button class="btn btn-custom" onclick="generateReferralCode()">Generate Referral Code</button>
-        <p id="referralCode"></p>
-    </div>
-
-    <div id="leaderboardPage">
-        <h2>Leaderboard</h2>
-        <p>Top mindful masters!</p>
-        <ol id="leaderboardList"></ol>
-    </div>
-
-    <div id="audioControls">
-        <audio id="binauralBeats" src="binaural_beats.mp3" loop></audio>
-        <button class="btn btn-custom" onclick="toggleAudio()">Play/Pause Binaural Beats</button>
-    </div>
-
-    <div id="footer">
-        <a href="#" onclick="showSection('wellnessManager')">Home</a>
-        <a href="#" onclick="showSection('tasksPage')">Tasks</a>
-        <a href="#" onclick="showSection('friendsHub')">Referrals</a>
-        <a href="#" onclick="showSection('leaderboardPage')">Leaderboard</a>
-    </div>
-</div>
-
-<script>
-    // Binaural Beats
-    var audio = document.getElementById("binauralBeats");
-    function toggleAudio() {
-        if (audio.paused) {
-            audio.play();
-        } else {
-            audio.pause();
+    <script>
+        // Audio Toggle
+        function toggleAudio() {
+            const audio = document.getElementById("binauralBeats");
+            const button = document.querySelector("#audioControls button");
+            if (audio.paused) {
+                audio.play();
+                button.innerHTML = '<i class="fas fa-pause"></i> Pause Binaural Beats';
+            } else {
+                audio.pause();
+                button.innerHTML = '<i class="fas fa-play"></i> Play Binaural Beats';
+            }
         }
-    }
 
-    // Telegram Web App init
-    Telegram.WebApp.ready();
+        // Telegram Web App init
+        Telegram.WebApp.ready();
 
-    // Sections
-    const horoscopeForm = document.getElementById('horoscopeForm');
-    const wellnessManager = document.getElementById('wellnessManager');
-    const tasksPage = document.getElementById('tasksPage');
-    const friendsHub = document.getElementById('friendsHub');
-    const leaderboardPage = document.getElementById('leaderboardPage');
-
-    // Show Section Function
-    function showSection(sectionId) {
+        // Sections
         const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
-        sections.forEach(id => {
-            document.getElementById(id).style.display = 'none';
+
+        // Show Section Function
+        function showSection(sectionId) {
+            sections.forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById(sectionId).style.display = 'block';
+        }
+
+        // Initial Load
+        document.addEventListener("DOMContentLoaded", function() {
+            if (localStorage.getItem('birthdate')) {
+                showSection('wellnessManager');
+                loadChallenges();
+                updateEnergyLevel();
+            } else {
+                showSection('horoscopeForm');
+            }
         });
-        document.getElementById(sectionId).style.display = 'block';
-    }
 
-     // Initial Load
-    document.addEventListener("DOMContentLoaded", function() {
-        // Check if birthdate is already saved (e.g., in localStorage)
-        if (localStorage.getItem('birthdate')) {
-            showSection('wellnessManager');
-            loadChallenges();
-            updateEnergyLevel(); // Load and update the energy level after showing the wellness manager
-        } else {
-            showSection('horoscopeForm');
+        // Save Horoscope
+        function saveHoroscope() {
+            const birthdate = document.getElementById('birthdate').value;
+            if (birthdate) {
+                localStorage.setItem('birthdate', birthdate);
+                showSection('wellnessManager');
+                loadChallenges();
+                updateEnergyLevel();
+            } else {
+                alert('Please enter your birthdate.');
+            }
         }
-    });
 
-    // Save Horoscope Function
-    function saveHoroscope() {
-        const birthdate = document.getElementById('birthdate').value;
-        if (birthdate) {
-            localStorage.setItem('birthdate', birthdate);
-            showSection('wellnessManager');
-            loadChallenges();
-            updateEnergyLevel(); // Load and update the energy level after showing the wellness manager
-        } else {
-            alert('Please enter your birthdate.');
+        // Task Links
+        function joinLink(platform) {
+            const links = {
+                'Telegram Channel': 'https://t.me/yourchannel',
+                'Telegram Group': 'https://t.me/yourgroup',
+                'Twitter/X': 'https://twitter.com/yourtwitter',
+                'Instagram': 'https://instagram.com/yourinstagram',
+                'YouTube': 'https://youtube.com/youryoutube'
+            };
+            window.open(links[platform] || '#', '_blank');
         }
-    }
 
-    // Tasks Page Function
-    function joinLink(platform) {
-        let link = "#";
-        switch (platform) {
-            case 'Telegram Channel':
-                link = 'https://t.me/yourchannel';
-                break;
-            case 'Telegram Group':
-                link = 'https://t.me/yourgroup';
-                break;
-            case 'Twitter/X':
-                link = 'https://twitter.com/yourtwitter';
-                break;
-            case 'Instagram':
-                link = 'https://instagram.com/yourinstagram';
-                break;
-            case 'YouTube':
-                link = 'https://youtube.com/youryoutube';
-                break;
+        // Energy Level
+        const energyValue = document.getElementById('energyValue');
+        function updateEnergyLevel() {
+            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.yogaCompleted ? 1 : 0), 0);
+            let energyLevel = Math.round((completedCount / (66 * 2)) * 100);
+            localStorage.setItem('energyLevel', energyLevel);
+            energyValue.innerText = energyLevel;
         }
-        window.open(link, '_blank');
-    }
 
-    // Energy Level
-    let energyLevel = localStorage.getItem('energyLevel') || 0;
-    const energyValue = document.getElementById('energyValue');
-
-    // Function to update energy level display
-    function updateEnergyLevel() {
-        energyLevel = localStorage.getItem('energyLevel') || 0;
-        energyValue.innerText = energyLevel;
-    }
-
-    // Load Challenges from localStorage or initialize
-    function loadChallenges() {
-        let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-        if (challenges.length === 0) {
-            challenges = initializeChallenges();
-            localStorage.setItem('challenges', JSON.stringify(challenges));
+        // Load Challenges
+        function loadChallenges() {
+            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            if (challenges.length === 0) {
+                challenges = initializeChallenges();
+                localStorage.setItem('challenges', JSON.stringify(challenges));
+            }
+            displayChallenges(challenges);
         }
-        displayChallenges(challenges);
-        updateEnergyLevel(); // Update the energy level after loading challenges
-    }
 
-    // Initialize 66-Day Challenge
-    function initializeChallenges() {
-        const challenges = [];
-        for (let i = 1; i <= 66; i++) {
-            challenges.push({
-                day: i,
+        // Initialize Challenges
+        function initializeChallenges() {
+            return Array.from({ length: 66 }, (_, i) => ({
+                day: i + 1,
                 meditationCompleted: false,
                 yogaCompleted: false
+            }));
+        }
+
+        // Display Challenges
+        function displayChallenges(challenges) {
+            const dailyChallengesDiv = document.getElementById('dailyChallenges');
+            dailyChallengesDiv.innerHTML = '';
+            challenges.forEach(challenge => {
+                const card = document.createElement('div');
+                card.className = 'challenge-card';
+                card.innerHTML = `
+                    <h4>Day ${challenge.day}:</h4>
+                    <p>Meditation: Spend 5 minutes meditating.</p>
+                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
+                        ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
+                    </button>
+                    <p>Yoga: Do a sun salutation.</p>
+                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'yoga')" ${challenge.yogaCompleted ? 'disabled' : ''}>
+                        ${challenge.yogaCompleted ? 'Completed' : 'Mark as Complete'}
+                    </button>
+                `;
+                dailyChallengesDiv.appendChild(card);
             });
         }
-        return challenges;
-    }
 
-    // Display Challenges
-    function displayChallenges(challenges) {
-        const dailyChallengesDiv = document.getElementById('dailyChallenges');
-        dailyChallengesDiv.innerHTML = ''; // Clear existing challenges
-
-        challenges.forEach((challenge) => {
-            const challengeCard = document.createElement('div');
-            challengeCard.className = 'challenge-card';
-            challengeCard.innerHTML = `
-                <h4>Day ${challenge.day}:</h4>
-                <p>Meditation: Spend 5 minutes meditating.</p>
-                <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
-                    ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
-                </button>
-                <p>Yoga: Do a sun salutation.</p>
-                <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'yoga')" ${challenge.yogaCompleted ? 'disabled' : ''}>
-                    ${challenge.yogaCompleted ? 'Completed' : 'Mark as Complete'}
-                </button>
-            `;
-            dailyChallengesDiv.appendChild(challengeCard);
-        });
-    }
-
-    // Complete Challenge Function
-    function completeChallenge(day, activity) {
-        let challenges = JSON.parse(localStorage.getItem('challenges'));
-        const challengeIndex = challenges.findIndex(c => c.day === day);
-
-        if (challengeIndex !== -1) {
-            if (activity === 'meditation') {
-                challenges[challengeIndex].meditationCompleted = true;
-            } else if (activity === 'yoga') {
-                challenges[challengeIndex].yogaCompleted = true;
+        // Complete Challenge
+        function completeChallenge(day, activity) {
+            let challenges = JSON.parse(localStorage.getItem('challenges'));
+            const challenge = challenges.find(c => c.day === day);
+            if (challenge) {
+                if (activity === 'meditation') challenge.meditationCompleted = true;
+                else if (activity === 'yoga') challenge.yogaCompleted = true;
+                localStorage.setItem('challenges', JSON.stringify(challenges));
+                updateEnergyLevel();
+                loadChallenges();
             }
-
-            localStorage.setItem('challenges', JSON.stringify(challenges));
-            updateEnergyLevel(); // Update the energy level after completing a challenge
-            loadChallenges(); // Reload challenges to update the display
         }
-    }
 
-    // Referral Code
-    let referralCode = "";
-
-    // Generate Referral Code Function
-    function generateReferralCode() {
-        referralCode = Math.random().toString(36).substring(7).toUpperCase();
-        document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
-    }
-
-    // Energy Level
-    function updateEnergyLevel() {
-        let challenges = JSON.parse(localStorage.getItem('challenges'));
-        let completedCount = 0;
-        challenges.forEach(challenge => {
-            if (challenge.meditationCompleted) completedCount++;
-            if (challenge.yogaCompleted) completedCount++;
-        });
-
-        energyLevel = Math.round((completedCount / (66 * 2)) * 100);
-        localStorage.setItem('energyLevel', energyLevel);
-        energyValue.innerText = energyLevel;
-    }
-</script>
-
+        // Referral Code
+        function generateReferralCode() {
+            const referralCode = Math.random().toString(36).substring(7).toUpperCase();
+            document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
+        }
+    </script>
 </body>
 </html>
