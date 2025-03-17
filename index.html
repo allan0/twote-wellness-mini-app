@@ -93,6 +93,12 @@
             margin-top: 20px;
         }
 
+        #dailyChallenges {
+            min-height: 50vh;
+            overflow-y: auto;
+            padding-bottom: 60px; /* Avoid overlap with footer */
+        }
+
         .challenge-card {
             background-color: #FFF8DC; /* Cornsilk */
             border: 1px solid #BDB76B;
@@ -100,6 +106,7 @@
             padding: 15px;
             margin: 15px 0;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: block;
         }
 
         #footer {
@@ -203,42 +210,51 @@
 
     <script>
         // Telegram Web App init
-        Telegram.WebApp.ready();
-
-        // Sections
-        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
-
-        // Show Section Function
-        function showSection(sectionId) {
-            sections.forEach(id => document.getElementById(id).style.display = 'none');
-            document.getElementById(sectionId).style.display = 'block';
+        if (typeof window.Telegram !== 'undefined') {
+            window.Telegram.WebApp.ready();
         }
 
-        // Initial Load
-        document.addEventListener("DOMContentLoaded", function() {
-            if (localStorage.getItem('birthdate')) {
-                showSection('wellnessManager');
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
+
+        function showSection(sectionId) {
+            sections.forEach(id => document.getElementById(id).style.display = 'none');
+            const section = document.getElementById(sectionId);
+            section.style.display = 'block';
+            if (sectionId === 'wellnessManager') {
                 loadChallenges();
-                updateEnergyLevel();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
+                window.Telegram.WebApp.ready();
+                window.Telegram.WebApp.onEvent('viewportChanged', loadChallenges);
+                console.log("Telegram WebApp initialized");
+                if (localStorage.getItem('birthdate')) {
+                    showSection('wellnessManager');
+                } else {
+                    showSection('horoscopeForm');
+                }
             } else {
-                showSection('horoscopeForm');
+                console.warn("Running in browser mode - Telegram WebApp not detected.");
+                if (localStorage.getItem('birthdate')) {
+                    showSection('wellnessManager');
+                } else {
+                    showSection('horoscopeForm');
+                }
             }
         });
 
-        // Save Horoscope
         function saveHoroscope() {
             const birthdate = document.getElementById('birthdate').value;
             if (birthdate) {
                 localStorage.setItem('birthdate', birthdate);
                 showSection('wellnessManager');
-                loadChallenges();
-                updateEnergyLevel();
             } else {
                 alert('Please enter your birthdate.');
             }
         }
 
-        // Task Links
         function joinLink(platform) {
             const links = {
                 'Telegram Channel': 'https://t.me/yourchannel',
@@ -250,17 +266,15 @@
             window.open(links[platform] || '#', '_blank');
         }
 
-        // Energy Level
         const energyValue = document.getElementById('energyValue');
         function updateEnergyLevel() {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            let energyLevel = Math.round((completedCount / (66 * 3)) * 100); // 66 days * 3 tasks per day
+            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
             localStorage.setItem('energyLevel', energyLevel);
             energyValue.innerText = energyLevel;
         }
 
-        // Define 11 unique goals with meditations and tasks
         const dailyGoals = [
             {
                 goal: "Wealth and Abundance",
@@ -330,10 +344,9 @@
             }
         ];
 
-        // Initialize 66 challenges by cycling through the 11 goals
         function initializeChallenges() {
             return Array.from({ length: 66 }, (_, i) => {
-                const goalIndex = i % dailyGoals.length; // Cycle through 0 to 10
+                const goalIndex = i % dailyGoals.length;
                 const goalData = dailyGoals[goalIndex];
                 return {
                     day: i + 1,
@@ -344,25 +357,29 @@
                     meditationCompleted: false,
                     task1Completed: false,
                     task2Completed: false,
-                    audioSrc: `binaural_${goalData.goal.toLowerCase().replace(/ /g, '_')}.mp3` // e.g., binaural_wealth_and_abundance.mp3
+                    audioSrc: '' // Placeholder; update with actual audio paths later
                 };
             });
         }
 
-        // Load Challenges
         function loadChallenges() {
+            if (typeof window.Telegram !== 'undefined') {
+                window.Telegram.WebApp.ready();
+            }
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            console.log("Loaded challenges:", challenges);
             if (challenges.length === 0) {
+                console.log("Initializing challenges...");
                 challenges = initializeChallenges();
                 localStorage.setItem('challenges', JSON.stringify(challenges));
             }
-            displayChallenges(challenges);
+            setTimeout(() => displayChallenges(challenges), 100); // Delay for Telegram WebView
         }
 
-        // Display Challenges
         function displayChallenges(challenges) {
             const dailyChallengesDiv = document.getElementById('dailyChallenges');
             dailyChallengesDiv.innerHTML = '';
+            console.log("Displaying challenges:", challenges);
             challenges.forEach(challenge => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
@@ -389,7 +406,6 @@
             });
         }
 
-        // Play Meditation Audio
         function playMeditation(day) {
             const audio = document.getElementById(`audioDay${day}`);
             if (audio.paused) {
@@ -399,7 +415,6 @@
             }
         }
 
-        // Complete Challenge
         function completeChallenge(day, activity) {
             let challenges = JSON.parse(localStorage.getItem('challenges'));
             const challenge = challenges.find(c => c.day === day);
@@ -413,7 +428,6 @@
             }
         }
 
-        // Referral Code
         function generateReferralCode() {
             const referralCode = Math.random().toString(36).substring(7).toUpperCase();
             document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
