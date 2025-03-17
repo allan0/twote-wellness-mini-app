@@ -165,7 +165,7 @@
 
         <div id="wellnessManager">
             <h2>Wellness Manager</h2>
-            <h3>66-Day Challenge</h3>
+            <h3>66-Day Challenge with Binaural Beats</h3>
             <div id="dailyChallenges"></div>
         </div>
 
@@ -193,11 +193,6 @@
             <ol id="leaderboardList"></ol>
         </div>
 
-        <div id="audioControls">
-            <audio id="binauralBeats" src="binaural_beats.mp3" loop></audio>
-            <button class="btn btn-custom" onclick="toggleAudio()"><i class="fas fa-play"></i> Play Binaural Beats</button>
-        </div>
-
         <div id="footer">
             <a href="#" onclick="showSection('wellnessManager')">Home</a>
             <a href="#" onclick="showSection('tasksPage')">Tasks</a>
@@ -207,19 +202,6 @@
     </div>
 
     <script>
-        // Audio Toggle
-        function toggleAudio() {
-            const audio = document.getElementById("binauralBeats");
-            const button = document.querySelector("#audioControls button");
-            if (audio.paused) {
-                audio.play();
-                button.innerHTML = '<i class="fas fa-pause"></i> Pause Binaural Beats';
-            } else {
-                audio.pause();
-                button.innerHTML = '<i class="fas fa-play"></i> Play Binaural Beats';
-            }
-        }
-
         // Telegram Web App init
         Telegram.WebApp.ready();
 
@@ -272,10 +254,57 @@
         const energyValue = document.getElementById('energyValue');
         function updateEnergyLevel() {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.yogaCompleted ? 1 : 0), 0);
-            let energyLevel = Math.round((completedCount / (66 * 2)) * 100);
+            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
+            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
             localStorage.setItem('energyLevel', energyLevel);
             energyValue.innerText = energyLevel;
+        }
+
+        // Daily Goals and Tasks
+        const dailyGoals = [
+            { 
+                goal: "Wealth and Abundance", 
+                meditation: "Listen to a 5-minute Wealth Binaural Beats track to boost motivation.", 
+                task1: "Write down three financial goals and visualize achieving them.", 
+                task2: "Create a small budget or savings plan for the week." 
+            },
+            { 
+                goal: "Calmness and Inner Peace", 
+                meditation: "Listen to a 5-minute Calmness Binaural Beats track for relaxation.", 
+                task1: "Practice a 5-minute gratitude reflection.", 
+                task2: "Perform a 5-minute deep breathing exercise." 
+            },
+            { 
+                goal: "Focus and Concentration", 
+                meditation: "Listen to a 5-minute Focus Binaural Beats track to enhance clarity.", 
+                task1: "List your top three priorities for the day.", 
+                task2: "Spend 5 minutes organizing your workspace." 
+            },
+            { 
+                goal: "Creativity and Inspiration", 
+                meditation: "Listen to a 5-minute Creativity Binaural Beats track to spark ideas.", 
+                task1: "Brainstorm five ideas for a personal project.", 
+                task2: "Draw or doodle something inspired by your day." 
+            }
+            // Add more goals as needed to expand variety
+        ];
+
+        // Initialize Challenges
+        function initializeChallenges() {
+            return Array.from({ length: 66 }, (_, i) => {
+                const goalIndex = i % dailyGoals.length; // Cycle through goals
+                return {
+                    day: i + 1,
+                    goal: dailyGoals[goalIndex].goal,
+                    meditation: dailyGoals[goalIndex].meditation,
+                    task1: dailyGoals[goalIndex].task1,
+                    task2: dailyGoals[goalIndex].task2,
+                    meditationCompleted: false,
+                    task1Completed: false,
+                    task2Completed: false,
+                    audioSrc: `binaural_${dailyGoals[goalIndex].goal.toLowerCase().replace(/ /g, '_')}.mp3` // e.g., binaural_wealth.mp3
+                };
+            });
         }
 
         // Load Challenges
@@ -288,15 +317,6 @@
             displayChallenges(challenges);
         }
 
-        // Initialize Challenges
-        function initializeChallenges() {
-            return Array.from({ length: 66 }, (_, i) => ({
-                day: i + 1,
-                meditationCompleted: false,
-                yogaCompleted: false
-            }));
-        }
-
         // Display Challenges
         function displayChallenges(challenges) {
             const dailyChallengesDiv = document.getElementById('dailyChallenges');
@@ -305,18 +325,36 @@
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
                 card.innerHTML = `
-                    <h4>Day ${challenge.day}:</h4>
-                    <p>Meditation: Spend 5 minutes meditating.</p>
+                    <h4>Day ${challenge.day}: ${challenge.goal}</h4>
+                    <p><strong>Meditation:</strong> ${challenge.meditation}</p>
+                    <audio id="audioDay${challenge.day}" src="${challenge.audioSrc}" loop></audio>
+                    <button class="btn btn-custom" onclick="playMeditation(${challenge.day})">
+                        <i class="fas fa-play"></i> Play Meditation
+                    </button>
                     <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
                         ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
                     </button>
-                    <p>Yoga: Do a sun salutation.</p>
-                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'yoga')" ${challenge.yogaCompleted ? 'disabled' : ''}>
-                        ${challenge.yogaCompleted ? 'Completed' : 'Mark as Complete'}
+                    <p><strong>Task 1:</strong> ${challenge.task1}</p>
+                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'task1')" ${challenge.task1Completed ? 'disabled' : ''}>
+                        ${challenge.task1Completed ? 'Completed' : 'Mark as Complete'}
+                    </button>
+                    <p><strong>Task 2:</strong> ${challenge.task2}</p>
+                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'task2')" ${challenge.task2Completed ? 'disabled' : ''}>
+                        ${challenge.task2Completed ? 'Completed' : 'Mark as Complete'}
                     </button>
                 `;
                 dailyChallengesDiv.appendChild(card);
             });
+        }
+
+        // Play Meditation Audio
+        function playMeditation(day) {
+            const audio = document.getElementById(`audioDay${day}`);
+            if (audio.paused) {
+                audio.play();
+            } else {
+                audio.pause();
+            }
         }
 
         // Complete Challenge
@@ -325,7 +363,8 @@
             const challenge = challenges.find(c => c.day === day);
             if (challenge) {
                 if (activity === 'meditation') challenge.meditationCompleted = true;
-                else if (activity === 'yoga') challenge.yogaCompleted = true;
+                else if (activity === 'task1') challenge.task1Completed = true;
+                else if (activity === 'task2') challenge.task2Completed = true;
                 localStorage.setItem('challenges', JSON.stringify(challenges));
                 updateEnergyLevel();
                 loadChallenges();
