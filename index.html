@@ -255,54 +255,96 @@
         function updateEnergyLevel() {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
+            let energyLevel = Math.round((completedCount / (66 * 3)) * 100); // 66 days * 3 tasks per day
             localStorage.setItem('energyLevel', energyLevel);
             energyValue.innerText = energyLevel;
         }
 
-        // Daily Goals and Tasks
+        // Define 11 unique goals with meditations and tasks
         const dailyGoals = [
-            { 
-                goal: "Wealth and Abundance", 
-                meditation: "Listen to a 5-minute Wealth Binaural Beats track to boost motivation.", 
-                task1: "Write down three financial goals and visualize achieving them.", 
-                task2: "Create a small budget or savings plan for the week." 
+            {
+                goal: "Wealth and Abundance",
+                meditation: "Listen to a 5-minute Wealth Binaural Beats track to boost motivation and positivity.",
+                task1: "Write down three financial goals and visualize achieving them.",
+                task2: "Create a small budget or savings plan for the week."
             },
-            { 
-                goal: "Calmness and Inner Peace", 
-                meditation: "Listen to a 5-minute Calmness Binaural Beats track for relaxation.", 
-                task1: "Practice a 5-minute gratitude reflection.", 
-                task2: "Perform a 5-minute deep breathing exercise." 
+            {
+                goal: "Calmness and Inner Peace",
+                meditation: "Listen to a 5-minute Calmness Binaural Beats track for relaxation and stress relief.",
+                task1: "Practice a 5-minute gratitude reflection.",
+                task2: "Perform a 5-minute deep breathing exercise."
             },
-            { 
-                goal: "Focus and Concentration", 
-                meditation: "Listen to a 5-minute Focus Binaural Beats track to enhance clarity.", 
-                task1: "List your top three priorities for the day.", 
-                task2: "Spend 5 minutes organizing your workspace." 
+            {
+                goal: "Focus and Concentration",
+                meditation: "Listen to a 5-minute Focus Binaural Beats track to enhance mental clarity.",
+                task1: "List your top three priorities for the day.",
+                task2: "Spend 5 minutes organizing your workspace."
             },
-            { 
-                goal: "Creativity and Inspiration", 
-                meditation: "Listen to a 5-minute Creativity Binaural Beats track to spark ideas.", 
-                task1: "Brainstorm five ideas for a personal project.", 
-                task2: "Draw or doodle something inspired by your day." 
+            {
+                goal: "Creativity and Inspiration",
+                meditation: "Listen to a 5-minute Creativity Binaural Beats track to stimulate imagination.",
+                task1: "Brainstorm five ideas for a personal project.",
+                task2: "Draw or doodle something inspired by your day."
+            },
+            {
+                goal: "Confidence and Self-Esteem",
+                meditation: "Listen to a 5-minute Confidence Binaural Beats track to boost self-belief.",
+                task1: "Write down three things you like about yourself.",
+                task2: "Stand in a power pose for 2 minutes."
+            },
+            {
+                goal: "Energy and Vitality",
+                meditation: "Listen to a 5-minute Energy Binaural Beats track to invigorate your mind and body.",
+                task1: "Visualize yourself full of energy and vitality.",
+                task2: "Do a 5-minute stretch or light exercise."
+            },
+            {
+                goal: "Gratitude and Appreciation",
+                meditation: "Listen to a 5-minute Gratitude Binaural Beats track to cultivate thankfulness.",
+                task1: "Write down three things you're grateful for today.",
+                task2: "Send a thank-you message to someone."
+            },
+            {
+                goal: "Love and Compassion",
+                meditation: "Listen to a 5-minute Love Binaural Beats track to open your heart.",
+                task1: "Reflect on a time you felt loved or showed love.",
+                task2: "Perform a small act of kindness for someone."
+            },
+            {
+                goal: "Health and Well-being",
+                meditation: "Listen to a 5-minute Health Binaural Beats track to promote healing.",
+                task1: "Set a health goal for the week.",
+                task2: "Drink an extra glass of water or eat a healthy snack."
+            },
+            {
+                goal: "Patience and Perseverance",
+                meditation: "Listen to a 5-minute Patience Binaural Beats track to build resilience.",
+                task1: "Think of a challenge you're facing and how to approach it calmly.",
+                task2: "Practice a hobby or skill for 10 minutes without rushing."
+            },
+            {
+                goal: "Joy and Happiness",
+                meditation: "Listen to a 5-minute Joy Binaural Beats track to uplift your spirit.",
+                task1: "Recall a happy memory and savor it.",
+                task2: "Smile at yourself in the mirror for 30 seconds."
             }
-            // Add more goals as needed to expand variety
         ];
 
-        // Initialize Challenges
+        // Initialize 66 challenges by cycling through the 11 goals
         function initializeChallenges() {
             return Array.from({ length: 66 }, (_, i) => {
-                const goalIndex = i % dailyGoals.length; // Cycle through goals
+                const goalIndex = i % dailyGoals.length; // Cycle through 0 to 10
+                const goalData = dailyGoals[goalIndex];
                 return {
                     day: i + 1,
-                    goal: dailyGoals[goalIndex].goal,
-                    meditation: dailyGoals[goalIndex].meditation,
-                    task1: dailyGoals[goalIndex].task1,
-                    task2: dailyGoals[goalIndex].task2,
+                    goal: goalData.goal,
+                    meditation: goalData.meditation,
+                    task1: goalData.task1,
+                    task2: goalData.task2,
                     meditationCompleted: false,
                     task1Completed: false,
                     task2Completed: false,
-                    audioSrc: `binaural_${dailyGoals[goalIndex].goal.toLowerCase().replace(/ /g, '_')}.mp3` // e.g., binaural_wealth.mp3
+                    audioSrc: `binaural_${goalData.goal.toLowerCase().replace(/ /g, '_')}.mp3` // e.g., binaural_wealth_and_abundance.mp3
                 };
             });
         }
