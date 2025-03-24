@@ -178,6 +178,13 @@
         .progress-bar {
             background-color: #BDB76B; /* Dark Khaki */
         }
+
+        #astrologyWheelCanvas, #numerologyCanvas {
+            border: 1px solid #BDB76B;
+            background-color: #000;
+            margin: 20px auto;
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -310,16 +317,25 @@
 
         <div id="gamePage" style="display:none;">
             <h2 id="gameWelcome"></h2>
-            <button class="btn btn-custom" onclick="startConstellationGame()">Play Constellation Game</button>
-            <canvas id="constellationCanvas" width="400" height="400" style="border:1px solid #BDB76B; background-color: #000; margin: 20px auto; display: block;"></canvas>
-            <p id="gameMessage"></p>
+            <div>
+                <button class="btn btn-custom" onclick="startAstrologyWheelGame()">Spin Astrology Wheel (10% Energy)</button>
+                <canvas id="astrologyWheelCanvas" width="300" height="300" style="display: block;"></canvas>
+                <p id="astrologyMessage"></p>
+            </div>
+            <div>
+                <button class="btn btn-custom" onclick="startNumerologyGame()">Play Numerology Match (15% Energy)</button>
+                <canvas id="numerologyCanvas" width="300" height="100" style="display: block;"></canvas>
+                <p id="numerologyMessage"></p>
+                <input type="number" id="numerologyGuess" min="1" max="9" style="margin-top: 10px; padding: 5px;" placeholder="Guess your lucky number (1-9)">
+                <button class="btn btn-custom" onclick="submitNumerologyGuess()">Submit Guess</button>
+            </div>
         </div>
 
         <div id="footer">
             <a href="#" onclick="showSection('wellnessManager')"><i class="fas fa-home"></i></a>
             <a href="#" onclick="showSection('tasksPage')"><i class="fas fa-tasks"></i></a>
             <a href="#" onclick="showSection('leaderboardPage')"><i class="fas fa-trophy"></i></a>
-            <a href="#" onclick="showSection('gamePage')"><i class="fas fa-star"></i></a>
+            <a href="#" onclick="showSection('gamePage')"><i class="fas fa-gamepad"></i></a>
         </div>
     </div>
 
@@ -429,19 +445,19 @@
             let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
             let baseEnergy = Math.round((completedCount / (66 * 3)) * 100);
             let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
-            // Use the higher of baseEnergy or currentEnergy (to preserve game bonuses)
             let energyLevel = Math.max(baseEnergy, currentEnergy);
             energyLevel = Math.min(energyLevel, 100); // Cap at 100%
             localStorage.setItem('energyLevel', energyLevel);
             energyValue.innerText = energyLevel;
         }
 
-        // Boost energy level (e.g., from game completion)
+        // Boost energy level
         function boostEnergyLevel(amount) {
             let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
             currentEnergy = Math.min(currentEnergy + amount, 100); // Cap at 100%
             localStorage.setItem('energyLevel', currentEnergy);
             energyValue.innerText = currentEnergy;
+            updateGameWelcome();
         }
 
         // Initialize challenges
@@ -585,69 +601,131 @@
             return sum % 9 || 9;
         }
 
-        const constellations = {
-            "Aries": [{x:100,y:100}, {x:150,y:150}, {x:200,y:100}],
-            "Taurus": [{x:100,y:100}, {x:150,y:50}, {x:200,y:100}],
-            "Gemini": [{x:100,y:150}, {x:150,y:100}, {x:200,y:150}],
-            "Cancer": [{x:120,y:100}, {x:140,y:140}, {x:160,y:100}],
-            "Leo": [{x:100,y:120}, {x:150,y:80}, {x:200,y:120}],
-            "Virgo": [{x:110,y:110}, {x:150,y:130}, {x:190,y:110}],
-            "Libra": [{x:100,y:130}, {x:150,y:90}, {x:200,y:130}],
-            "Scorpio": [{x:130,y:100}, {x:150,y:150}, {x:170,y:100}],
-            "Sagittarius": [{x:100,y:140}, {x:150,y:110}, {x:200,y:140}],
-            "Capricorn": [{x:140,y:100}, {x:160,y:140}, {x:180,y:100}],
-            "Aquarius": [{x:100,y:110}, {x:150,y:150}, {x:200,y:110}],
-            "Pisces": [{x:110,y:100}, {x:150,y:120}, {x:190,y:100}]
+        // Astrology Wheel Game
+        const astrologyInsights = {
+            "Aries": ["Bold actions lead to success today.", "Energy flows where courage goes.", "A new adventure awaits you."],
+            "Taurus": ["Stability brings peace today.", "Patience will reward you.", "Enjoy the simple pleasures."],
+            "Gemini": ["Communication opens doors.", "Curiosity sparks inspiration.", "Adaptability is your strength."],
+            "Cancer": ["Emotions guide your path.", "Home is your sanctuary today.", "Nurture yourself and others."],
+            "Leo": ["Shine brightly today.", "Confidence attracts opportunities.", "Lead with your heart."],
+            "Virgo": ["Details matter today.", "Organization brings clarity.", "Help someone in need."],
+            "Libra": ["Balance restores harmony.", "A decision looms ahead.", "Beauty surrounds you today."],
+            "Scorpio": ["Transformation is near.", "Trust your intuition.", "Secrets may surface today."],
+            "Sagittarius": ["Adventure calls you.", "Optimism lights your way.", "Seek wisdom today."],
+            "Capricorn": ["Hard work pays off.", "Discipline is your ally.", "Plan for the future today."],
+            "Aquarius": ["Innovation sparks change.", "Connect with like minds.", "Dream big today."],
+            "Pisces": ["Imagination fuels your day.", "Compassion heals today.", "Listen to your dreams."]
         };
 
-        let currentSequence = [];
-        let correctSequence = [];
-
-        function drawStars() {
-            const canvas = document.getElementById('constellationCanvas');
+        function drawAstrologyWheel(spinAngle) {
+            const canvas = document.getElementById('astrologyWheelCanvas');
             const ctx = canvas.getContext('2d');
+            const radius = canvas.width / 2;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            correctSequence.forEach(point => {
+            const segments = 12;
+            const angleStep = (2 * Math.PI) / segments;
+
+            for (let i = 0; i < segments; i++) {
                 ctx.beginPath();
-                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
-                ctx.fillStyle = 'white';
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, i * angleStep, (i + 1) * angleStep);
+                ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#BDB76B'; // Gold and khaki alternation
                 ctx.fill();
-            });
+                ctx.stroke();
+            }
+
+            // Draw spinning effect
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(spinAngle);
+            ctx.translate(-radius, -radius);
+            ctx.beginPath();
+            ctx.moveTo(radius, 0);
+            ctx.lineTo(radius + 10, 20);
+            ctx.lineTo(radius - 10, 20);
+            ctx.closePath();
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            ctx.restore();
         }
 
-        function handleClick(event) {
-            const canvas = document.getElementById('constellationCanvas');
-            const rect = canvas.getBoundingClientRect();
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            const clickedStar = correctSequence.find(point => Math.hypot(point.x - x, point.y - y) < 10);
-            if (clickedStar) {
-                if (currentSequence.length === 0 || clickedStar === correctSequence[currentSequence.length]) {
-                    currentSequence.push(clickedStar);
-                    if (currentSequence.length > 1) {
-                        const prev = currentSequence[currentSequence.length - 2];
-                        const ctx = canvas.getContext('2d');
-                        ctx.beginPath();
-                        ctx.moveTo(prev.x, prev.y);
-                        ctx.lineTo(clickedStar.x, clickedStar.y);
-                        ctx.strokeStyle = 'yellow';
-                        ctx.stroke();
-                    }
-                    if (currentSequence.length === correctSequence.length) {
-                        const birthdate = new Date(localStorage.getItem('birthdate'));
-                        const luckyNumber = getLuckyNumber(birthdate);
-                        document.getElementById('gameMessage').innerText = `Congratulations! You've connected your constellation. Your lucky number is ${luckyNumber}. Energy boosted by 5%!`;
-                        boostEnergyLevel(5); // Boost energy by 5% on completion
-                        updateGameWelcome();
-                    }
-                } else {
-                    currentSequence = [];
-                    drawStars();
-                    document.getElementById('gameMessage').innerText = 'Incorrect sequence. Try again.';
+        function startAstrologyWheelGame() {
+            const birthdate = localStorage.getItem('birthdate');
+            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            if (!birthdate) {
+                document.getElementById('astrologyMessage').innerText = 'Please enter your birthdate first.';
+                return;
+            }
+            if (currentEnergy < 10) {
+                document.getElementById('astrologyMessage').innerText = 'You need at least 10% energy to play. Complete some challenges!';
+                return;
+            }
+            const date = new Date(birthdate);
+            const zodiacSign = getZodiacSign(date);
+            const insights = astrologyInsights[zodiacSign];
+            let spinAngle = 0;
+            let spinSpeed = 0.1;
+            document.getElementById('astrologyMessage').innerText = 'Spinning the wheel...';
+
+            const spinInterval = setInterval(() => {
+                spinAngle += spinSpeed;
+                spinSpeed *= 0.98; // Slow down
+                drawAstrologyWheel(spinAngle);
+                if (spinSpeed < 0.001) {
+                    clearInterval(spinInterval);
+                    const segment = Math.floor(((spinAngle % (2 * Math.PI)) / (2 * Math.PI)) * insights.length);
+                    document.getElementById('astrologyMessage').innerText = `Insight: ${insights[segment]}. Energy boosted by 5%!`;
+                    boostEnergyLevel(5);
                 }
+            }, 20);
+        }
+
+        // Numerology Game
+        let targetLuckyNumber = 0;
+
+        function drawNumerologyGame() {
+            const canvas = document.getElementById('numerologyCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '20px Nunito';
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.fillText('Guess your lucky number!', canvas.width / 2, canvas.height / 2);
+        }
+
+        function startNumerologyGame() {
+            const birthdate = localStorage.getItem('birthdate');
+            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            if (!birthdate) {
+                document.getElementById('numerologyMessage').innerText = 'Please enter your birthdate first.';
+                return;
+            }
+            if (currentEnergy < 15) {
+                document.getElementById('numerologyMessage').innerText = 'You need at least 15% energy to play. Complete some challenges!';
+                return;
+            }
+            const date = new Date(birthdate);
+            targetLuckyNumber = getLuckyNumber(date);
+            drawNumerologyGame();
+            document.getElementById('numerologyMessage').innerText = 'Enter a number between 1 and 9.';
+            document.getElementById('numerologyGuess').value = '';
+        }
+
+        function submitNumerologyGuess() {
+            const guess = parseInt(document.getElementById('numerologyGuess').value);
+            if (isNaN(guess) || guess < 1 || guess > 9) {
+                document.getElementById('numerologyMessage').innerText = 'Please enter a valid number (1-9).';
+                return;
+            }
+            if (guess === targetLuckyNumber) {
+                document.getElementById('numerologyMessage').innerText = `Correct! Your lucky number is ${targetLuckyNumber}. Energy boosted by 5%!`;
+                boostEnergyLevel(5);
+            } else {
+                document.getElementById('numerologyMessage').innerText = `Wrong! Try again. Hint: It's ${guess > targetLuckyNumber ? 'lower' : 'higher'} than ${guess}.`;
             }
         }
 
+        // Update game welcome message
         function updateGameWelcome() {
             const birthdate = localStorage.getItem('birthdate');
             const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
@@ -656,32 +734,6 @@
                 const zodiacSign = getZodiacSign(date);
                 document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Your zodiac sign is ${zodiacSign}. Energy: ${currentEnergy}%`;
             }
-        }
-
-        function startConstellationGame() {
-            const birthdate = localStorage.getItem('birthdate');
-            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
-            if (!birthdate) {
-                alert('Please enter your birthdate first.');
-                return;
-            }
-            if (currentEnergy < 10) {
-                alert('You need at least 10% energy to play the game. Complete some challenges to boost your energy!');
-                return;
-            }
-            const date = new Date(birthdate);
-            const zodiacSign = getZodiacSign(date);
-            if (!constellations[zodiacSign]) {
-                alert('Constellation data not available.');
-                return;
-            }
-            correctSequence = constellations[zodiacSign];
-            currentSequence = [];
-            drawStars();
-            const canvas = document.getElementById('constellationCanvas');
-            canvas.removeEventListener('click', handleClick); // Prevent duplicate listeners
-            canvas.addEventListener('click', handleClick);
-            document.getElementById('gameMessage').innerText = 'Connect the stars in order to form your constellation!';
         }
     </script>
 </body>
