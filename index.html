@@ -25,51 +25,6 @@
             flex-direction: column;
         }
 
-        #preloader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #1a1a2e;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
-
-        #preloader img {
-            width: 100px;
-            height: 100px;
-            animation: breathe 2s infinite ease-in-out;
-        }
-
-        @keyframes breathe {
-            0% { transform: scale(0.8); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(0.8); }
-        }
-
-        #loadError {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255, 0, 0, 0.8);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 10000;
-            display: none;
-            animation: fadeOut 3s forwards;
-        }
-
-        @keyframes fadeOut {
-            0% { opacity: 1; }
-            80% { opacity: 1; }
-            100% { opacity: 0; display: none; }
-        }
-
         #background-video {
             position: fixed;
             top: 0;
@@ -88,7 +43,7 @@
             position: relative;
             z-index: 1;
             flex-grow: 1;
-            display: none;
+            display: block; /* Always visible */
         }
 
         .section {
@@ -339,12 +294,6 @@
     </style>
 </head>
 <body>
-    <!-- Preloader with Breathing Logo -->
-    <div id="preloader">
-        <img src="logo.png" alt="Loading Logo">
-    </div>
-    <div id="loadError">Video failed to load</div>
-
     <video id="background-video" autoplay loop muted playsinline>
         <source src="cosmic.mp4" type="video/mp4">
     </video>
@@ -620,40 +569,16 @@
         document.getElementById('profilePhoto').src = userPhoto;
         document.getElementById('profileNameDisplay').textContent = userName;
 
-        // Preloader Logic with Fallback
-        function hidePreloader() {
-            console.log("Hiding preloader");
-            document.getElementById('preloader').style.display = 'none';
-            document.querySelector('.container').style.display = 'block';
-            initializeCanvases();
-            animateChallenges();
-        }
-
+        // Initialize Canvases After Video Loads (Optional)
         window.addEventListener('load', () => {
             const video = document.getElementById('background-video');
-            console.log("Page loaded, waiting for video...");
-
             video.onloadeddata = () => {
-                console.log("Video metadata loaded successfully");
-                hidePreloader();
+                initializeCanvases(); // Draw canvases once video is ready
             };
-
-            video.onerror = () => {
-                console.warn("Video failed to load, proceeding without it");
-                document.getElementById('loadError').style.display = 'block';
-                hidePreloader();
-            };
-
-            setTimeout(() => {
-                if (document.getElementById('preloader').style.display !== 'none') {
-                    console.warn("Video loading timed out, forcing preloader hide");
-                    document.getElementById('loadError').style.display = 'block';
-                    hidePreloader();
-                }
-            }, 5000);
+            animateChallenges(); // Animate challenges immediately
         });
 
-        // Animate Challenges on Scroll/Load
+        // Animate Challenges on Load
         function animateChallenges() {
             const challenges = document.querySelectorAll('.challenge-div');
             challenges.forEach((challenge, index) => {
@@ -932,4 +857,218 @@
             const month = date.getMonth() + 1;
             const year = date.getFullYear();
             const sum = day + month + year;
-            return sumSorry about that, something didn't go as planned. Please try again, and if you're still seeing this message, go ahead and restart the app.
+            return sum % 9 || 9;
+        }
+
+        function updateGameWelcome() {
+            const birthdate = localStorage.getItem('birthdate');
+            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            document.getElementById('gameWelcome').textContent = birthdate
+                ? `Welcome, ${userName}! Your zodiac sign is ${getZodiacSign(new Date(birthdate))}. Energy: ${currentEnergy}%`
+                : `Welcome, ${userName}! Enter your birthdate to play. Energy: ${currentEnergy}%`;
+        }
+
+        // Initialize Canvases with Circular Logo
+        function initializeCanvases() {
+            const wheelCanvas = document.getElementById('astrologyWheelCanvas');
+            const numCanvas = document.getElementById('numerologyCanvas');
+            const wheelCtx = wheelCanvas.getContext('2d');
+            const numCtx = numCanvas.getContext('2d');
+            const radius = wheelCanvas.width / 2;
+
+            if (wheelLogo.complete) {
+                // Astrology Wheel
+                wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+                wheelCtx.beginPath();
+                wheelCtx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                wheelCtx.clip();
+                wheelCtx.drawImage(wheelLogo, 0, 0, wheelCanvas.width, wheelCanvas.height);
+
+                // Numerology Canvas
+                numCtx.clearRect(0, 0, numCanvas.width, numCanvas.height);
+                numCtx.beginPath();
+                numCtx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                numCtx.clip();
+                numCtx.drawImage(wheelLogo, 0, 0, numCanvas.width, numCanvas.height);
+            }
+        }
+
+        function drawAstrologyWheel(spinAngle) {
+            const canvas = document.getElementById('astrologyWheelCanvas');
+            const ctx = canvas.getContext('2d');
+            const radius = canvas.width / 2;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw circular logo as background
+            if (wheelLogo.complete) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                ctx.clip();
+                ctx.globalAlpha = 0.2;
+                ctx.drawImage(wheelLogo, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+
+            const segments = 12;
+            const angleStep = (2 * Math.PI) / segments;
+            zodiacOrder.forEach((zodiac, i) => {
+                ctx.beginPath();
+                ctx.moveTo(radius, radius);
+                ctx.arc(radius, radius, radius, i * angleStep, (i + 1) * angleStep);
+                ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#BDB76B';
+                ctx.fill();
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(i * angleStep + angleStep / 2);
+                ctx.fillStyle = 'white';
+                ctx.font = '24px Nunito';
+                ctx.textAlign = 'center';
+                ctx.fillText(zodiac.symbol, 0, -radius + 40);
+                ctx.restore();
+            });
+
+            ctx.save();
+            ctx.translate(radius, radius);
+            ctx.rotate(spinAngle);
+            ctx.beginPath();
+            ctx.moveTo(0, -radius);
+            ctx.lineTo(10, -radius + 20);
+            ctx.lineTo(-10, -radius + 20);
+            ctx.fillStyle = '#fff';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function startAstrologyWheelGame() {
+            const birthdate = localStorage.getItem('birthdate');
+            if (!birthdate) {
+                document.getElementById('astrologyMessage').textContent = 'Please enter your birthdate first.';
+                return;
+            }
+            const date = new Date(birthdate);
+            const zodiacSign = getZodiacSign(date);
+            let spinAngle = 0;
+            let spinSpeed = 0.1;
+            document.getElementById('astrologyMessage').textContent = 'Spinning the wheel...';
+
+            const spinInterval = setInterval(() => {
+                spinAngle += spinSpeed;
+                spinSpeed *= 0.98;
+                drawAstrologyWheel(spinAngle);
+                if (spinSpeed < 0.001) {
+                    clearInterval(spinInterval);
+                    const insight = astrologyInsights[zodiacSign][Math.floor(Math.random() * 3)];
+                    document.getElementById('astrologyMessage').textContent = `Insight for ${zodiacSign}: ${insight}. Energy boosted by 1%!`;
+                    boostEnergyLevel(1);
+                }
+            }, 20);
+        }
+
+        // Numerology Game
+        let targetLuckyNumber = 0;
+        let numerologyGrid = [];
+        let selectedPath = [];
+        let movesLeft = 3;
+
+        function generateNumerologyGrid() {
+            numerologyGrid = [];
+            for (let i = 0; i < 3; i++) {
+                const row = [];
+                for (let j = 0; j < 3; j++) {
+                    row.push(Math.floor(Math.random() * 5) + 1);
+                }
+                numerologyGrid.push(row);
+            }
+        }
+
+        function drawNumerologyGrid() {
+            const canvas = document.getElementById('numerologyCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const tileSize = canvas.width / 3;
+
+            // Draw circular logo as background
+            if (wheelLogo.complete) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, 2 * Math.PI);
+                ctx.clip();
+                ctx.globalAlpha = 0.2;
+                ctx.drawImage(wheelLogo, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
+            }
+
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    ctx.beginPath();
+                    ctx.rect(j * tileSize, i * tileSize, tileSize, tileSize);
+                    ctx.fillStyle = selectedPath.some(p => p.row === i && p.col === j) ? '#FFD700' : '#BDB76B';
+                    ctx.fill();
+                    ctx.strokeStyle = '#fff';
+                    ctx.stroke();
+                    ctx.fillStyle = 'white';
+                    ctx.font = '24px Nunito';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(numerologyGrid[i][j], j * tileSize + tileSize / 2, i * tileSize + tileSize / 2 + 5);
+                }
+            }
+        }
+
+        function handleNumerologyClick(event) {
+            const canvas = document.getElementById('numerologyCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const tileSize = canvas.width / 3;
+            const col = Math.floor(x / tileSize);
+            const row = Math.floor(y / tileSize);
+
+            if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+                if (selectedPath.length === 0 || isAdjacent(selectedPath[selectedPath.length - 1], { row, col })) {
+                    selectedPath.push({ row, col });
+                    movesLeft--;
+                    drawNumerologyGrid();
+                    const sum = selectedPath.reduce((acc, p) => acc + numerologyGrid[p.row][p.col], 0);
+                    if (movesLeft === 0 || sum >= targetLuckyNumber) {
+                        if (sum === targetLuckyNumber) {
+                            document.getElementById('numerologyMessage').textContent = `Success! You reached ${targetLuckyNumber}. Energy boosted by 1%!`;
+                            boostEnergyLevel(1);
+                        } else {
+                            document.getElementById('numerologyMessage').textContent = `Game Over! Sum was ${sum}, needed ${targetLuckyNumber}.`;
+                        }
+                        canvas.removeEventListener('click', handleNumerologyClick);
+                    } else {
+                        document.getElementById('numerologyMessage').textContent = `Sum: ${sum}. Moves left: ${movesLeft}. Target: ${targetLuckyNumber}.`;
+                    }
+                }
+            }
+        }
+
+        function isAdjacent(pos1, pos2) {
+            return (Math.abs(pos1.row - pos2.row) === 1 && pos1.col === pos2.col) ||
+                   (Math.abs(pos1.col - pos2.col) === 1 && pos1.row === pos2.row);
+        }
+
+        function startNumerologyGame() {
+            const birthdate = localStorage.getItem('birthdate');
+            if (!birthdate) {
+                document.getElementById('numerologyMessage').textContent = 'Please enter your birthdate first.';
+                return;
+            }
+            const date = new Date(birthdate);
+            targetLuckyNumber = getLuckyNumber(date);
+            generateNumerologyGrid();
+            selectedPath = [];
+            movesLeft = 3;
+            drawNumerologyGrid();
+            document.getElementById('numerologyMessage').textContent = `Reach ${targetLuckyNumber} in 3 moves by selecting adjacent tiles!`;
+            const canvas = document.getElementById('numerologyCanvas');
+            canvas.removeEventListener('click', handleNumerologyClick);
+            canvas.addEventListener('click', handleNumerologyClick);
+        }
+    </script>
+</body>
+</html>
