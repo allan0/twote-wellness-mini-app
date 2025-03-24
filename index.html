@@ -6,67 +6,198 @@
     <title>Third Eye</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --text-color: #6B451D;
+            --button-color: #BDB76B;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Nunito', sans-serif; background: #1a1a2e; color: #6B451D; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
-        #background-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.8; }
-        .container { width: 90%; max-width: 900px; margin: 30px auto; position: relative; z-index: 1; flex-grow: 1; }
-        .section { background: rgba(255, 248, 220, 0.85); padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); animation: fadeIn 0.5s ease-in; position: relative; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        h1 { font-size: 28px; font-weight: 700; color: #D4AF37; margin-bottom: 15px; }
-        h2 { font-size: 22px; font-weight: 600; color: #6B451D; margin-bottom: 20px; }
-        p { font-size: 16px; font-weight: 400; color: #6B451D; line-height: 1.5; }
-        #header .header-content { display: flex; align-items: center; gap: 15px; }
-        #header .header-logo { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
-        #headerProfileButton { background: none; border: 2px solid #D4AF37; border-radius: 50%; padding: 0; cursor: pointer; transition: transform 0.3s ease; margin-left: auto; }
-        #headerProfileButton:hover { transform: scale(1.05); }
-        #headerProfileButton img { width: 45px; height: 45px; border-radius: 50%; }
-        .btn-custom { background: linear-gradient(135deg, #D4AF37, #BDB76B); color: #fff; border: none; padding: 10px 25px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
-        .btn-custom:hover { background: linear-gradient(135deg, #BDB76B, #D4AF37); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); }
-        .btn-custom:disabled { background: #8FBC8F; cursor: not-allowed; box-shadow: none; }
-        .btn-secondary { background: linear-gradient(135deg, #4A7C6F, #6B9C8F); color: #fff; }
-        .btn-secondary:hover { background: linear-gradient(135deg, #6B9C8F, #4A7C6F); }
-        .btn-danger-custom { background: linear-gradient(135deg, #D9534F, #C9302C); color: #fff; border: none; padding: 10px 25px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
-        .btn-danger-custom:hover { background: linear-gradient(135deg, #C9302C, #D9534F); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); }
-        .challenge-div { background: rgba(255, 248, 220, 0.9); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin: 20px 0; text-align: center; position: relative; z-index: 5; opacity: 0; transition: all 0.5s ease; }
-        .challenge-div.visible { opacity: 1; transform: translateX(0) translateY(0); }
-        .challenge-div.locked { opacity: 0.7; position: relative; }
-        .challenge-div.locked .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); color: #fff; display: flex; justify-content: center; align-items: center; z-index: 6; font-size: 1.1rem; border-radius: 15px; }
-        .challenge-icon { font-size: 2.8rem; color: #D4AF37; margin-bottom: 15px; }
-        .challenge-div h3 { font-size: 20px; font-weight: 600; margin: 10px 0; }
-        .challenge-div p { font-size: 14px; margin-bottom: 15px; }
-        .challenge-card { background: #FFF8DC; border: 1px solid #D4AF37; border-radius: 10px; padding: 15px; margin: 15px 0; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); }
-        #footer { background: #D2B48C; padding: 15px; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.1); z-index: 100; }
-        #footer a { color: #6B451D; font-size: 1.8rem; padding: 10px; transition: all 0.3s ease; }
-        #footer a:hover { color: #D4AF37; transform: scale(1.1); }
-        .modal { z-index: 2000; }
-        .modal-backdrop { z-index: 1999; }
-        .modal-content { background: rgba(255, 248, 220, 0.9); border: 1px solid #D4AF37; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden; }
-        #astrologyWheelCanvas, #numerologyCanvas { background: #1a1a2e; border-radius: 50%; box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); margin: 25px auto; display: block; }
-        .energy-slider { width: 100%; height: 12px; border-radius: 6px; background: linear-gradient(to right, #FF6347, #FFD700, #4A7C6F); outline: none; opacity: 0.9; -webkit-appearance: none; }
-        .energy-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #6B451D; cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
-        #reflectionVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.4; }
-        #profileHistory img { max-width: 60px; border-radius: 8px; border: 1px solid #D4AF37; }
-        #energyLevel { background: #D2B48C; color: #6B451D; border-radius: 8px; padding: 8px 15px; text-align: center; margin-top: 15px; font-size: 14px; }
-        .table tr { cursor: pointer; transition: background 0.2s ease; }
-        .table tr:hover { background: rgba(212, 175, 55, 0.15); }
-        .back-button { position: absolute; top: 15px; left: 15px; width: 32px; height: 32px; background: #1a1a2e; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); transition: background 0.3s ease; }
-        .back-button:hover { background: #4A7C6F; }
-        @media (max-width: 768px) { h1 { font-size: 24px; } h2 { font-size: 20px; } p { font-size: 14px; } .btn-custom, .btn-danger-custom { width: 100%; padding: 8px 20px; font-size: 13px; } .container { width: 95%; margin: 20px auto; } #astrologyWheelCanvas, #numerologyCanvas { width: 100%; height: auto; max-width: 320px; } .section { padding: 20px; } #headerProfileButton img, #header .header-logo { width: 30px; height: 30px; } .challenge-icon { font-size: 2.2rem; } .back-button { width: 28px; height: 28px; font-size: 14px; } }
-        .slide-left { animation: slideLeft 0.5s ease-out forwards; }
-        .slide-right { animation: slideRight 0.5s ease-out forwards; }
-        .slide-top { animation: slideTop 0.5s ease-out forwards; }
-        @keyframes slideLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideTop { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.7;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 20px auto;
+            position: relative;
+            z-index: 1;
+            flex-grow: 1;
+        }
+        .section {
+            background: rgba(255, 248, 220, 0.75);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        #header .header-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        #header .header-logo {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        #header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #D4AF37;
+            margin: 0;
+        }
+        #headerProfileButton {
+            background: none;
+            border: 2px solid #D4AF37;
+            border-radius: 50%;
+            padding: 0;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            margin-left: auto;
+        }
+        #headerProfileButton:hover {
+            transform: scale(1.1);
+        }
+        #headerProfileButton img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+        .btn-custom {
+            background: var(--button-color);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .btn-custom:hover {
+            background: #8B864E;
+            transform: translateY(-2px);
+        }
+        .btn-custom:disabled {
+            background: #8FBC8F;
+            cursor: not-allowed;
+        }
+        .challenge-div {
+            background: rgba(255, 248, 220, 0.75);
+            border: 2px solid #D4AF37;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .challenge-div.visible {
+            opacity: 1;
+        }
+        .challenge-div.locked {
+            opacity: 0.6;
+            position: relative;
+        }
+        .challenge-div.locked .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            border-radius: 15px;
+        }
+        .challenge-icon {
+            font-size: 2.5rem;
+            color: #D4AF37;
+            margin-bottom: 10px;
+        }
+        #footer {
+            background: #D2B48C;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+        }
+        #footer a {
+            color: #6B451D;
+            font-size: 1.5rem;
+            padding: 10px;
+            transition: all 0.3s ease;
+        }
+        #footer a:hover {
+            color: #FFD700;
+            transform: scale(1.1);
+        }
+        .modal-content {
+            background: rgba(255, 248, 220, 0.75);
+            border-radius: 15px;
+        }
+        .energy-slider {
+            width: 100%;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #FF6347, #FFD700, #32CD32);
+            outline: none;
+            opacity: 0.9;
+            -webkit-appearance: none;
+        }
+        .energy-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #6B451D;
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 1.6rem; }
+            .btn-custom { width: 100%; margin: 5px 0; }
+            .container { width: 95%; padding: 10px; }
+        }
     </style>
 </head>
 <body>
     <video id="background-video" autoplay loop muted playsinline>
         <source src="cosmic.mp4" type="video/mp4">
     </video>
+    <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <p style="color: white;">Loading...</p>
+    </div>
     <div class="container">
         <div id="header" class="section">
             <div class="header-content">
@@ -79,107 +210,64 @@
         </div>
         <div id="horoscopeForm" class="section" style="display: none;">
             <h2>Enter Your Birthdate</h2>
-            <div class="form-group">
-                <label for="birthdate">Birthdate:</label>
-                <input type="date" id="birthdate" name="birthdate" class="form-control" style="border-radius: 10px;">
-            </div>
-            <button class="btn btn-custom mt-3" id="saveHoroscopeBtn">Save & Continue</button>
+            <input type="date" id="birthdate" class="form-control">
+            <button class="btn btn-custom mt-2" id="saveHoroscopeBtn">Save & Continue</button>
         </div>
-        <div id="wellnessManager" class="section">
+        <div id="wellnessManager" class="section" style="display: none;">
             <h2>Wellness Manager</h2>
-            <p style="text-align: center;">Embark on a journey of mindfulness and self-discovery.</p>
+            <p>Embark on a journey of mindfulness.</p>
             <div id="challengeOptions">
-                <div class="challenge-div slide-left" id="challenge7">
+                <div class="challenge-div" id="challenge7">
                     <i class="fas fa-lotus-position challenge-icon"></i>
                     <h3>7-Day Challenge</h3>
                     <p>A gentle introduction.</p>
                     <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#challengeModal7">Start Challenge</button>
                 </div>
-                <div class="challenge-div locked slide-right" id="challenge21">
+                <div class="challenge-div locked" id="challenge21">
                     <div class="overlay"><p>Complete the 7-Day Challenge to unlock.</p></div>
                     <i class="fas fa-sun challenge-icon"></i>
                     <h3>21-Day Challenge</h3>
                     <p>Deepen your focus.</p>
                     <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#challengeModal21" disabled>Start Challenge</button>
                 </div>
-                <div class="challenge-div locked slide-top" id="challenge41">
-                    <div class="overlay"><p>Complete the 21-Day Challenge to unlock.</p></div>
-                    <i class="fas fa-star challenge-icon"></i>
-                    <h3>41-Day Challenge</h3>
-                    <p>Elevate your spirit.</p>
-                    <button class="btn btn-custom" data-bs-toggle="modal" data-bs-target="#challengeModal41" disabled>Start Challenge</button>
-                </div>
-                <div class="challenge-div locked slide-left" id="challenge66">
-                    <div class="overlay"><p>Complete an offline seminar.</p></div>
-                    <i class="fas fa-moon challenge-icon"></i>
-                    <h3>66-Day Challenge</h3>
-                    <p>Build resilience.</p>
-                    <button class="btn btn-custom" id="enroll66"><i class="fas fa-key"></i> Enroll</button>
-                </div>
-                <div class="challenge-div locked slide-right" id="challenge150">
-                    <div class="overlay"><p>Complete an offline seminar.</p></div>
-                    <i class="fas fa-crown challenge-icon"></i>
-                    <h3>150-Day Challenge</h3>
-                    <p>Master your mind.</p>
-                    <button class="btn btn-custom" id="enroll150"><i class="fas fa-key"></i> Enroll</button>
-                </div>
             </div>
-            <div class="modal fade" id="challengeModal7" tabindex="-1" aria-labelledby="challengeModal7Label" aria-hidden="true">
+            <div class="modal fade" id="challengeModal7" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="challengeModal7Label">7-Day Challenge</h5>
+                            <h5 class="modal-title">7-Day Challenge</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div id="modalDailyChallenges7"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal fade" id="challengeModal21" tabindex="-1" aria-labelledby="challengeModal21Label" aria-hidden="true">
+            <div class="modal fade" id="challengeModal21" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="challengeModal21Label">21-Day Challenge</h5>
+                            <h5 class="modal-title">21-Day Challenge</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
                             <div id="modalDailyChallenges21"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="modal fade" id="challengeModal41" tabindex="-1" aria-labelledby="challengeModal41Label" aria-hidden="true">
-                <div class="modal-dialog modal-lg">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="challengeModal41Label">41-Day Challenge</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div id="modalDailyChallenges41"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="energyLogModal" tabindex="-1" aria-labelledby="energyLogModalLabel" aria-hidden="true">
+            <div class="modal fade" id="energyLogModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
-                        <video id="reflectionVideo" autoplay loop muted>
-                            <source src="cosmic.mp4" type="video/mp4">
-                        </video>
                         <div class="modal-header">
-                            <h5 class="modal-title" id="energyLogModalLabel">Energy Log</h5>
+                            <h5 class="modal-title">Energy Log</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
@@ -191,9 +279,9 @@
                                 <audio id="binauralBeats" src="binaural.mp3"></audio>
                                 <button class="btn btn-custom" id="playMeditation">Play Meditation</button>
                                 <p><strong>Task 1:</strong> <span id="task1Text"></span></p>
-                                <input type="file" id="task1Proof" accept="image/*">
+                                <button class="btn btn-custom" id="task1CompleteBtn">Mark as Completed</button>
                                 <p><strong>Task 2:</strong> <span id="task2Text"></span></p>
-                                <input type="file" id="task2Proof" accept="image/*">
+                                <button class="btn btn-custom" id="task2CompleteBtn">Mark as Completed</button>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -208,68 +296,38 @@
             <ul style="list-style: none; padding: 0;">
                 <li><a href="#" class="btn btn-custom" id="telegramLink"><i class="fab fa-telegram-plane"></i> Join Telegram Channel</a></li>
                 <li><a href="#" class="btn btn-custom" id="twitterLink"><i class="fab fa-twitter"></i> Follow on Twitter/X</a></li>
-                <li><h4>Referral Task</h4><p>Generate your referral code!</p><button class="btn btn-custom" id="generateReferral"><i class="fas fa-share"></i> Generate Referral Code</button><p id="referralCode"></p></li>
+                <li>
+                    <h4>Referral Task</h4>
+                    <p>Generate your referral code!</p>
+                    <button class="btn btn-custom" id="generateReferral"><i class="fas fa-share"></i> Generate Referral Code</button>
+                    <p id="referralCode"></p>
+                    <button class="btn btn-custom" id="shareReferral" style="display: none;">Share Referral Code</button>
+                </li>
             </ul>
-        </div>
-        <div id="leaderboardPage" class="section" style="display: none;">
-            <h2>Leaderboard</h2>
-            <p>Top mindful masters!</p>
-            <ol id="leaderboardList"></ol>
-        </div>
-        <div id="gamePage" class="section" style="display: none;">
-            <h2 id="gameWelcome"></h2>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                <button class="btn btn-custom" id="spinWheel">Spin Astrology Wheel</button>
-                <canvas id="astrologyWheelCanvas" width="400" height="400"></canvas>
-                <p id="astrologyMessage"></p>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
-                <button class="btn btn-custom" id="playNumber">Play Number Path</button>
-                <canvas id="numerologyCanvas" width="400" height="400"></canvas>
-                <p id="numerologyMessage"></p>
-            </div>
         </div>
         <div id="playerProfile" class="section" style="display: none;">
             <h2>Player Profile</h2>
             <p>Welcome, <span id="profileNameDisplay">Guest</span>!</p>
             <div id="energyLevel">Energy Level: <span id="energyValue">0</span>%</div>
-            <button class="btn btn-danger-custom mt-3" data-bs-toggle="modal" data-bs-target="#deleteProgressModal">Delete Progress</button>
-            <h3 class="mt-4">Challenge History</h3>
+            <button class="btn btn-custom mt-3" data-bs-toggle="modal" data-bs-target="#deleteProgressModal">Delete Progress</button>
+            <h3 class="mt-3">Challenge History</h3>
             <table class="table">
-                <thead><tr><th>Day</th><th>Goal</th><th>Energy Before</th><th>Energy After</th><th>Task 1 Proof</th><th>Task 2 Proof</th></tr></thead>
+                <thead><tr><th>Day</th><th>Goal</th><th>Energy Before</th><th>Energy After</th></tr></thead>
                 <tbody id="profileHistory"></tbody>
             </table>
-            <div class="modal fade" id="deleteProgressModal" tabindex="-1" aria-labelledby="deleteProgressModalLabel" aria-hidden="true">
+            <div class="modal fade" id="deleteProgressModal" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title" id="deleteProgressModalLabel">Are You Sure?</h5>
+                            <h5 class="modal-title">Are You Sure?</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <p>This will reset all your progress and history. This action cannot be undone.</p>
+                            <p>This will reset all your progress and history.</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                            <button type="button" class="btn btn-danger-custom" id="confirmDelete">Delete</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal fade" id="taskDetailsModal" tabindex="-1" aria-labelledby="taskDetailsModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="taskDetailsModalLabel">Task Details</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <p><strong>Day:</strong> <span id="taskDay"></span></p>
-                            <p><strong>Goal:</strong> <span id="taskGoal"></span></p>
-                            <p><strong>Task 1:</strong> <span id="task1Detail"></span></p>
-                            <p><strong>Task 2:</strong> <span id="task2Detail"></span></p>
-                            <button class="btn btn-custom" id="playBinaural">Play Binaural Beats</button>
-                            <audio id="profileBinauralBeats" src="binaural.mp3"></audio>
+                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-custom" id="confirmDelete">Delete</button>
                         </div>
                     </div>
                 </div>
@@ -278,14 +336,13 @@
         <div id="footer">
             <a href="#" id="navHome"><i class="fas fa-home"></i></a>
             <a href="#" id="navTasks"><i class="fas fa-tasks"></i></a>
-            <a href="#" id="navLeaderboard"><i class="fas fa-trophy"></i></a>
-            <a href="#" id="navGame"><i class="fas fa-gamepad"></i></a>
+            <a href="#" id="navProfile"><i class="fas fa-user"></i></a>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Constants and Initial Data
+        // Constants
         const dailyGoals = [
             { goal: "Wealth", meditation: "Visualize wealth.", task1: "Write 3 financial goals.", task2: "Plan a budget." },
             { goal: "Peace", meditation: "Reflect on peace.", task1: "5-min gratitude.", task2: "5-min breathing." },
@@ -296,37 +353,25 @@
             { goal: "Gratitude", meditation: "Cultivate gratitude.", task1: "Write 3 thanks.", task2: "Send a thank-you." }
         ];
 
-        const zodiacOrder = [
-            { sign: "Aries", symbol: "♈" }, { sign: "Taurus", symbol: "♉" }, { sign: "Gemini", symbol: "♊" },
-            { sign: "Cancer", symbol: "♋" }, { sign: "Leo", symbol: "♌" }, { sign: "Virgo", symbol: "♍" },
-            { sign: "Libra", symbol: "♎" }, { sign: "Scorpio", symbol: "♏" }, { sign: "Sagittarius", symbol: "♐" },
-            { sign: "Capricorn", symbol: "♑" }, { sign: "Aquarius", symbol: "♒" }, { sign: "Pisces", symbol: "♓" }
-        ];
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'playerProfile'];
 
-        const astrologyInsights = {
-            "Aries": ["Bold actions today."], "Taurus": ["Stability brings peace."], "Gemini": ["Communication opens."],
-            "Cancer": ["Emotions guide."], "Leo": ["Shine bright."], "Virgo": ["Details matter."],
-            "Libra": ["Balance harmonizes."], "Scorpio": ["Transformation nears."], "Sagittarius": ["Adventure calls."],
-            "Capricorn": ["Work pays."], "Aquarius": ["Innovation changes."], "Pisces": ["Imagination fuels."]
-        };
-
-        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'leaderboardPage', 'gamePage', 'playerProfile'];
-
-        // Cached State
+        // State
         let state = {
-            userName: localStorage.getItem('userName') || "Guest",
-            userPhoto: localStorage.getItem('userPhoto') || "https://via.placeholder.com/40",
-            energyLevel: parseInt(localStorage.getItem('energyLevel') || '0'),
-            challenges: JSON.parse(localStorage.getItem('challenges') || '[]'),
+            userName: "Guest",
+            userPhoto: "https://via.placeholder.com/40",
+            energyLevel: 0,
+            challenges: [],
             energyBefore: null,
             currentChallengeDay: null,
-            currentContainerId: null
+            currentContainerId: null,
+            challengeHistory: []
         };
 
-        const wheelLogo = new Image();
-        wheelLogo.src = 'logo.webp';
+        let sectionStack = ['wellnessManager'];
+        let task1Completed = false;
+        let task2Completed = false;
 
-        // Cached DOM Elements
+        // DOM Elements
         const domElements = {
             profilePhoto: document.getElementById('profilePhoto'),
             profileNameDisplay: document.getElementById('profileNameDisplay'),
@@ -334,7 +379,6 @@
             challengeOptions: document.getElementById('challengeOptions'),
             modalDailyChallenges7: document.getElementById('modalDailyChallenges7'),
             modalDailyChallenges21: document.getElementById('modalDailyChallenges21'),
-            modalDailyChallenges41: document.getElementById('modalDailyChallenges41'),
             energyLogPrompt: document.getElementById('energyLogPrompt'),
             energySlider: document.getElementById('energySlider'),
             energySliderValue: document.getElementById('energySliderValue'),
@@ -343,54 +387,74 @@
             meditationTask: document.getElementById('meditationTask'),
             task1Text: document.getElementById('task1Text'),
             task2Text: document.getElementById('task2Text'),
-            task1Proof: document.getElementById('task1Proof'),
-            task2Proof: document.getElementById('task2Proof'),
+            task1CompleteBtn: document.getElementById('task1CompleteBtn'),
+            task2CompleteBtn: document.getElementById('task2CompleteBtn'),
             binauralBeats: document.getElementById('binauralBeats'),
             playMeditation: document.getElementById('playMeditation'),
             profileHistory: document.getElementById('profileHistory'),
-            taskDay: document.getElementById('taskDay'),
-            taskGoal: document.getElementById('taskGoal'),
-            task1Detail: document.getElementById('task1Detail'),
-            task2Detail: document.getElementById('task2Detail'),
-            playBinaural: document.getElementById('playBinaural'),
-            profileBinauralBeats: document.getElementById('profileBinauralBeats'),
-            gameWelcome: document.getElementById('gameWelcome'),
-            astrologyWheelCanvas: document.getElementById('astrologyWheelCanvas'),
-            numerologyCanvas: document.getElementById('numerologyCanvas'),
-            astrologyMessage: document.getElementById('astrologyMessage'),
-            numerologyMessage: document.getElementById('numerologyMessage'),
-            referralCode: document.getElementById('referralCode')
+            referralCode: document.getElementById('referralCode'),
+            shareReferral: document.getElementById('shareReferral')
         };
 
-        // Telegram Integration
+        // Telegram Initialization
         if (window.Telegram?.WebApp) {
-            window.Telegram.WebApp.ready();
-            window.Telegram.WebApp.expand();
-            const user = window.Telegram.WebApp.initDataUnsafe.user;
+            Telegram.WebApp.ready();
+            Telegram.WebApp.expand();
+            const user = Telegram.WebApp.initDataUnsafe.user;
             if (user) {
                 state.userName = user.first_name || "Guest";
                 state.userPhoto = user.photo_url || "https://via.placeholder.com/40";
-                localStorage.setItem('userName', state.userName);
-                localStorage.setItem('userPhoto', state.userPhoto);
+            }
+            setTheme();
+            init();
+        }
+
+        // Theme Adaptation
+        function setTheme() {
+            const theme = Telegram.WebApp.themeParams;
+            if (theme) {
+                document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#1a1a2e');
+                document.documentElement.style.setProperty('--text-color', theme.text_color || '#6B451D');
+                document.documentElement.style.setProperty('--button-color', theme.button_color || '#BDB76B');
             }
         }
 
-        // Initial Setup
-        domElements.profilePhoto.src = state.userPhoto;
-        domElements.profileNameDisplay.textContent = state.userName;
-        domElements.energyValue.textContent = state.energyLevel;
+        // Initialization
+        async function init() {
+            document.getElementById('loading').style.display = 'flex';
+            try {
+                const [userName, userPhoto, energyLevel, challenges, challengeHistory, birthdate] = await Promise.all([
+                    Telegram.WebApp.CloudStorage.getItem('userName'),
+                    Telegram.WebApp.CloudStorage.getItem('userPhoto'),
+                    Telegram.WebApp.CloudStorage.getItem('energyLevel'),
+                    Telegram.WebApp.CloudStorage.getItem('challenges'),
+                    Telegram.WebApp.CloudStorage.getItem('challengeHistory'),
+                    Telegram.WebApp.CloudStorage.getItem('birthdate')
+                ]);
 
-        // Add Back Button to Sections
-        sections.forEach(id => {
-            if (id !== 'wellnessManager' && id !== 'header') {
-                const section = document.getElementById(id);
-                const backBtn = document.createElement('div');
-                backBtn.className = 'back-button';
-                backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
-                backBtn.addEventListener('click', () => showSection('wellnessManager'));
-                section.appendChild(backBtn);
+                state.userName = userName || state.userName;
+                state.userPhoto = userPhoto || state.userPhoto;
+                state.energyLevel = parseInt(energyLevel || '0');
+                state.challenges = JSON.parse(challenges || '[]');
+                state.challengeHistory = JSON.parse(challengeHistory || '[]');
+
+                if (!state.challenges.length) {
+                    state.challenges = initializeChallenges();
+                    await Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges));
+                }
+
+                domElements.profilePhoto.src = state.userPhoto;
+                domElements.profileNameDisplay.textContent = state.userName;
+                domElements.energyValue.textContent = state.energyLevel;
+
+                showSection(birthdate ? 'wellnessManager' : 'horoscopeForm');
+            } catch (error) {
+                console.error('Error initializing app:', error);
+                Telegram.WebApp.showAlert('Failed to load app data.');
+            } finally {
+                document.getElementById('loading').style.display = 'none';
             }
-        });
+        }
 
         // Utility Functions
         const debounce = (func, wait) => {
@@ -401,147 +465,131 @@
             };
         };
 
-        const animateChallenges = () => {
+        function animateChallenges() {
             const challenges = domElements.challengeOptions.children;
-            let index = 0;
-            const step = () => {
-                if (index < challenges.length) {
-                    challenges[index].classList.add('visible');
-                    index++;
-                    requestAnimationFrame(step);
-                }
-            };
-            requestAnimationFrame(step);
-        };
+            Array.from(challenges).forEach((challenge, index) => {
+                setTimeout(() => challenge.classList.add('visible'), index * 100);
+            });
+        }
 
         // Core Functions
-        const showSection = (sectionId) => {
-            try {
-                sections.forEach(id => {
-                    const el = document.getElementById(id);
-                    if (el) el.style.display = id === sectionId ? 'block' : 'none';
-                });
-                if (sectionId === 'wellnessManager') {
-                    loadChallenges();
-                    animateChallenges();
-                } else if (sectionId === 'gamePage') {
-                    updateGameWelcome();
-                    initializeCanvases();
-                } else if (sectionId === 'playerProfile') {
-                    loadProfileHistory();
-                }
-            } catch (e) {
-                console.error('Error in showSection:', e);
+        function showSection(sectionId) {
+            if (sectionId !== sectionStack[sectionStack.length - 1]) {
+                sectionStack.push(sectionId);
             }
-        };
-
-        const saveHoroscope = () => {
-            const birthdate = document.getElementById('birthdate').value;
-            if (birthdate) {
-                localStorage.setItem('birthdate', birthdate);
-                showSection('wellnessManager');
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = id === sectionId ? 'block' : 'none';
+            });
+            if (sectionStack.length > 1) {
+                Telegram.WebApp.BackButton.show();
             } else {
-                alert('Please enter your birthdate.');
+                Telegram.WebApp.BackButton.hide();
             }
-        };
-
-        const updateEnergyLevel = (before = null, after = null) => {
-            if (before !== null && after !== null) {
-                state.energyLevel = Math.min(Math.round((before + after) / 2), 100);
-                localStorage.setItem('energyLevel', state.energyLevel);
+            if (sectionId === 'wellnessManager') {
+                loadChallenges();
+                animateChallenges();
+            } else if (sectionId === 'playerProfile') {
+                loadProfileHistory();
             }
-            domElements.energyValue.textContent = state.energyLevel;
-        };
+        }
 
-        const boostEnergyLevel = (amount) => {
-            state.energyLevel = Math.min(state.energyLevel + amount, 100);
-            localStorage.setItem('energyLevel', state.energyLevel);
-            localStorage.setItem('gamePlayed', 'true');
-            updateEnergyLevel();
-            loadChallenges();
-        };
-
-        const initializeChallenges = () => Array.from({ length: 150 }, (_, i) => {
-            const goalIndex = i % dailyGoals.length;
-            return { day: i + 1, goal: dailyGoals[goalIndex].goal, meditation: dailyGoals[goalIndex].meditation, task1: dailyGoals[goalIndex].task1, task2: dailyGoals[goalIndex].task2, completed: false };
+        Telegram.WebApp.BackButton.onClick(() => {
+            if (sectionStack.length > 1) {
+                sectionStack.pop();
+                showSection(sectionStack[sectionStack.length - 1]);
+            }
         });
 
-        const loadChallenges = () => {
-            try {
-                if (!state.challenges.length) {
-                    state.challenges = initializeChallenges();
-                    localStorage.setItem('challenges', JSON.stringify(state.challenges));
-                }
-                displayChallenges(domElements.modalDailyChallenges7, 7);
-                displayChallenges(domElements.modalDailyChallenges21, 21);
-                displayChallenges(domElements.modalDailyChallenges41, 41);
-
-                const sevenDayComplete = state.challenges.slice(0, 7).every(ch => ch.completed);
-                const twentyOneDayComplete = state.challenges.slice(0, 28).every(ch => ch.completed);
-                if (sevenDayComplete) {
-                    const div = document.getElementById('challenge21');
-                    div.classList.remove('locked');
-                    div.querySelector('button').removeAttribute('disabled');
-                }
-                if (twentyOneDayComplete) {
-                    const div = document.getElementById('challenge41');
-                    div.classList.remove('locked');
-                    div.querySelector('button').removeAttribute('disabled');
-                }
-            } catch (e) {
-                console.error('Error in loadChallenges:', e);
+        async function saveHoroscope() {
+            const birthdate = document.getElementById('birthdate').value;
+            if (birthdate) {
+                await Telegram.WebApp.CloudStorage.setItem('birthdate', birthdate);
+                showSection('wellnessManager');
+            } else {
+                Telegram.WebApp.showAlert('Please enter your birthdate.');
             }
-        };
+        }
 
-        const displayChallenges = (container, days) => {
+        async function updateEnergyLevel(before = null, after = null) {
+            if (before !== null && after !== null) {
+                state.energyLevel = Math.min(Math.round((before + after) / 2), 100);
+                await Telegram.WebApp.CloudStorage.setItem('energyLevel', state.energyLevel.toString());
+            }
+            domElements.energyValue.textContent = state.energyLevel;
+        }
+
+        function initializeChallenges() {
+            return Array.from({ length: 21 }, (_, i) => {
+                const goalIndex = i % dailyGoals.length;
+                return {
+                    day: i + 1,
+                    goal: dailyGoals[goalIndex].goal,
+                    meditation: dailyGoals[goalIndex].meditation,
+                    task1: dailyGoals[goalIndex].task1,
+                    task2: dailyGoals[goalIndex].task2,
+                    completed: false
+                };
+            });
+        }
+
+        function loadChallenges() {
+            displayChallenges(domElements.modalDailyChallenges7, 7);
+            displayChallenges(domElements.modalDailyChallenges21, 21);
+
+            const sevenDayComplete = state.challenges.slice(0, 7).every(ch => ch.completed);
+            if (sevenDayComplete) {
+                const div = document.getElementById('challenge21');
+                div.classList.remove('locked');
+                div.querySelector('button').removeAttribute('disabled');
+            }
+        }
+
+        function displayChallenges(container, days) {
             if (!container) return;
             container.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            const gamePlayed = localStorage.getItem('gamePlayed') === 'true';
             state.challenges.slice(0, days).forEach((challenge, index) => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
                 const prevDayCompleted = index === 0 || state.challenges[index - 1].completed;
                 if (challenge.completed) {
                     card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Completed</p>`;
-                } else if (!prevDayCompleted && !gamePlayed) {
-                    card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete Day ${challenge.day - 1} first. Play a <a href="#" data-section="gamePage">game</a>!</p>`;
+                } else if (!prevDayCompleted) {
+                    card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete Day ${challenge.day - 1} first.</p>`;
                 } else {
                     card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><button class="btn btn-custom" data-day="${challenge.day}" data-container="${container.id}">Start Day ${challenge.day}</button>`;
                 }
-                fragment.appendChild(card);
+                container.appendChild(card);
             });
-            container.appendChild(fragment);
-        };
+        }
 
-        const startChallenge = (day, containerId) => {
-            try {
-                state.currentChallengeDay = day;
-                state.currentContainerId = containerId;
-                state.energyBefore = null;
-                domElements.energyLogPrompt.textContent = "How positive is your mind frame?";
-                domElements.energySlider.value = 50;
-                domElements.energySliderValue.textContent = '50%';
-                domElements.challengeTasks.style.display = 'none';
-                domElements.submitEnergyLog.setAttribute('data-stage', 'before');
-                domElements.submitEnergyLog.disabled = true;
-                const modal = new bootstrap.Modal(document.getElementById('energyLogModal'));
-                modal.show();
-                document.getElementById('energyLogModal').addEventListener('hidden.bs.modal', () => {
-                    document.querySelector('.modal-backdrop')?.remove();
-                }, { once: true });
-            } catch (e) {
-                console.error('Error in startChallenge:', e);
-            }
-        };
+        function startChallenge(day, containerId) {
+            state.currentChallengeDay = day;
+            state.currentContainerId = containerId;
+            state.energyBefore = null;
+            domElements.energyLogPrompt.textContent = "How positive is your mind frame?";
+            domElements.energySlider.value = 50;
+            domElements.energySliderValue.textContent = '50%';
+            domElements.challengeTasks.style.display = 'none';
+            domElements.submitEnergyLog.setAttribute('data-stage', 'before');
+            domElements.submitEnergyLog.disabled = true;
+            task1Completed = false;
+            task2Completed = false;
+            domElements.task1CompleteBtn.textContent = 'Mark as Completed';
+            domElements.task2CompleteBtn.textContent = 'Mark as Completed';
+            const modal = new bootstrap.Modal(document.getElementById('energyLogModal'));
+            modal.show();
+            Telegram.WebApp.MainButton.text = 'Log Energy Before';
+            Telegram.WebApp.MainButton.show();
+            Telegram.WebApp.MainButton.onClick(submitEnergyLog);
+        }
 
-        const checkUploads = () => {
-            const task1Proof = domElements.task1Proof.files.length > 0;
-            const task2Proof = domElements.task2Proof.files.length > 0;
-            domElements.submitEnergyLog.disabled = !(task1Proof && task2Proof);
-        };
+        document.getElementById('energyLogModal').addEventListener('hidden.bs.modal', () => {
+            Telegram.WebApp.MainButton.hide();
+            document.querySelector('.modal-backdrop')?.remove();
+        });
 
-        const submitEnergyLog = () => {
+        async function submitEnergyLog() {
             try {
                 const sliderValue = parseInt(domElements.energySlider.value);
                 const stage = domElements.submitEnergyLog.getAttribute('data-stage');
@@ -556,41 +604,41 @@
                     domElements.task2Text.textContent = challenge.task2;
                     domElements.submitEnergyLog.setAttribute('data-stage', 'after');
                     domElements.submitEnergyLog.disabled = true;
+                    Telegram.WebApp.MainButton.text = 'Submit Challenge';
                 } else if (stage === 'after') {
+                    if (!task1Completed || !task2Completed) {
+                        Telegram.WebApp.showAlert('Please complete both tasks.');
+                        return;
+                    }
                     const energyAfter = sliderValue;
-                    const task1File = domElements.task1Proof.files[0];
-                    const task2File = domElements.task2Proof.files[0];
-                    const reader1 = new FileReader();
-                    const reader2 = new FileReader();
+                    const challenge = state.challenges.find(c => c.day === state.currentChallengeDay);
+                    challenge.completed = true;
+                    await Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges));
+                    await updateEnergyLevel(state.energyBefore, energyAfter);
 
-                    reader1.onload = e => {
-                        const task1Image = e.target.result;
-                        reader2.onload = e => {
-                            const task2Image = e.target.result;
-                            const challenge = state.challenges.find(c => c.day === state.currentChallengeDay);
-                            challenge.completed = true;
-                            localStorage.setItem('challenges', JSON.stringify(state.challenges));
-                            updateEnergyLevel(state.energyBefore, energyAfter);
+                    state.challengeHistory.push({
+                        day: state.currentChallengeDay,
+                        goal: challenge.goal,
+                        energyBefore: state.energyBefore,
+                        energyAfter
+                    });
+                    await Telegram.WebApp.CloudStorage.setItem('challengeHistory', JSON.stringify(state.challengeHistory));
 
-                            let history = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
-                            history.push({ day: state.currentChallengeDay, goal: challenge.goal, energyBefore: state.energyBefore, energyAfter, task1Image, task2Image, task1: challenge.task1, task2: challenge.task2 });
-                            localStorage.setItem('challengeHistory', JSON.stringify(history));
-
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('energyLogModal'));
-                            modal.hide();
-                            document.querySelector('.modal-backdrop')?.remove();
-                            loadChallenges();
-                        };
-                        reader2.readAsDataURL(task2File);
-                    };
-                    reader1.readAsDataURL(task1File);
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('energyLogModal'));
+                    modal.hide();
+                    loadChallenges();
                 }
             } catch (e) {
                 console.error('Error in submitEnergyLog:', e);
+                Telegram.WebApp.showAlert('An error occurred.');
             }
-        };
+        }
 
-        const playMeditation = () => {
+        function checkTasksCompleted() {
+            domElements.submitEnergyLog.disabled = !(task1Completed && task2Completed);
+        }
+
+        function playMeditation() {
             const audio = domElements.binauralBeats;
             if (audio.paused) {
                 audio.play();
@@ -599,217 +647,134 @@
                 audio.pause();
                 domElements.playMeditation.textContent = 'Play Meditation';
             }
-        };
+        }
 
-        const loadProfileHistory = () => {
-            const history = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
-            domElements.profileHistory.innerHTML = history.map((entry, index) => `
-                <tr data-index="${index}">
+        async function loadProfileHistory() {
+            domElements.profileHistory.innerHTML = state.challengeHistory.map(entry => `
+                <tr>
                     <td>${entry.day}</td>
                     <td>${entry.goal}</td>
                     <td>${entry.energyBefore}%</td>
                     <td>${entry.energyAfter}%</td>
-                    <td><img src="${entry.task1Image}" alt="Task 1 Proof"></td>
-                    <td><img src="${entry.task2Image}" alt="Task 2 Proof"></td>
                 </tr>
             `).join('');
-        };
+        }
 
-        const showTaskDetails = (index) => {
-            const history = JSON.parse(localStorage.getItem('challengeHistory') || '[]')[index];
-            domElements.taskDay.textContent = history.day;
-            domElements.taskGoal.textContent = history.goal;
-            domElements.task1Detail.textContent = history.task1;
-            domElements.task2Detail.textContent = history.task2;
-            new bootstrap.Modal(document.getElementById('taskDetailsModal')).show();
-        };
+        async function deleteProgress() {
+            Telegram.WebApp.showConfirm('Are you sure you want to delete your progress?', async (confirmed) => {
+                if (confirmed) {
+                    try {
+                        await Promise.all([
+                            Telegram.WebApp.CloudStorage.removeItem('challenges'),
+                            Telegram.WebApp.CloudStorage.removeItem('challengeHistory'),
+                            Telegram.WebApp.CloudStorage.setItem('energyLevel', '0')
+                        ]);
+                        state.challenges = [];
+                        state.energyLevel = 0;
+                        state.challengeHistory = [];
+                        await updateEnergyLevel();
+                        loadChallenges();
+                        loadProfileHistory();
+                        const modal = bootstrap.Modal.getInstance(document.getElementById('deleteProgressModal'));
+                        modal.hide();
+                        showSection('wellnessManager');
+                    } catch (e) {
+                        console.error('Error in deleteProgress:', e);
+                        Telegram.WebApp.showAlert('An error occurred.');
+                    }
+                }
+            });
+        }
 
-        const playBinauralBeats = () => {
-            const audio = domElements.profileBinauralBeats;
-            if (audio.paused) {
-                audio.play();
-                domElements.playBinaural.textContent = 'Pause Binaural Beats';
-            } else {
-                audio.pause();
-                domElements.playBinaural.textContent = 'Play Binaural Beats';
-            }
-        };
+        function joinLink(platform) {
+            const links = {
+                'Telegram Channel': 'https://t.me/yourchannel',
+                'Twitter/X': 'https://twitter.com/yourtwitter'
+            };
+            Telegram.WebApp.openLink(links[platform] || '#');
+        }
 
-        const deleteProgress = () => {
-            try {
-                state.challenges = [];
-                localStorage.removeItem('challenges');
-                localStorage.removeItem('challengeHistory');
-                state.energyLevel = 0;
-                localStorage.setItem('energyLevel', '0');
-                localStorage.setItem('gamePlayed', 'false');
-                updateEnergyLevel();
-                loadChallenges();
-                loadProfileHistory();
-                const modal = bootstrap.Modal.getInstance(document.getElementById('deleteProgressModal'));
-                modal.hide();
-                document.querySelector('.modal-backdrop')?.remove();
-                showSection('wellnessManager');
-            } catch (e) {
-                console.error('Error in deleteProgress:', e);
-            }
-        };
-
-        const joinLink = (platform) => {
-            const links = { 'Telegram Channel': 'https://t.me/yourchannel', 'Twitter/X': 'https://twitter.com/yourtwitter' };
-            window.open(links[platform] || '#', '_blank');
-        };
-
-        const generateReferralCode = () => {
+        function generateReferralCode() {
             const referralCode = Math.random().toString(36).substring(7).toUpperCase();
             domElements.referralCode.textContent = "Your Referral Code: " + referralCode;
-        };
-
-        const enrollSeminar = (challenge) => {
-            const code = prompt("Enter seminar code:");
-            if (code === "wellness") {
-                localStorage.setItem(`seminarCompleted${challenge}`, true);
-                alert("Challenge unlocked!");
-                document.getElementById(`challenge${challenge}`).classList.remove('locked');
-                loadChallenges();
-            } else {
-                alert("Invalid code.");
-            }
-        };
-
-        const updateGameWelcome = () => {
-            domElements.gameWelcome.textContent = `Welcome, ${state.userName}! Play to boost energy!`;
-        };
-
-        const initializeCanvases = () => {
-            drawAstrologyWheel();
-            drawNumerologyGrid();
-        };
-
-        const drawAstrologyWheel = () => {
-            const ctx = domElements.astrologyWheelCanvas.getContext('2d');
-            const centerX = domElements.astrologyWheelCanvas.width / 2;
-            const centerY = domElements.astrologyWheelCanvas.height / 2;
-            const radius = domElements.astrologyWheelCanvas.width / 2 - 20;
-
-            ctx.clearRect(0, 0, domElements.astrologyWheelCanvas.width, domElements.astrologyWheelCanvas.height);
-            if (wheelLogo.complete) {
-                ctx.globalAlpha = 0.2;
-                ctx.drawImage(wheelLogo, centerX - radius, centerY - radius, radius * 2, radius * 2);
-                ctx.globalAlpha = 1.0;
-            }
-
-            zodiacOrder.forEach((zodiac, index) => {
-                const angle = (index / 12) * 2 * Math.PI - Math.PI / 2;
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, angle, angle + (2 * Math.PI / 12));
-                ctx.lineTo(centerX, centerY);
-                ctx.fillStyle = `hsl(${index * 30}, 50%, 50%)`;
-                ctx.fill();
-
-                ctx.fillStyle = '#fff';
-                ctx.font = '20px Nunito';
-                ctx.textAlign = 'center';
-                const textX = centerX + Math.cos(angle + Math.PI / 12) * (radius - 40);
-                const textY = centerY + Math.sin(angle + Math.PI / 12) * (radius - 40);
-                ctx.fillText(zodiac.symbol, textX, textY);
-            });
-        };
-
-        const drawNumerologyGrid = () => {
-            const ctx = domElements.numerologyCanvas.getContext('2d');
-            const size = domElements.numerologyCanvas.width / 3;
-
-            ctx.clearRect(0, 0, domElements.numerologyCanvas.width, domElements.numerologyCanvas.height);
-            if (wheelLogo.complete) {
-                ctx.globalAlpha = 0.2;
-                ctx.drawImage(wheelLogo, 0, 0, domElements.numerologyCanvas.width, domElements.numerologyCanvas.height);
-                ctx.globalAlpha = 1.0;
-            }
-
-            for (let i = 0; i < 9; i++) {
-                const x = (i % 3) * size;
-                const y = Math.floor(i / 3) * size;
-                ctx.strokeStyle = '#D4AF37';
-                ctx.strokeRect(x, y, size, size);
-                ctx.fillStyle = '#fff';
-                ctx.font = '24px Nunito';
-                ctx.textAlign = 'center';
-                ctx.fillText(i + 1, x + size / 2, y + size / 2 + 8);
-            }
-        };
-
-        const startAstrologyWheelGame = () => {
-            const randomSign = zodiacOrder[Math.floor(Math.random() * zodiacOrder.length)].sign;
-            domElements.astrologyMessage.textContent = astrologyInsights[randomSign][0];
-            boostEnergyLevel(5);
-        };
-
-        const startNumerologyGame = () => {
-            const randomNumber = Math.floor(Math.random() * 9) + 1;
-            domElements.numerologyMessage.textContent = `Your number is ${randomNumber}. Reflect on its energy!`;
-            boostEnergyLevel(5);
-        };
+            domElements.shareReferral.style.display = 'block';
+        }
 
         // Event Listeners
-        window.addEventListener('load', () => {
-            showSection(localStorage.getItem('birthdate') ? 'wellnessManager' : 'horoscopeForm');
+        document.getElementById('headerProfileButton').addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            showSection('playerProfile');
         });
-
-        document.getElementById('headerProfileButton').addEventListener('click', () => showSection('playerProfile'));
-        document.getElementById('saveHoroscopeBtn').addEventListener('click', saveHoroscope);
-        document.getElementById('navHome').addEventListener('click', (e) => { e.preventDefault(); showSection('wellnessManager'); });
-        document.getElementById('navTasks').addEventListener('click', (e) => { e.preventDefault(); showSection('tasksPage'); });
-        document.getElementById('navLeaderboard').addEventListener('click', (e) => { e.preventDefault(); showSection('leaderboardPage'); });
-        document.getElementById('navGame').addEventListener('click', (e) => { e.preventDefault(); showSection('gamePage'); });
-        document.getElementById('telegramLink').addEventListener('click', (e) => { e.preventDefault(); joinLink('Telegram Channel'); });
-        document.getElementById('twitterLink').addEventListener('click', (e) => { e.preventDefault(); joinLink('Twitter/X'); });
-        document.getElementById('generateReferral').addEventListener('click', generateReferralCode);
-        document.getElementById('enroll66').addEventListener('click', () => enrollSeminar('66'));
-        document.getElementById('enroll150').addEventListener('click', () => enrollSeminar('150'));
-        document.getElementById('spinWheel').addEventListener('click', startAstrologyWheelGame);
-        document.getElementById('playNumber').addEventListener('click', startNumerologyGame);
-        document.getElementById('confirmDelete').addEventListener('click', deleteProgress);
-        domElements.playMeditation.addEventListener('click', playMeditation);
-        domElements.playBinaural.addEventListener('click', playBinauralBeats);
-        domElements.submitEnergyLog.addEventListener('click', submitEnergyLog);
-        domElements.task1Proof.addEventListener('change', checkUploads);
-        domElements.task2Proof.addEventListener('change', checkUploads);
-
+        document.getElementById('saveHoroscopeBtn').addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            saveHoroscope();
+        });
+        document.getElementById('navHome').addEventListener('click', (e) => {
+            e.preventDefault();
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            showSection('wellnessManager');
+        });
+        document.getElementById('navTasks').addEventListener('click', (e) => {
+            e.preventDefault();
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            showSection('tasksPage');
+        });
+        document.getElementById('navProfile').addEventListener('click', (e) => {
+            e.preventDefault();
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            showSection('playerProfile');
+        });
+        document.getElementById('telegramLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            joinLink('Telegram Channel');
+        });
+        document.getElementById('twitterLink').addEventListener('click', (e) => {
+            e.preventDefault();
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            joinLink('Twitter/X');
+        });
+        document.getElementById('generateReferral').addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            generateReferralCode();
+        });
+        document.getElementById('shareReferral').addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            const referralCode = domElements.referralCode.textContent.split(': ')[1];
+            Telegram.WebApp.openLink(`https://t.me/share/url?url=Join%20Third%20Eye%20with%20code:%20${referralCode}`);
+        });
+        document.getElementById('confirmDelete').addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('heavy');
+            deleteProgress();
+        });
+        domElements.playMeditation.addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('light');
+            playMeditation();
+        });
+        domElements.task1CompleteBtn.addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            task1Completed = !task1Completed;
+            domElements.task1CompleteBtn.textContent = task1Completed ? 'Completed' : 'Mark as Completed';
+            checkTasksCompleted();
+        });
+        domElements.task2CompleteBtn.addEventListener('click', () => {
+            Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+            task2Completed = !task2Completed;
+            domElements.task2CompleteBtn.textContent = task2Completed ? 'Completed' : 'Mark as Completed';
+            checkTasksCompleted();
+        });
+        domElements.challengeOptions.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-day]');
+            if (btn) {
+                Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+                startChallenge(parseInt(btn.dataset.day), btn.dataset.container);
+            }
+        });
         const updateSliderValue = debounce(() => {
             domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
             domElements.submitEnergyLog.disabled = false;
         }, 100);
         domElements.energySlider.addEventListener('input', updateSliderValue);
-
-        domElements.challengeOptions.addEventListener('click', (e) => {
-            const btn = e.target.closest('button[data-day]');
-            if (btn) {
-                const day = parseInt(btn.dataset.day);
-                const containerId = btn.dataset.container;
-                startChallenge(day, containerId);
-            }
-        });
-
-        domElements.profileHistory.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if (row) showTaskDetails(parseInt(row.dataset.index));
-        });
-
-        document.querySelectorAll('[data-section]').forEach(link => {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                showSection(link.dataset.section);
-            });
-        });
-
-        // Fallback for unclickable issue
-        document.body.addEventListener('click', (e) => {
-            if (e.target.classList.contains('modal-backdrop')) {
-                document.querySelector('.modal-backdrop')?.remove();
-            }
-        });
     </script>
 </body>
 </html>
