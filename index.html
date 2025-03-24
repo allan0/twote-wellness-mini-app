@@ -526,14 +526,39 @@
         document.getElementById('profilePhoto').src = userPhoto;
         document.getElementById('profileNameDisplay').textContent = userName;
 
-        // Preloader Logic
+        // Preloader Logic with Fallback
+        function hidePreloader() {
+            console.log("Hiding preloader");
+            document.getElementById('preloader').style.display = 'none';
+            document.querySelector('.container').style.display = 'block';
+            initializeCanvases(); // Draw logo on canvases after load
+        }
+
         window.addEventListener('load', () => {
             const video = document.getElementById('background-video');
+            console.log("Page loaded, waiting for video...");
+
+            // Success case: Video metadata loaded
             video.onloadeddata = () => {
-                document.getElementById('preloader').style.display = 'none';
-                document.querySelector('.container').style.display = 'block';
-                initializeCanvases(); // Draw logo on canvases after load
+                console.log("Video metadata loaded successfully");
+                hidePreloader();
             };
+
+            // Error case: Video fails to load
+            video.onerror = () => {
+                console.warn("Video failed to load, proceeding without it");
+                hidePreloader();
+                document.getElementById('energyLevel').textContent = "Energy Level: 0% (Background video unavailable)";
+            };
+
+            // Fallback: Timeout after 5 seconds
+            setTimeout(() => {
+                if (document.getElementById('preloader').style.display !== 'none') {
+                    console.warn("Video loading timed out, forcing preloader hide");
+                    hidePreloader();
+                    document.getElementById('energyLevel').textContent = "Energy Level: 0% (Video load timeout)";
+                }
+            }, 5000);
         });
 
         // Section Management
