@@ -13,7 +13,7 @@
         body { font-family: 'Nunito', sans-serif; background: #1a1a2e; color: #6B451D; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
         #background-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.7; }
         .container { width: 90%; max-width: 800px; margin: 20px auto; position: relative; z-index: 1; flex-grow: 1; }
-        .section { background: rgba(255, 248, 220, 0.92); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); animation: fadeIn 0.5s ease-in; overflow-x: auto; }
+        .section { background: rgba(255, 248, 220, 0.75); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); animation: fadeIn 0.5s ease-in; overflow-x: auto; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         #header .header-content { display: flex; align-items: center; gap: 10px; }
         #header .header-logo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
@@ -26,7 +26,7 @@
         .btn-custom:disabled { background: #8FBC8F; cursor: not-allowed; }
         .btn-danger-custom { background: #D9534F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; }
         .btn-danger-custom:hover { background: #C9302C; transform: translateY(-2px); }
-        .challenge-div { background: rgba(255, 248, 220, 0.95); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin: 15px 0; text-align: center; position: relative; z-index: 5; opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
+        .challenge-div { background: rgba(255, 248, 220, 0.75); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin: 15px 0; text-align: center; position: relative; z-index: 5; opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
         .challenge-div.visible { opacity: 1; transform: translateX(0) translateY(0); }
         .challenge-div.locked { opacity: 0.6; position: relative; }
         .challenge-div.locked .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); color: white; display: flex; justify-content: center; align-items: center; z-index: 6; font-size: 1.1rem; border-radius: 15px; }
@@ -38,7 +38,7 @@
         #footer a { color: #6B451D; font-size: 1.5rem; padding: 10px; transition: all 0.3s ease; }
         #footer a:hover { color: #FFD700; transform: scale(1.1); }
         .modal { z-index: 1050; }
-        .modal-content { background: rgba(255, 248, 220, 0.95); border-radius: 15px; position: relative; }
+        .modal-content { background: rgba(255, 248, 220, 0.75); border-radius: 15px; position: relative; }
         #astrologyWheelCanvas, #numerologyCanvas { background: #000; border-radius: 50%; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); margin: 20px auto; display: block; }
         .energy-slider { width: 100%; height: 10px; border-radius: 5px; background: linear-gradient(to right, #FF6347, #FFD700, #32CD32); outline: none; opacity: 0.9; -webkit-appearance: none; }
         .energy-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #6B451D; cursor: pointer; }
@@ -78,7 +78,7 @@
             </div>
             <button class="btn btn-custom" onclick="saveHoroscope()">Save & Continue</button>
         </div>
-        <div id="wellnessManager" class="section" style="display: none;">
+        <div id="wellnessManager" class="section">
             <h2>Wellness Manager</h2>
             <p style="text-align: center; margin-bottom: 20px;">Embark on a journey of mindfulness.</p>
             <div id="challengeOptions">
@@ -325,30 +325,43 @@
         document.getElementById('profileNameDisplay').textContent = userName;
 
         window.addEventListener('load', () => {
+            console.log('Window loaded');
             animateChallenges();
             initializeCanvases();
-        });
-
-        function animateChallenges() {
-            document.querySelectorAll('.challenge-div').forEach((challenge, index) => setTimeout(() => challenge.classList.add('visible'), index * 200));
-        }
-
-        function showSection(sectionId) {
-            sections.forEach(id => document.getElementById(id).style.display = id === sectionId ? 'block' : 'none');
-            if (sectionId === 'wellnessManager') loadChallenges(), animateChallenges();
-            else if (sectionId === 'gamePage') updateGameWelcome();
-            else if (sectionId === 'playerProfile') loadProfileHistory();
-        }
-
-        document.addEventListener("DOMContentLoaded", () => {
-            updateEnergyLevel();
             showSection(localStorage.getItem('birthdate') ? 'wellnessManager' : 'horoscopeForm');
         });
 
+        function animateChallenges() {
+            console.log('Animating challenges');
+            document.querySelectorAll('.challenge-div').forEach((challenge, index) => {
+                setTimeout(() => challenge.classList.add('visible'), index * 200);
+            });
+        }
+
+        function showSection(sectionId) {
+            console.log('Showing section:', sectionId);
+            sections.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.style.display = id === sectionId ? 'block' : 'none';
+            });
+            if (sectionId === 'wellnessManager') {
+                loadChallenges();
+                animateChallenges();
+            } else if (sectionId === 'gamePage') {
+                updateGameWelcome();
+            } else if (sectionId === 'playerProfile') {
+                loadProfileHistory();
+            }
+        }
+
         function saveHoroscope() {
             const birthdate = document.getElementById('birthdate').value;
-            if (birthdate) localStorage.setItem('birthdate', birthdate), showSection('wellnessManager');
-            else alert('Please enter your birthdate.');
+            if (birthdate) {
+                localStorage.setItem('birthdate', birthdate);
+                showSection('wellnessManager');
+            } else {
+                alert('Please enter your birthdate.');
+            }
         }
 
         function updateEnergyLevel(before = null, after = null) {
@@ -376,8 +389,12 @@
         }
 
         function loadChallenges() {
+            console.log('Loading challenges');
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            if (!challenges.length) challenges = initializeChallenges(), localStorage.setItem('challenges', JSON.stringify(challenges));
+            if (!challenges.length) {
+                challenges = initializeChallenges();
+                localStorage.setItem('challenges', JSON.stringify(challenges));
+            }
             displayChallenges('modalDailyChallenges7', 7);
             displayChallenges('modalDailyChallenges21', 21);
             displayChallenges('modalDailyChallenges41', 41);
@@ -613,7 +630,7 @@
                 ctx.font = '24px Nunito';
                 ctx.textAlign = 'center';
                 ctx.fillText(i + 1, x + size / 2, y + size / 2 + 8);
-            });
+            }
         }
 
         function startAstrologyWheelGame() {
