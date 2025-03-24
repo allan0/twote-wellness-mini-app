@@ -323,11 +323,9 @@
                 <p id="astrologyMessage"></p>
             </div>
             <div>
-                <button class="btn btn-custom" onclick="startNumerologyGame()">Play Numerology Match (15% Energy)</button>
-                <canvas id="numerologyCanvas" width="300" height="100" style="display: block;"></canvas>
+                <button class="btn btn-custom" onclick="startNumerologyGame()">Play Number Path (15% Energy)</button>
+                <canvas id="numerologyCanvas" width="300" height="300" style="display: block;"></canvas>
                 <p id="numerologyMessage"></p>
-                <input type="number" id="numerologyGuess" min="1" max="9" style="margin-top: 10px; padding: 5px;" placeholder="Guess your lucky number (1-9)">
-                <button class="btn btn-custom" onclick="submitNumerologyGuess()">Submit Guess</button>
             </div>
         </div>
 
@@ -602,6 +600,21 @@
         }
 
         // Astrology Wheel Game
+        const zodiacOrder = [
+            { sign: "Aries", symbol: "♈" },
+            { sign: "Taurus", symbol: "♉" },
+            { sign: "Gemini", symbol: "♊" },
+            { sign: "Cancer", symbol: "♋" },
+            { sign: "Leo", symbol: "♌" },
+            { sign: "Virgo", symbol: "♍" },
+            { sign: "Libra", symbol: "♎" },
+            { sign: "Scorpio", symbol: "♏" },
+            { sign: "Sagittarius", symbol: "♐" },
+            { sign: "Capricorn", symbol: "♑" },
+            { sign: "Aquarius", symbol: "♒" },
+            { sign: "Pisces", symbol: "♓" }
+        ];
+
         const astrologyInsights = {
             "Aries": ["Bold actions lead to success today.", "Energy flows where courage goes.", "A new adventure awaits you."],
             "Taurus": ["Stability brings peace today.", "Patience will reward you.", "Enjoy the simple pleasures."],
@@ -629,12 +642,22 @@
                 ctx.beginPath();
                 ctx.moveTo(radius, radius);
                 ctx.arc(radius, radius, radius, i * angleStep, (i + 1) * angleStep);
-                ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#BDB76B'; // Gold and khaki alternation
+                ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#BDB76B';
                 ctx.fill();
                 ctx.stroke();
+
+                // Add zodiac symbol
+                ctx.save();
+                ctx.translate(radius, radius);
+                ctx.rotate(i * angleStep + angleStep / 2);
+                ctx.font = '20px Nunito';
+                ctx.fillStyle = 'white';
+                ctx.textAlign = 'center';
+                ctx.fillText(zodiacOrder[i].symbol, 0, -radius + 30);
+                ctx.restore();
             }
 
-            // Draw spinning effect
+            // Draw spinning pointer
             ctx.save();
             ctx.translate(radius, radius);
             ctx.rotate(spinAngle);
@@ -673,24 +696,85 @@
                 drawAstrologyWheel(spinAngle);
                 if (spinSpeed < 0.001) {
                     clearInterval(spinInterval);
-                    const segment = Math.floor(((spinAngle % (2 * Math.PI)) / (2 * Math.PI)) * insights.length);
-                    document.getElementById('astrologyMessage').innerText = `Insight: ${insights[segment]}. Energy boosted by 5%!`;
+                    const insightIndex = Math.floor(Math.random() * insights.length);
+                    document.getElementById('astrologyMessage').innerText = `Insight for ${zodiacSign}: ${insights[insightIndex]}. Energy boosted by 5%!`;
                     boostEnergyLevel(5);
                 }
             }, 20);
         }
 
-        // Numerology Game
+        // Numerology Game (Number Path)
         let targetLuckyNumber = 0;
+        let numerologyGrid = [];
+        let selectedPath = [];
+        let movesLeft = 3;
 
-        function drawNumerologyGame() {
+        function generateNumerologyGrid() {
+            numerologyGrid = [];
+            for (let i = 0; i < 3; i++) {
+                const row = [];
+                for (let j = 0; j < 3; j++) {
+                    row.push(Math.floor(Math.random() * 5) + 1); // Numbers 1-5
+                }
+                numerologyGrid.push(row);
+            }
+        }
+
+        function drawNumerologyGrid() {
             const canvas = document.getElementById('numerologyCanvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.font = '20px Nunito';
-            ctx.fillStyle = 'white';
-            ctx.textAlign = 'center';
-            ctx.fillText('Guess your lucky number!', canvas.width / 2, canvas.height / 2);
+            const tileSize = canvas.width / 3;
+
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 3; j++) {
+                    ctx.beginPath();
+                    ctx.rect(j * tileSize, i * tileSize, tileSize, tileSize);
+                    ctx.fillStyle = selectedPath.some(p => p.row === i && p.col === j) ? '#FFD700' : '#BDB76B';
+                    ctx.fill();
+                    ctx.strokeStyle = 'white';
+                    ctx.stroke();
+                    ctx.font = '20px Nunito';
+                    ctx.fillStyle = 'white';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(numerologyGrid[i][j], j * tileSize + tileSize / 2, i * tileSize + tileSize / 2 + 5);
+                }
+            }
+        }
+
+        function handleNumerologyClick(event) {
+            const canvas = document.getElementById('numerologyCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const tileSize = canvas.width / 3;
+            const col = Math.floor(x / tileSize);
+            const row = Math.floor(y / tileSize);
+
+            if (row >= 0 && row < 3 && col >= 0 && col < 3) {
+                if (selectedPath.length === 0 || isAdjacent(selectedPath[selectedPath.length - 1], { row, col })) {
+                    selectedPath.push({ row, col });
+                    movesLeft--;
+                    drawNumerologyGrid();
+                    const sum = selectedPath.reduce((acc, p) => acc + numerologyGrid[p.row][p.col], 0);
+                    if (movesLeft === 0 || sum >= targetLuckyNumber) {
+                        if (sum === targetLuckyNumber) {
+                            document.getElementById('numerologyMessage').innerText = `Success! You reached your lucky number ${targetLuckyNumber}. Energy boosted by 5%!`;
+                            boostEnergyLevel(5);
+                        } else {
+                            document.getElementById('numerologyMessage').innerText = `Game Over! Sum was ${sum}, needed ${targetLuckyNumber}. Try again.`;
+                        }
+                        canvas.removeEventListener('click', handleNumerologyClick);
+                    } else {
+                        document.getElementById('numerologyMessage').innerText = `Sum: ${sum}. Moves left: ${movesLeft}. Target: ${targetLuckyNumber}.`;
+                    }
+                }
+            }
+        }
+
+        function isAdjacent(pos1, pos2) {
+            return (Math.abs(pos1.row - pos2.row) === 1 && pos1.col === pos2.col) ||
+                   (Math.abs(pos1.col - pos2.col) === 1 && pos1.row === pos2.row);
         }
 
         function startNumerologyGame() {
@@ -706,23 +790,14 @@
             }
             const date = new Date(birthdate);
             targetLuckyNumber = getLuckyNumber(date);
-            drawNumerologyGame();
-            document.getElementById('numerologyMessage').innerText = 'Enter a number between 1 and 9.';
-            document.getElementById('numerologyGuess').value = '';
-        }
-
-        function submitNumerologyGuess() {
-            const guess = parseInt(document.getElementById('numerologyGuess').value);
-            if (isNaN(guess) || guess < 1 || guess > 9) {
-                document.getElementById('numerologyMessage').innerText = 'Please enter a valid number (1-9).';
-                return;
-            }
-            if (guess === targetLuckyNumber) {
-                document.getElementById('numerologyMessage').innerText = `Correct! Your lucky number is ${targetLuckyNumber}. Energy boosted by 5%!`;
-                boostEnergyLevel(5);
-            } else {
-                document.getElementById('numerologyMessage').innerText = `Wrong! Try again. Hint: It's ${guess > targetLuckyNumber ? 'lower' : 'higher'} than ${guess}.`;
-            }
+            generateNumerologyGrid();
+            selectedPath = [];
+            movesLeft = 3;
+            drawNumerologyGrid();
+            document.getElementById('numerologyMessage').innerText = `Reach ${targetLuckyNumber} in 3 moves by selecting adjacent tiles!`;
+            const canvas = document.getElementById('numerologyCanvas');
+            canvas.removeEventListener('click', handleNumerologyClick);
+            canvas.addEventListener('click', handleNumerologyClick);
         }
 
         // Update game welcome message
