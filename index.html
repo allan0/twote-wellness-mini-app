@@ -33,10 +33,22 @@
             text-align: center;
         }
 
-        #header {
+        #background-video {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            text-align: center;
-            padding: 10px;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+        }
+
+        #header, #horoscopeForm, #wellnessManager, #tasksPage, #friendsHub, #leaderboardPage {
+            background-color: #FFF8DC; /* Cornsilk */
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         #energyLevel {
@@ -91,32 +103,6 @@
             font-weight: 700;
         }
 
-        #horoscopeForm {
-            margin-top: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        input[type="date"] {
-            padding: 8px;
-            border: 1px solid #BDB76B;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        #wellnessManager {
-            display: none;
-            margin-top: 20px;
-        }
-
         .challenge-div {
             background-color: #FFF8DC; /* Cornsilk */
             border: 1px solid #BDB76B;
@@ -149,11 +135,6 @@
         .fa-microphone {
             cursor: pointer;
             margin-left: 10px;
-        }
-
-        .daily-challenges {
-            max-height: 300px;
-            overflow-y: auto;
         }
 
         .challenge-card {
@@ -190,21 +171,19 @@
             border-radius: 5px;
         }
 
-        #tasksPage, #friendsHub, #leaderboardPage {
-            display: none;
+        .modal-content {
+            background-color: #FFF8DC;
         }
 
-        #tasksPage ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        #tasksPage li {
-            margin: 10px 0;
+        .progress-bar {
+            background-color: #BDB76B; /* Dark Khaki */
         }
     </style>
 </head>
 <body>
+    <video id="background-video" autoplay loop muted poster="poster.jpg">
+        <source src="cosmic.mp4" type="video/mp4">
+    </video>
     <div class="container">
         <div id="header">
             <h1>The World of Third Eye</h1>
@@ -230,19 +209,16 @@
             <h2>Wellness Manager</h2>
             <div id="challengeOptions">
                 <div class="challenge-div" id="challenge7">
-                    <h3>7-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(7)"></i></h3>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal7">7-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(7)"></i></h3>
                     <audio id="audioChallenge7" src="path/to/challenge7audio.mp3" loop></audio>
-                    <div class="daily-challenges" id="dailyChallenges7"></div>
                 </div>
                 <div class="challenge-div" id="challenge21">
-                    <h3>21-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(21)"></i></h3>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal21">21-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(21)"></i></h3>
                     <audio id="audioChallenge21" src="path/to/challenge21audio.mp3" loop></audio>
-                    <div class="daily-challenges" id="dailyChallenges21"></div>
                 </div>
                 <div class="challenge-div" id="challenge41">
-                    <h3>41-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(41)"></i></h3>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal41">41-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(41)"></i></h3>
                     <audio id="audioChallenge41" src="path/to/challenge41audio.mp3" loop></audio>
-                    <div class="daily-challenges" id="dailyChallenges41"></div>
                 </div>
                 <div class="challenge-div locked" id="challenge66">
                     <div class="overlay">
@@ -255,6 +231,56 @@
                         <p>Complete an offline seminar to unlock.</p>
                     </div>
                     <h3>150-Day Challenge</h3>
+                </div>
+            </div>
+
+            <!-- Challenge Modals -->
+            <div class="modal fade" id="challengeModal7" tabindex="-1" aria-labelledby="challengeModal7Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="challengeModal7Label">7-Day Challenge</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div id="modalDailyChallenges7"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="challengeModal21" tabindex="-1" aria-labelledby="challengeModal21Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="challengeModal21Label">21-Day Challenge</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div id="modalDailyChallenges21"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="challengeModal41" tabindex="-1" aria-labelledby="challengeModal41Label" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="challengeModal41Label">41-Day Challenge</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="progress mb-3">
+                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div id="modalDailyChallenges41"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -291,8 +317,9 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Define dailyGoals globally with meditation updated
+        // Existing JavaScript with updates below
         const dailyGoals = [
             { goal: "Wealth and Abundance", meditation: "Listen to the challenge audio", task1: "Write down three financial goals and visualize achieving them.", task2: "Create a small budget or savings plan for the week." },
             { goal: "Calmness and Inner Peace", meditation: "Listen to the challenge audio", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
@@ -307,7 +334,6 @@
             { goal: "Joy and Happiness", meditation: "Listen to the challenge audio", task1: "Recall a happy memory and savor it.", task2: "Smile at yourself in the mirror for 30 seconds." }
         ];
 
-        // Telegram Web App init and profile setup
         let userName = "Guest";
         let userPhoto = "https://via.placeholder.com/30";
 
@@ -406,9 +432,9 @@
                 challenges = initializeChallenges();
                 localStorage.setItem('challenges', JSON.stringify(challenges));
             }
-            displayChallenges('dailyChallenges7', 7);
-            displayChallenges('dailyChallenges21', 21);
-            displayChallenges('dailyChallenges41', 41);
+            displayChallenges('modalDailyChallenges7', 7);
+            displayChallenges('modalDailyChallenges21', 21);
+            displayChallenges('modalDailyChallenges41', 41);
             updateEnergyLevel();
         }
 
@@ -439,6 +465,14 @@
             });
         }
 
+        function calculateProgress(days) {
+            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            const selectedChallenges = challenges.slice(0, days);
+            let totalTasks = days * 3;
+            let completedTasks = selectedChallenges.reduce((sum, c) => sum + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
+            return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        }
+
         function playChallengeAudio(days) {
             const audio = document.getElementById(`audioChallenge${days}`);
             if (audio.paused) {
@@ -465,6 +499,23 @@
             const referralCode = Math.random().toString(36).substring(7).toUpperCase();
             document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
         }
+
+        // Progress bar updates for modals
+        document.getElementById('challengeModal7').addEventListener('shown.bs.modal', function () {
+            let progress = calculateProgress(7);
+            this.querySelector('.progress-bar').style.width = progress + '%';
+            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+        });
+        document.getElementById('challengeModal21').addEventListener('shown.bs.modal', function () {
+            let progress = calculateProgress(21);
+            this.querySelector('.progress-bar').style.width = progress + '%';
+            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+        });
+        document.getElementById('challengeModal41').addEventListener('shown.bs.modal', function () {
+            let progress = calculateProgress(41);
+            this.querySelector('.progress-bar').style.width = progress + '%';
+            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
+        });
     </script>
 </body>
 </html>
