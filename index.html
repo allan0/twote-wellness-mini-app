@@ -13,7 +13,7 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #F5F5DC; /* Beige */
+            background-color: #D4AF37; /* Gold texture base color */
             color: #6B451D; /* Brown */
             margin: 0;
             padding: 0;
@@ -117,10 +117,43 @@
             margin-top: 20px;
         }
 
-        #dailyChallenges {
-            min-height: 50vh;
+        .challenge-div {
+            background-color: #FFF8DC; /* Cornsilk */
+            border: 1px solid #BDB76B;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .challenge-div.locked {
+            opacity: 0.6;
+        }
+
+        .challenge-div .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            font-size: 1.2em;
+        }
+
+        .fa-microphone {
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .daily-challenges {
+            max-height: 300px;
             overflow-y: auto;
-            padding-bottom: 60px;
         }
 
         .challenge-card {
@@ -128,9 +161,8 @@
             border: 1px solid #BDB76B;
             border-radius: 8px;
             padding: 15px;
-            margin: 15px 0;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: block;
+            margin: 10px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         #footer {
@@ -196,8 +228,35 @@
 
         <div id="wellnessManager">
             <h2>Wellness Manager</h2>
-            <h3>66-Day Challenge with Binaural Beats</h3>
-            <div id="dailyChallenges"></div>
+            <div id="challengeOptions">
+                <div class="challenge-div" id="challenge7">
+                    <h3>7-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(7)"></i></h3>
+                    <audio id="audioChallenge7" src="path/to/challenge7audio.mp3" loop></audio>
+                    <div class="daily-challenges" id="dailyChallenges7"></div>
+                </div>
+                <div class="challenge-div" id="challenge21">
+                    <h3>21-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(21)"></i></h3>
+                    <audio id="audioChallenge21" src="path/to/challenge21audio.mp3" loop></audio>
+                    <div class="daily-challenges" id="dailyChallenges21"></div>
+                </div>
+                <div class="challenge-div" id="challenge41">
+                    <h3>41-Day Challenge <i class="fas fa-microphone" onclick="playChallengeAudio(41)"></i></h3>
+                    <audio id="audioChallenge41" src="path/to/challenge41audio.mp3" loop></audio>
+                    <div class="daily-challenges" id="dailyChallenges41"></div>
+                </div>
+                <div class="challenge-div locked" id="challenge66">
+                    <div class="overlay">
+                        <p>Complete an offline workshop to unlock.</p>
+                    </div>
+                    <h3>66-Day Challenge</h3>
+                </div>
+                <div class="challenge-div locked" id="challenge150">
+                    <div class="overlay">
+                        <p>Complete an offline seminar to unlock.</p>
+                    </div>
+                    <h3>150-Day Challenge</h3>
+                </div>
+            </div>
         </div>
 
         <div id="tasksPage">
@@ -233,26 +292,24 @@
     </div>
 
     <script>
-        // Define dailyGoals globally
+        // Define dailyGoals globally with meditation updated
         const dailyGoals = [
-            { goal: "Wealth and Abundance", meditation: "Listen to a 5-minute Wealth Binaural Beats track to boost motivation and positivity.", task1: "Write down three financial goals and visualize achieving them.", task2: "Create a small budget or savings plan for the week." },
-            { goal: "Calmness and Inner Peace", meditation: "Listen to a 5-minute Calmness Binaural Beats track for relaxation and stress relief.", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
-            { goal: "Focus and Concentration", meditation: "Listen to a 5-minute Focus Binaural Beats track to enhance mental clarity.", task1: "List your top three priorities for the day.", task2: "Spend 5 minutes organizing your workspace." },
-            { goal: "Creativity and Inspiration", meditation: "Listen to a 5-minute Creativity Binaural Beats track to stimulate imagination.", task1: "Brainstorm five ideas for a personal project.", task2: "Draw or doodle something inspired by your day." },
-            { goal: "Confidence and Self-Esteem", meditation: "Listen to a 5-minute Confidence Binaural Beats track to boost self-belief.", task1: "Write down three things you like about yourself.", task2: "Stand in a power pose for 2 minutes." },
-            { goal: "Energy and Vitality", meditation: "Listen to a 5-minute Energy Binaural Beats track to invigorate your mind and body.", task1: "Visualize yourself full of energy and vitality.", task2: "Do a 5-minute stretch or light exercise." },
-            { goal: "Gratitude and Appreciation", meditation: "Listen to a 5-minute Gratitude Binaural Beats track to cultivate thankfulness.", task1: "Write down three things you're grateful for today.", task2: "Send a thank-you message to someone." },
-            { goal: "Love and Compassion", meditation: "Listen to a 5-minute Love Binaural Beats track to open your heart.", task1: "Reflect on a time you felt loved or showed love.", task2: "Perform a small act of kindness for someone." },
-            { goal: "Health and Well-being", meditation: "Listen to a 5-minute Health Binaural Beats track to promote healing.", task1: "Set a health goal for the week.", task2: "Drink an extra glass of water or eat a healthy snack." },
-            { goal: "Patience and Perseverance", meditation: "Listen to a 5-minute Patience Binaural Beats track to build resilience.", task1: "Think of a challenge you're facing and how to approach it calmly.", task2: "Practice a hobby or skill for 10 minutes without rushing." },
-            { goal: "Joy and Happiness", meditation: "Listen to a 5-minute Joy Binaural Beats track to uplift your spirit.", task1: "Recall a happy memory and savor it.", task2: "Smile at yourself in the mirror for 30 seconds." }
+            { goal: "Wealth and Abundance", meditation: "Listen to the challenge audio", task1: "Write down three financial goals and visualize achieving them.", task2: "Create a small budget or savings plan for the week." },
+            { goal: "Calmness and Inner Peace", meditation: "Listen to the challenge audio", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
+            { goal: "Focus and Concentration", meditation: "Listen to the challenge audio", task1: "List your top three priorities for the day.", task2: "Spend 5 minutes organizing your workspace." },
+            { goal: "Creativity and Inspiration", meditation: "Listen to the challenge audio", task1: "Brainstorm five ideas for a personal project.", task2: "Draw or doodle something inspired by your day." },
+            { goal: "Confidence and Self-Esteem", meditation: "Listen to the challenge audio", task1: "Write down three things you like about yourself.", task2: "Stand in a power pose for 2 minutes." },
+            { goal: "Energy and Vitality", meditation: "Listen to the challenge audio", task1: "Visualize yourself full of energy and vitality.", task2: "Do a 5-minute stretch or light exercise." },
+            { goal: "Gratitude and Appreciation", meditation: "Listen to the challenge audio", task1: "Write down three things you're grateful for today.", task2: "Send a thank-you message to someone." },
+            { goal: "Love and Compassion", meditation: "Listen to the challenge audio", task1: "Reflect on a time you felt loved or showed love.", task2: "Perform a small act of kindness for someone." },
+            { goal: "Health and Well-being", meditation: "Listen to the challenge audio", task1: "Set a health goal for the week.", task2: "Drink an extra glass of water or eat a healthy snack." },
+            { goal: "Patience and Perseverance", meditation: "Listen to the challenge audio", task1: "Think of a challenge you're facing and how to approach it calmly.", task2: "Practice a hobby or skill for 10 minutes without rushing." },
+            { goal: "Joy and Happiness", meditation: "Listen to the challenge audio", task1: "Recall a happy memory and savor it.", task2: "Smile at yourself in the mirror for 30 seconds." }
         ];
-
-        console.log("Daily goals defined:", dailyGoals);
 
         // Telegram Web App init and profile setup
         let userName = "Guest";
-        let userPhoto = "https://via.placeholder.com/30"; // Default placeholder
+        let userPhoto = "https://via.placeholder.com/30";
 
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -261,10 +318,8 @@
                 userName = user.first_name || "Guest";
                 userPhoto = user.photo_url || "https://via.placeholder.com/30";
             }
-            console.log("Telegram user data:", user);
         }
 
-        // Update profile button with Telegram data
         document.getElementById('profileName').innerText = userName;
         document.getElementById('profilePhoto').src = userPhoto;
 
@@ -283,14 +338,12 @@
             if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
                 window.Telegram.WebApp.onEvent('viewportChanged', loadChallenges);
-                console.log("Telegram WebApp initialized");
                 if (localStorage.getItem('birthdate')) {
                     showSection('wellnessManager');
                 } else {
                     showSection('horoscopeForm');
                 }
             } else {
-                console.warn("Running in browser mode - Telegram WebApp not detected.");
                 if (localStorage.getItem('birthdate')) {
                     showSection('wellnessManager');
                 } else {
@@ -330,67 +383,46 @@
         }
 
         function initializeChallenges() {
-            console.log("Initializing challenges with dailyGoals:", dailyGoals);
             const challenges = Array.from({ length: 66 }, (_, i) => {
                 const goalIndex = i % dailyGoals.length;
                 const goalData = dailyGoals[goalIndex];
-                if (!goalData) {
-                    console.error("Goal data undefined at index", goalIndex);
-                    return null;
-                }
                 return {
                     day: i + 1,
-                    goal: goalData.goal || "Unknown Goal",
-                    meditation: goalData.meditation || "Meditation not set",
-                    task1: goalData.task1 || "Task 1 not set",
-                    task2: goalData.task2 || "Task 2 not set",
+                    goal: goalData.goal,
+                    meditation: goalData.meditation,
+                    task1: goalData.task1,
+                    task2: goalData.task2,
                     meditationCompleted: false,
                     task1Completed: false,
-                    task2Completed: false,
-                    audioSrc: '' // Placeholder for audio files
+                    task2Completed: false
                 };
-            }).filter(challenge => challenge !== null);
-            console.log("Initialized challenges:", challenges);
+            });
             return challenges;
         }
 
         function loadChallenges() {
-            if (typeof window.Telegram !== 'undefined') {
-                window.Telegram.WebApp.ready();
-            }
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            console.log("Loaded challenges from localStorage:", challenges);
-
-            if (!challenges || challenges.length === 0 || challenges.some(c => !c.goal || c.goal === "undefined")) {
-                console.log("Challenges invalid or empty, reinitializing...");
+            if (challenges.length === 0) {
                 challenges = initializeChallenges();
                 localStorage.setItem('challenges', JSON.stringify(challenges));
             }
-            setTimeout(() => displayChallenges(challenges), 100);
+            displayChallenges('dailyChallenges7', 7);
+            displayChallenges('dailyChallenges21', 21);
+            displayChallenges('dailyChallenges41', 41);
+            updateEnergyLevel();
         }
 
-        function displayChallenges(challenges) {
-            const dailyChallengesDiv = document.getElementById('dailyChallenges');
-            if (!dailyChallengesDiv) {
-                console.error("dailyChallenges div not found!");
-                return;
-            }
-            dailyChallengesDiv.innerHTML = '';
-            console.log("Displaying challenges:", challenges);
-            challenges.forEach(challenge => {
-                if (!challenge || typeof challenge.goal === 'undefined') {
-                    console.error("Invalid challenge object:", challenge);
-                    return;
-                }
+        function displayChallenges(containerId, days) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
+            const selectedChallenges = challenges.slice(0, days);
+            selectedChallenges.forEach(challenge => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
                 card.innerHTML = `
                     <h4>Day ${challenge.day}: ${challenge.goal}</h4>
                     <p><strong>Meditation:</strong> ${challenge.meditation}</p>
-                    <audio id="audioDay${challenge.day}" src="${challenge.audioSrc}" loop></audio>
-                    <button class="btn btn-custom" onclick="playMeditation(${challenge.day})">
-                        <i class="fas fa-play"></i> Play Meditation
-                    </button>
                     <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
                         ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
                     </button>
@@ -403,12 +435,12 @@
                         ${challenge.task2Completed ? 'Completed' : 'Mark as Complete'}
                     </button>
                 `;
-                dailyChallengesDiv.appendChild(card);
+                container.appendChild(card);
             });
         }
 
-        function playMeditation(day) {
-            const audio = document.getElementById(`audioDay${day}`);
+        function playChallengeAudio(days) {
+            const audio = document.getElementById(`audioChallenge${days}`);
             if (audio.paused) {
                 audio.play();
             } else {
