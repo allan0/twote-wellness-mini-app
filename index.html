@@ -13,8 +13,8 @@
     <style>
         body {
             font-family: 'Nunito', sans-serif;
-            background-color: #D4AF37; /* Gold texture base color */
-            color: #6B451D; /* Brown */
+            background-color: #D4AF37;
+            color: #6B451D;
             margin: 0;
             padding: 0;
             display: flex;
@@ -44,7 +44,7 @@
         }
 
         #header, #horoscopeForm, #wellnessManager, #tasksPage, #leaderboardPage, #gamePage {
-            background-color: #FFF8DC; /* Cornsilk */
+            background-color: #FFF8DC;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 20px;
@@ -52,7 +52,7 @@
         }
 
         #energyLevel {
-            background-color: #D2B48C; /* Tan */
+            background-color: #D2B48C;
             color: #6B451D;
             border-radius: 5px;
             padding: 5px 10px;
@@ -60,7 +60,7 @@
         }
 
         .btn-custom {
-            background-color: #BDB76B; /* Dark Khaki */
+            background-color: #BDB76B;
             color: #FFFFFF;
             border: none;
             padding: 10px 20px;
@@ -70,17 +70,17 @@
         }
 
         .btn-custom:hover {
-            background-color: #8B864E; /* Darker Khaki */
+            background-color: #8B864E;
         }
 
         .btn-custom:disabled {
-            background-color: #8FBC8F; /* SeaGreen */
+            background-color: #8FBC8F;
             color: #FFFFFF;
             cursor: not-allowed;
         }
 
         #profileButton {
-            background-color: #FFF8DC; /* Cornsilk */
+            background-color: #FFF8DC;
             border: 1px solid #BDB76B;
             border-radius: 50px;
             padding: 5px 15px;
@@ -104,7 +104,7 @@
         }
 
         .challenge-div {
-            background-color: #FFF8DC; /* Cornsilk */
+            background-color: #FFF8DC;
             border: 1px solid #BDB76B;
             border-radius: 8px;
             padding: 15px;
@@ -173,10 +173,11 @@
 
         .modal-content {
             background-color: #FFF8DC;
+            position: relative;
         }
 
         .progress-bar {
-            background-color: #BDB76B; /* Dark Khaki */
+            background-color: #BDB76B;
         }
 
         #astrologyWheelCanvas, #numerologyCanvas {
@@ -184,6 +185,36 @@
             background-color: #000;
             margin: 20px auto;
             display: block;
+        }
+
+        .energy-slider {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #FF6347, #FFD700, #32CD32);
+            outline: none;
+            opacity: 0.9;
+        }
+
+        .energy-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #6B451D;
+            cursor: pointer;
+        }
+
+        #reflectionVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.5;
         }
     </style>
 </head>
@@ -216,16 +247,13 @@
             <h2>Wellness Manager</h2>
             <div id="challengeOptions">
                 <div class="challenge-div" id="challenge7">
-                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal7">7-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(7)"></i></h3>
-                    <audio id="audioChallenge7" src="path/to/challenge7audio.mp3" loop></audio>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal7">7-Day Challenge</a></h3>
                 </div>
                 <div class="challenge-div" id="challenge21">
-                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal21">21-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(21)"></i></h3>
-                    <audio id="audioChallenge21" src="path/to/challenge21audio.mp3" loop></audio>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal21">21-Day Challenge</a></h3>
                 </div>
                 <div class="challenge-div" id="challenge41">
-                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal41">41-Day Challenge</a> <i class="fas fa-microphone" onclick="playChallengeAudio(41)"></i></h3>
-                    <audio id="audioChallenge41" src="path/to/challenge41audio.mp3" loop></audio>
+                    <h3><a href="#" data-bs-toggle="modal" data-bs-target="#challengeModal41">41-Day Challenge</a></h3>
                 </div>
                 <div class="challenge-div locked" id="challenge66">
                     <div class="overlay">
@@ -250,9 +278,6 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
                             <div id="modalDailyChallenges7"></div>
                         </div>
                     </div>
@@ -266,9 +291,6 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
                             <div id="modalDailyChallenges21"></div>
                         </div>
                     </div>
@@ -282,10 +304,39 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <div class="progress mb-3">
-                                <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            </div>
                             <div id="modalDailyChallenges41"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Energy Log Modal -->
+            <div class="modal fade" id="energyLogModal" tabindex="-1" aria-labelledby="energyLogModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <video id="reflectionVideo" autoplay loop muted>
+                            <source src="cosmic.mp4" type="video/mp4">
+                        </video>
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="energyLogModalLabel">Energy Log</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p id="energyLogPrompt">How positive is your mind frame right now?</p>
+                            <input type="range" min="0" max="100" value="50" class="energy-slider" id="energySlider">
+                            <p id="energySliderValue">50%</p>
+                            <div id="challengeTasks" style="display:none;">
+                                <p><strong>Meditation:</strong> <span id="meditationTask"></span></p>
+                                <audio id="binauralBeats" src="binaural.mp3"></audio>
+                                <button class="btn btn-custom" id="playMeditation" onclick="playMeditation()">Play Meditation</button>
+                                <p><strong>Task 1:</strong> <span id="task1Text"></span></p>
+                                <input type="file" id="task1Proof" accept="image/*">
+                                <p><strong>Task 2:</strong> <span id="task2Text"></span></p>
+                                <input type="file" id="task2Proof" accept="image/*">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button class="btn btn-custom" id="submitEnergyLog" onclick="submitEnergyLog()">Submit</button>
                         </div>
                     </div>
                 </div>
@@ -318,12 +369,12 @@
         <div id="gamePage" style="display:none;">
             <h2 id="gameWelcome"></h2>
             <div>
-                <button class="btn btn-custom" onclick="startAstrologyWheelGame()">Spin Astrology Wheel (10% Energy)</button>
+                <button class="btn btn-custom" onclick="startAstrologyWheelGame()">Spin Astrology Wheel</button>
                 <canvas id="astrologyWheelCanvas" width="300" height="300" style="display: block;"></canvas>
                 <p id="astrologyMessage"></p>
             </div>
             <div>
-                <button class="btn btn-custom" onclick="startNumerologyGame()">Play Number Path (15% Energy)</button>
+                <button class="btn btn-custom" onclick="startNumerologyGame()">Play Number Path</button>
                 <canvas id="numerologyCanvas" width="300" height="300" style="display: block;"></canvas>
                 <p id="numerologyMessage"></p>
             </div>
@@ -341,17 +392,13 @@
     <script>
         // Daily goals for challenges
         const dailyGoals = [
-            { goal: "Wealth and Abundance", meditation: "Listen to the challenge audio", task1: "Write down three financial goals and visualize achieving them.", task2: "Create a small budget or savings plan for the week." },
-            { goal: "Calmness and Inner Peace", meditation: "Listen to the challenge audio", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
-            { goal: "Focus and Concentration", meditation: "Listen to the challenge audio", task1: "List your top three priorities for the day.", task2: "Spend 5 minutes organizing your workspace." },
-            { goal: "Creativity and Inspiration", meditation: "Listen to the challenge audio", task1: "Brainstorm five ideas for a personal project.", task2: "Draw or doodle something inspired by your day." },
-            { goal: "Confidence and Self-Esteem", meditation: "Listen to the challenge audio", task1: "Write down three things you like about yourself.", task2: "Stand in a power pose for 2 minutes." },
-            { goal: "Energy and Vitality", meditation: "Listen to the challenge audio", task1: "Visualize yourself full of energy and vitality.", task2: "Do a 5-minute stretch or light exercise." },
-            { goal: "Gratitude and Appreciation", meditation: "Listen to the challenge audio", task1: "Write down three things you're grateful for today.", task2: "Send a thank-you message to someone." },
-            { goal: "Love and Compassion", meditation: "Listen to the challenge audio", task1: "Reflect on a time you felt loved or showed love.", task2: "Perform a small act of kindness for someone." },
-            { goal: "Health and Well-being", meditation: "Listen to the challenge audio", task1: "Set a health goal for the week.", task2: "Drink an extra glass of water or eat a healthy snack." },
-            { goal: "Patience and Perseverance", meditation: "Listen to the challenge audio", task1: "Think of a challenge you're facing and how to approach it calmly.", task2: "Practice a hobby or skill for 10 minutes without rushing." },
-            { goal: "Joy and Happiness", meditation: "Listen to the challenge audio", task1: "Recall a happy memory and savor it.", task2: "Smile at yourself in the mirror for 30 seconds." }
+            { goal: "Wealth and Abundance", meditation: "Visualize achieving your financial goals with binaural beats.", task1: "Write down three financial goals.", task2: "Create a small budget or savings plan for the week." },
+            { goal: "Calmness and Inner Peace", meditation: "Reflect on peace with binaural beats.", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
+            { goal: "Focus and Concentration", meditation: "Focus your mind with binaural beats.", task1: "List your top three priorities for the day.", task2: "Spend 5 minutes organizing your workspace." },
+            { goal: "Creativity and Inspiration", meditation: "Boost creativity with binaural beats.", task1: "Brainstorm five ideas for a personal project.", task2: "Draw or doodle something inspired by your day." },
+            { goal: "Confidence and Self-Esteem", meditation: "Build confidence with binaural beats.", task1: "Write down three things you like about yourself.", task2: "Stand in a power pose for 2 minutes." },
+            { goal: "Energy and Vitality", meditation: "Energize yourself with binaural beats.", task1: "Visualize yourself full of energy.", task2: "Do a 5-minute stretch or light exercise." },
+            { goal: "Gratitude and Appreciation", meditation: "Cultivate gratitude with binaural beats.", task1: "Write down three things you're grateful for.", task2: "Send a thank-you message to someone." }
         ];
 
         // Initialize user data with persistence
@@ -382,34 +429,16 @@
             if (sectionId === 'wellnessManager') {
                 loadChallenges();
             } else if (sectionId === 'gamePage') {
-                const birthdate = localStorage.getItem('birthdate');
-                const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
-                if (birthdate) {
-                    const date = new Date(birthdate);
-                    const zodiacSign = getZodiacSign(date);
-                    document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Your zodiac sign is ${zodiacSign}. Energy: ${currentEnergy}%`;
-                } else {
-                    document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Please enter your birthdate to play. Energy: ${currentEnergy}%`;
-                }
+                updateGameWelcome();
             }
         }
 
         // Initial page load
         document.addEventListener("DOMContentLoaded", function() {
-            if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
-                window.Telegram.WebApp.ready();
-                window.Telegram.WebApp.onEvent('viewportChanged', loadChallenges);
-                if (localStorage.getItem('birthdate')) {
-                    showSection('wellnessManager');
-                } else {
-                    showSection('horoscopeForm');
-                }
+            if (localStorage.getItem('birthdate')) {
+                showSection('wellnessManager');
             } else {
-                if (localStorage.getItem('birthdate')) {
-                    showSection('wellnessManager');
-                } else {
-                    showSection('horoscopeForm');
-                }
+                showSection('horoscopeForm');
             }
         });
 
@@ -438,21 +467,20 @@
 
         // Energy level management
         const energyValue = document.getElementById('energyValue');
-        function updateEnergyLevel() {
-            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            let baseEnergy = Math.round((completedCount / (66 * 3)) * 100);
+        function updateEnergyLevel(before = null, after = null) {
             let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
-            let energyLevel = Math.max(baseEnergy, currentEnergy);
-            energyLevel = Math.min(energyLevel, 100); // Cap at 100%
-            localStorage.setItem('energyLevel', energyLevel);
-            energyValue.innerText = energyLevel;
+            if (before !== null && after !== null) {
+                currentEnergy = Math.round((before + after) / 2);
+            }
+            currentEnergy = Math.min(currentEnergy, 100);
+            localStorage.setItem('energyLevel', currentEnergy);
+            energyValue.innerText = currentEnergy;
         }
 
         // Boost energy level
         function boostEnergyLevel(amount) {
             let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
-            currentEnergy = Math.min(currentEnergy + amount, 100); // Cap at 100%
+            currentEnergy = Math.min(currentEnergy + amount, 100);
             localStorage.setItem('energyLevel', currentEnergy);
             energyValue.innerText = currentEnergy;
             updateGameWelcome();
@@ -460,7 +488,7 @@
 
         // Initialize challenges
         function initializeChallenges() {
-            const challenges = Array.from({ length: 66 }, (_, i) => {
+            const challenges = Array.from({ length: 41 }, (_, i) => {
                 const goalIndex = i % dailyGoals.length;
                 const goalData = dailyGoals[goalIndex];
                 return {
@@ -469,9 +497,8 @@
                     meditation: goalData.meditation,
                     task1: goalData.task1,
                     task2: goalData.task2,
-                    meditationCompleted: false,
-                    task1Completed: false,
-                    task2Completed: false
+                    completed: false,
+                    lastCompleted: null
                 };
             });
             return challenges;
@@ -495,58 +522,92 @@
             container.innerHTML = '';
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             const selectedChallenges = challenges.slice(0, days);
+            let nextAvailableDay = 1;
             selectedChallenges.forEach(challenge => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
-                card.innerHTML = `
-                    <h4>Day ${challenge.day}: ${challenge.goal}</h4>
-                    <p><strong>Meditation:</strong> ${challenge.meditation}</p>
-                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'meditation')" ${challenge.meditationCompleted ? 'disabled' : ''}>
-                        ${challenge.meditationCompleted ? 'Completed' : 'Mark as Complete'}
-                    </button>
-                    <p><strong>Task 1:</strong> ${challenge.task1}</p>
-                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'task1')" ${challenge.task1Completed ? 'disabled' : ''}>
-                        ${challenge.task1Completed ? 'Completed' : 'Mark as Complete'}
-                    </button>
-                    <p><strong>Task 2:</strong> ${challenge.task2}</p>
-                    <button class="btn btn-custom" onclick="completeChallenge(${challenge.day}, 'task2')" ${challenge.task2Completed ? 'disabled' : ''}>
-                        ${challenge.task2Completed ? 'Completed' : 'Mark as Complete'}
-                    </button>
-                `;
+                const now = new Date().getTime();
+                const lockTime = challenge.lastCompleted ? challenge.lastCompleted + 24 * 60 * 60 * 1000 : 0;
+                const isLocked = challenge.completed && now < lockTime;
+                const timeLeft = isLocked ? Math.ceil((lockTime - now) / (60 * 60 * 1000)) : 0;
+
+                if (challenge.day > nextAvailableDay) {
+                    card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete Day ${nextAvailableDay} first.</p>`;
+                } else if (isLocked) {
+                    card.innerHTML = `
+                        <h4>Day ${challenge.day}: ${challenge.goal}</h4>
+                        <p>Locked for ${timeLeft} hours. Play a <a href="#" onclick="showSection('gamePage')">game</a> to boost energy by 1% while you wait!</p>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <h4>Day ${challenge.day}: ${challenge.goal}</h4>
+                        <button class="btn btn-custom" onclick="startChallenge(${challenge.day}, '${containerId}')">
+                            ${challenge.completed ? 'Completed' : 'Start Day ' + challenge.day}
+                        </button>
+                    `;
+                    if (!challenge.completed) nextAvailableDay = challenge.day + 1;
+                }
                 container.appendChild(card);
             });
         }
 
-        // Calculate challenge progress
-        function calculateProgress(days) {
-            let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-            const selectedChallenges = challenges.slice(0, days);
-            let totalTasks = days * 3;
-            let completedTasks = selectedChallenges.reduce((sum, c) => sum + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+        let currentChallengeDay = null;
+        let currentContainerId = null;
+        let energyBefore = null;
+
+        function startChallenge(day, containerId) {
+            currentChallengeDay = day;
+            currentContainerId = containerId;
+            energyBefore = null;
+            const modal = new bootstrap.Modal(document.getElementById('energyLogModal'));
+            document.getElementById('energyLogPrompt').innerText = "How positive is your mind frame right now?";
+            document.getElementById('energySlider').value = 50;
+            document.getElementById('energySliderValue').innerText = '50%';
+            document.getElementById('challengeTasks').style.display = 'none';
+            document.getElementById('submitEnergyLog').setAttribute('data-stage', 'before');
+            modal.show();
+
+            document.getElementById('energySlider').oninput = function() {
+                document.getElementById('energySliderValue').innerText = this.value + '%';
+            };
         }
 
-        // Play challenge audio
-        function playChallengeAudio(days) {
-            const audio = document.getElementById(`audioChallenge${days}`);
-            if (audio.paused) {
-                audio.play();
-            } else {
-                audio.pause();
+        function submitEnergyLog() {
+            const sliderValue = parseInt(document.getElementById('energySlider').value);
+            const stage = document.getElementById('submitEnergyLog').getAttribute('data-stage');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('energyLogModal'));
+
+            if (stage === 'before') {
+                energyBefore = sliderValue;
+                let challenges = JSON.parse(localStorage.getItem('challenges'));
+                const challenge = challenges.find(c => c.day === currentChallengeDay);
+                document.getElementById('energyLogPrompt').innerText = "Complete the challenge and log your energy after.";
+                document.getElementById('challengeTasks').style.display = 'block';
+                document.getElementById('meditationTask').innerText = challenge.meditation;
+                document.getElementById('task1Text').innerText = challenge.task1;
+                document.getElementById('task2Text').innerText = challenge.task2;
+                document.getElementById('submitEnergyLog').setAttribute('data-stage', 'after');
+            } else if (stage === 'after') {
+                const energyAfter = sliderValue;
+                updateEnergyLevel(energyBefore, energyAfter);
+                let challenges = JSON.parse(localStorage.getItem('challenges'));
+                const challenge = challenges.find(c => c.day === currentChallengeDay);
+                challenge.completed = true;
+                challenge.lastCompleted = new Date().getTime();
+                localStorage.setItem('challenges', JSON.stringify(challenges));
+                modal.hide();
+                loadChallenges();
             }
         }
 
-        // Mark challenge tasks as complete
-        function completeChallenge(day, activity) {
-            let challenges = JSON.parse(localStorage.getItem('challenges'));
-            const challenge = challenges.find(c => c.day === day);
-            if (challenge) {
-                if (activity === 'meditation') challenge.meditationCompleted = true;
-                else if (activity === 'task1') challenge.task1Completed = true;
-                else if (activity === 'task2') challenge.task2Completed = true;
-                localStorage.setItem('challenges', JSON.stringify(challenges));
-                updateEnergyLevel();
-                loadChallenges();
+        function playMeditation() {
+            const audio = document.getElementById('binauralBeats');
+            if (audio.paused) {
+                audio.play();
+                document.getElementById('playMeditation').innerText = 'Pause Meditation';
+            } else {
+                audio.pause();
+                document.getElementById('playMeditation').innerText = 'Play Meditation';
             }
         }
 
@@ -555,23 +616,6 @@
             const referralCode = Math.random().toString(36).substring(7).toUpperCase();
             document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
         }
-
-        // Update progress bars in modals
-        document.getElementById('challengeModal7').addEventListener('shown.bs.modal', function () {
-            let progress = calculateProgress(7);
-            this.querySelector('.progress-bar').style.width = progress + '%';
-            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
-        });
-        document.getElementById('challengeModal21').addEventListener('shown.bs.modal', function () {
-            let progress = calculateProgress(21);
-            this.querySelector('.progress-bar').style.width = progress + '%';
-            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
-        });
-        document.getElementById('challengeModal41').addEventListener('shown.bs.modal', function () {
-            let progress = calculateProgress(41);
-            this.querySelector('.progress-bar').style.width = progress + '%';
-            this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
-        });
 
         // Game Section Logic
         function getZodiacSign(date) {
@@ -646,7 +690,6 @@
                 ctx.fill();
                 ctx.stroke();
 
-                // Add zodiac symbol
                 ctx.save();
                 ctx.translate(radius, radius);
                 ctx.rotate(i * angleStep + angleStep / 2);
@@ -657,7 +700,6 @@
                 ctx.restore();
             }
 
-            // Draw spinning pointer
             ctx.save();
             ctx.translate(radius, radius);
             ctx.rotate(spinAngle);
@@ -674,13 +716,8 @@
 
         function startAstrologyWheelGame() {
             const birthdate = localStorage.getItem('birthdate');
-            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
             if (!birthdate) {
                 document.getElementById('astrologyMessage').innerText = 'Please enter your birthdate first.';
-                return;
-            }
-            if (currentEnergy < 10) {
-                document.getElementById('astrologyMessage').innerText = 'You need at least 10% energy to play. Complete some challenges!';
                 return;
             }
             const date = new Date(birthdate);
@@ -692,13 +729,13 @@
 
             const spinInterval = setInterval(() => {
                 spinAngle += spinSpeed;
-                spinSpeed *= 0.98; // Slow down
+                spinSpeed *= 0.98;
                 drawAstrologyWheel(spinAngle);
                 if (spinSpeed < 0.001) {
                     clearInterval(spinInterval);
                     const insightIndex = Math.floor(Math.random() * insights.length);
-                    document.getElementById('astrologyMessage').innerText = `Insight for ${zodiacSign}: ${insights[insightIndex]}. Energy boosted by 5%!`;
-                    boostEnergyLevel(5);
+                    document.getElementById('astrologyMessage').innerText = `Insight for ${zodiacSign}: ${insights[insightIndex]}. Energy boosted by 1%!`;
+                    boostEnergyLevel(1);
                 }
             }, 20);
         }
@@ -714,7 +751,7 @@
             for (let i = 0; i < 3; i++) {
                 const row = [];
                 for (let j = 0; j < 3; j++) {
-                    row.push(Math.floor(Math.random() * 5) + 1); // Numbers 1-5
+                    row.push(Math.floor(Math.random() * 5) + 1);
                 }
                 numerologyGrid.push(row);
             }
@@ -759,8 +796,8 @@
                     const sum = selectedPath.reduce((acc, p) => acc + numerologyGrid[p.row][p.col], 0);
                     if (movesLeft === 0 || sum >= targetLuckyNumber) {
                         if (sum === targetLuckyNumber) {
-                            document.getElementById('numerologyMessage').innerText = `Success! You reached your lucky number ${targetLuckyNumber}. Energy boosted by 5%!`;
-                            boostEnergyLevel(5);
+                            document.getElementById('numerologyMessage').innerText = `Success! You reached your lucky number ${targetLuckyNumber}. Energy boosted by 1%!`;
+                            boostEnergyLevel(1);
                         } else {
                             document.getElementById('numerologyMessage').innerText = `Game Over! Sum was ${sum}, needed ${targetLuckyNumber}. Try again.`;
                         }
@@ -779,13 +816,8 @@
 
         function startNumerologyGame() {
             const birthdate = localStorage.getItem('birthdate');
-            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
             if (!birthdate) {
                 document.getElementById('numerologyMessage').innerText = 'Please enter your birthdate first.';
-                return;
-            }
-            if (currentEnergy < 15) {
-                document.getElementById('numerologyMessage').innerText = 'You need at least 15% energy to play. Complete some challenges!';
                 return;
             }
             const date = new Date(birthdate);
@@ -808,6 +840,8 @@
                 const date = new Date(birthdate);
                 const zodiacSign = getZodiacSign(date);
                 document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Your zodiac sign is ${zodiacSign}. Energy: ${currentEnergy}%`;
+            } else {
+                document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Please enter your birthdate to play. Energy: ${currentEnergy}%`;
             }
         }
     </script>
