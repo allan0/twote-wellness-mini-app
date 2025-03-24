@@ -43,7 +43,7 @@
             z-index: -1;
         }
 
-        #header, #horoscopeForm, #wellnessManager, #tasksPage, #friendsHub, #leaderboardPage {
+        #header, #horoscopeForm, #wellnessManager, #tasksPage, #leaderboardPage, #gamePage {
             background-color: #FFF8DC; /* Cornsilk */
             padding: 20px;
             border-radius: 10px;
@@ -293,14 +293,13 @@
                 <li><a href="#" class="btn btn-custom" onclick="joinLink('Twitter/X')"><i class="fab fa-twitter"></i> Follow on Twitter/X</a></li>
                 <li><a href="#" class="btn btn-custom" onclick="joinLink('Instagram')"><i class="fab fa-instagram"></i> Follow on Instagram</a></li>
                 <li><a href="#" class="btn btn-custom" onclick="joinLink('YouTube')"><i class="fab fa-youtube"></i> Subscribe on YouTube</a></li>
+                <li>
+                    <h4>Referral Task</h4>
+                    <p>Generate your referral code to invite friends and earn rewards!</p>
+                    <button class="btn btn-custom" onclick="generateReferralCode()"><i class="fas fa-share"></i> Generate Referral Code</button>
+                    <p id="referralCode"></p>
+                </li>
             </ul>
-        </div>
-
-        <div id="friendsHub">
-            <h2>Friends Hub</h2>
-            <p>Refer friends and earn rewards!</p>
-            <button class="btn btn-custom" onclick="generateReferralCode()"><i class="fas fa-share"></i> Generate Referral Code</button>
-            <p id="referralCode"></p>
         </div>
 
         <div id="leaderboardPage">
@@ -309,17 +308,24 @@
             <ol id="leaderboardList"></ol>
         </div>
 
+        <div id="gamePage" style="display:none;">
+            <h2 id="gameWelcome"></h2>
+            <button class="btn btn-custom" onclick="startConstellationGame()">Play Constellation Game</button>
+            <canvas id="constellationCanvas" width="400" height="400" style="border:1px solid #BDB76B; background-color: #000; margin: 20px auto; display: block;"></canvas>
+            <p id="gameMessage"></p>
+        </div>
+
         <div id="footer">
-            <a href="#" onclick="showSection('wellnessManager')">Home</a>
-            <a href="#" onclick="showSection('tasksPage')">Tasks</a>
-            <a href="#" onclick="showSection('friendsHub')">Referrals</a>
-            <a href="#" onclick="showSection('leaderboardPage')">Leaderboard</a>
+            <a href="#" onclick="showSection('wellnessManager')"><i class="fas fa-home"></i></a>
+            <a href="#" onclick="showSection('tasksPage')"><i class="fas fa-tasks"></i></a>
+            <a href="#" onclick="showSection('leaderboardPage')"><i class="fas fa-trophy"></i></a>
+            <a href="#" onclick="showSection('gamePage')"><i class="fas fa-star"></i></a>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Existing JavaScript with updates below
+        // Daily goals for challenges
         const dailyGoals = [
             { goal: "Wealth and Abundance", meditation: "Listen to the challenge audio", task1: "Write down three financial goals and visualize achieving them.", task2: "Create a small budget or savings plan for the week." },
             { goal: "Calmness and Inner Peace", meditation: "Listen to the challenge audio", task1: "Practice a 5-minute gratitude reflection.", task2: "Perform a 5-minute deep breathing exercise." },
@@ -334,8 +340,9 @@
             { goal: "Joy and Happiness", meditation: "Listen to the challenge audio", task1: "Recall a happy memory and savor it.", task2: "Smile at yourself in the mirror for 30 seconds." }
         ];
 
-        let userName = "Guest";
-        let userPhoto = "https://via.placeholder.com/30";
+        // Initialize user data with persistence
+        let userName = localStorage.getItem('userName') || "Guest";
+        let userPhoto = localStorage.getItem('userPhoto') || "https://via.placeholder.com/30";
 
         if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
             window.Telegram.WebApp.ready();
@@ -343,23 +350,37 @@
             if (user) {
                 userName = user.first_name || "Guest";
                 userPhoto = user.photo_url || "https://via.placeholder.com/30";
+                localStorage.setItem('userName', userName);
+                localStorage.setItem('userPhoto', userPhoto);
             }
         }
 
         document.getElementById('profileName').innerText = userName;
         document.getElementById('profilePhoto').src = userPhoto;
 
-        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'friendsHub', 'leaderboardPage'];
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'leaderboardPage', 'gamePage'];
 
+        // Show a specific section
         function showSection(sectionId) {
             sections.forEach(id => document.getElementById(id).style.display = 'none');
             const section = document.getElementById(sectionId);
             section.style.display = 'block';
             if (sectionId === 'wellnessManager') {
                 loadChallenges();
+            } else if (sectionId === 'gamePage') {
+                const birthdate = localStorage.getItem('birthdate');
+                const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+                if (birthdate) {
+                    const date = new Date(birthdate);
+                    const zodiacSign = getZodiacSign(date);
+                    document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Your zodiac sign is ${zodiacSign}. Energy: ${currentEnergy}%`;
+                } else {
+                    document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Please enter your birthdate to play. Energy: ${currentEnergy}%`;
+                }
             }
         }
 
+        // Initial page load
         document.addEventListener("DOMContentLoaded", function() {
             if (typeof window.Telegram !== 'undefined' && window.Telegram.WebApp) {
                 window.Telegram.WebApp.ready();
@@ -378,6 +399,7 @@
             }
         });
 
+        // Save birthdate and proceed
         function saveHoroscope() {
             const birthdate = document.getElementById('birthdate').value;
             if (birthdate) {
@@ -388,6 +410,7 @@
             }
         }
 
+        // Open social media links
         function joinLink(platform) {
             const links = {
                 'Telegram Channel': 'https://t.me/yourchannel',
@@ -399,15 +422,29 @@
             window.open(links[platform] || '#', '_blank');
         }
 
+        // Energy level management
         const energyValue = document.getElementById('energyValue');
         function updateEnergyLevel() {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             let completedCount = challenges.reduce((count, c) => count + (c.meditationCompleted ? 1 : 0) + (c.task1Completed ? 1 : 0) + (c.task2Completed ? 1 : 0), 0);
-            let energyLevel = Math.round((completedCount / (66 * 3)) * 100);
+            let baseEnergy = Math.round((completedCount / (66 * 3)) * 100);
+            let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            // Use the higher of baseEnergy or currentEnergy (to preserve game bonuses)
+            let energyLevel = Math.max(baseEnergy, currentEnergy);
+            energyLevel = Math.min(energyLevel, 100); // Cap at 100%
             localStorage.setItem('energyLevel', energyLevel);
             energyValue.innerText = energyLevel;
         }
 
+        // Boost energy level (e.g., from game completion)
+        function boostEnergyLevel(amount) {
+            let currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            currentEnergy = Math.min(currentEnergy + amount, 100); // Cap at 100%
+            localStorage.setItem('energyLevel', currentEnergy);
+            energyValue.innerText = currentEnergy;
+        }
+
+        // Initialize challenges
         function initializeChallenges() {
             const challenges = Array.from({ length: 66 }, (_, i) => {
                 const goalIndex = i % dailyGoals.length;
@@ -426,6 +463,7 @@
             return challenges;
         }
 
+        // Load and display challenges
         function loadChallenges() {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             if (challenges.length === 0) {
@@ -465,6 +503,7 @@
             });
         }
 
+        // Calculate challenge progress
         function calculateProgress(days) {
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             const selectedChallenges = challenges.slice(0, days);
@@ -473,6 +512,7 @@
             return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
         }
 
+        // Play challenge audio
         function playChallengeAudio(days) {
             const audio = document.getElementById(`audioChallenge${days}`);
             if (audio.paused) {
@@ -482,6 +522,7 @@
             }
         }
 
+        // Mark challenge tasks as complete
         function completeChallenge(day, activity) {
             let challenges = JSON.parse(localStorage.getItem('challenges'));
             const challenge = challenges.find(c => c.day === day);
@@ -495,12 +536,13 @@
             }
         }
 
+        // Generate referral code
         function generateReferralCode() {
             const referralCode = Math.random().toString(36).substring(7).toUpperCase();
             document.getElementById('referralCode').innerText = "Your Referral Code: " + referralCode;
         }
 
-        // Progress bar updates for modals
+        // Update progress bars in modals
         document.getElementById('challengeModal7').addEventListener('shown.bs.modal', function () {
             let progress = calculateProgress(7);
             this.querySelector('.progress-bar').style.width = progress + '%';
@@ -516,6 +558,131 @@
             this.querySelector('.progress-bar').style.width = progress + '%';
             this.querySelector('.progress-bar').setAttribute('aria-valuenow', progress);
         });
+
+        // Game Section Logic
+        function getZodiacSign(date) {
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
+            if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Pisces";
+            if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Aries";
+            if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Taurus";
+            if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gemini";
+            if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Cancer";
+            if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leo";
+            if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgo";
+            if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+            if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Scorpio";
+            if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittarius";
+            if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricorn";
+        }
+
+        function getLuckyNumber(date) {
+            const day = date.getDate();
+            const month = date.getMonth() + 1;
+            const year = date.getFullYear();
+            const sum = day + month + year;
+            return sum % 9 || 9;
+        }
+
+        const constellations = {
+            "Aries": [{x:100,y:100}, {x:150,y:150}, {x:200,y:100}],
+            "Taurus": [{x:100,y:100}, {x:150,y:50}, {x:200,y:100}],
+            "Gemini": [{x:100,y:150}, {x:150,y:100}, {x:200,y:150}],
+            "Cancer": [{x:120,y:100}, {x:140,y:140}, {x:160,y:100}],
+            "Leo": [{x:100,y:120}, {x:150,y:80}, {x:200,y:120}],
+            "Virgo": [{x:110,y:110}, {x:150,y:130}, {x:190,y:110}],
+            "Libra": [{x:100,y:130}, {x:150,y:90}, {x:200,y:130}],
+            "Scorpio": [{x:130,y:100}, {x:150,y:150}, {x:170,y:100}],
+            "Sagittarius": [{x:100,y:140}, {x:150,y:110}, {x:200,y:140}],
+            "Capricorn": [{x:140,y:100}, {x:160,y:140}, {x:180,y:100}],
+            "Aquarius": [{x:100,y:110}, {x:150,y:150}, {x:200,y:110}],
+            "Pisces": [{x:110,y:100}, {x:150,y:120}, {x:190,y:100}]
+        };
+
+        let currentSequence = [];
+        let correctSequence = [];
+
+        function drawStars() {
+            const canvas = document.getElementById('constellationCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            correctSequence.forEach(point => {
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, 5, 0, 2 * Math.PI);
+                ctx.fillStyle = 'white';
+                ctx.fill();
+            });
+        }
+
+        function handleClick(event) {
+            const canvas = document.getElementById('constellationCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const clickedStar = correctSequence.find(point => Math.hypot(point.x - x, point.y - y) < 10);
+            if (clickedStar) {
+                if (currentSequence.length === 0 || clickedStar === correctSequence[currentSequence.length]) {
+                    currentSequence.push(clickedStar);
+                    if (currentSequence.length > 1) {
+                        const prev = currentSequence[currentSequence.length - 2];
+                        const ctx = canvas.getContext('2d');
+                        ctx.beginPath();
+                        ctx.moveTo(prev.x, prev.y);
+                        ctx.lineTo(clickedStar.x, clickedStar.y);
+                        ctx.strokeStyle = 'yellow';
+                        ctx.stroke();
+                    }
+                    if (currentSequence.length === correctSequence.length) {
+                        const birthdate = new Date(localStorage.getItem('birthdate'));
+                        const luckyNumber = getLuckyNumber(birthdate);
+                        document.getElementById('gameMessage').innerText = `Congratulations! You've connected your constellation. Your lucky number is ${luckyNumber}. Energy boosted by 5%!`;
+                        boostEnergyLevel(5); // Boost energy by 5% on completion
+                        updateGameWelcome();
+                    }
+                } else {
+                    currentSequence = [];
+                    drawStars();
+                    document.getElementById('gameMessage').innerText = 'Incorrect sequence. Try again.';
+                }
+            }
+        }
+
+        function updateGameWelcome() {
+            const birthdate = localStorage.getItem('birthdate');
+            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            if (birthdate) {
+                const date = new Date(birthdate);
+                const zodiacSign = getZodiacSign(date);
+                document.getElementById('gameWelcome').innerText = `Welcome, ${userName}! Your zodiac sign is ${zodiacSign}. Energy: ${currentEnergy}%`;
+            }
+        }
+
+        function startConstellationGame() {
+            const birthdate = localStorage.getItem('birthdate');
+            const currentEnergy = parseInt(localStorage.getItem('energyLevel') || '0');
+            if (!birthdate) {
+                alert('Please enter your birthdate first.');
+                return;
+            }
+            if (currentEnergy < 10) {
+                alert('You need at least 10% energy to play the game. Complete some challenges to boost your energy!');
+                return;
+            }
+            const date = new Date(birthdate);
+            const zodiacSign = getZodiacSign(date);
+            if (!constellations[zodiacSign]) {
+                alert('Constellation data not available.');
+                return;
+            }
+            correctSequence = constellations[zodiacSign];
+            currentSequence = [];
+            drawStars();
+            const canvas = document.getElementById('constellationCanvas');
+            canvas.removeEventListener('click', handleClick); // Prevent duplicate listeners
+            canvas.addEventListener('click', handleClick);
+            document.getElementById('gameMessage').innerText = 'Connect the stars in order to form your constellation!';
+        }
     </script>
 </body>
 </html>
