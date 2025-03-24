@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Third Eye</title>
+    <title>The World of Third Eye</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
@@ -25,6 +25,19 @@
             flex-direction: column;
         }
 
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
         #background-video {
             position: fixed;
             top: 0;
@@ -43,6 +56,7 @@
             position: relative;
             z-index: 1;
             flex-grow: 1;
+            display: none; /* Hidden until preloader finishes */
         }
 
         .section {
@@ -108,6 +122,7 @@
             border-radius: 10px;
             font-weight: 700;
             transition: all 0.3s ease;
+            z-index: 10;
         }
 
         .btn-custom:hover {
@@ -127,11 +142,12 @@
             padding: 15px;
             margin: 10px 0;
             transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
         }
 
         .challenge-div.locked {
             opacity: 0.6;
-            position: relative;
         }
 
         .challenge-div.locked .overlay {
@@ -145,7 +161,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 1;
+            z-index: 6;
             font-size: 1.1rem;
         }
 
@@ -244,14 +260,19 @@
     </style>
 </head>
 <body>
-    <video id="background-video" autoplay loop muted>
+    <!-- Preloader -->
+    <div id="preloader">
+        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #D4AF37;"></i>
+    </div>
+
+    <video id="background-video" autoplay loop muted playsinline>
         <source src="cosmic.mp4" type="video/mp4">
     </video>
     <div class="container">
         <!-- Header -->
         <div id="header" class="section">
             <div class="header-content">
-                <h1>Third Eye</h1>
+                <h1>The World of Third Eye</h1>
                 <button id="headerProfileButton" onclick="showSection('playerProfile')">
                     <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
                 </button>
@@ -504,6 +525,16 @@
 
         document.getElementById('profilePhoto').src = userPhoto;
         document.getElementById('profileNameDisplay').textContent = userName;
+
+        // Preloader Logic
+        window.addEventListener('load', () => {
+            const video = document.getElementById('background-video');
+            video.onloadeddata = () => {
+                document.getElementById('preloader').style.display = 'none';
+                document.querySelector('.container').style.display = 'block';
+                initializeCanvases(); // Draw logo on canvases after load
+            };
+        });
 
         // Section Management
         function showSection(sectionId) {
@@ -783,12 +814,35 @@
                 : `Welcome, ${userName}! Enter your birthdate to play. Energy: ${currentEnergy}%`;
         }
 
+        // Initialize Canvases with Logo
+        function initializeCanvases() {
+            const wheelCanvas = document.getElementById('astrologyWheelCanvas');
+            const numCanvas = document.getElementById('numerologyCanvas');
+            const wheelCtx = wheelCanvas.getContext('2d');
+            const numCtx = numCanvas.getContext('2d');
+            const radius = wheelCanvas.width / 2;
+
+            if (wheelLogo.complete) {
+                // Astrology Wheel
+                wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+                wheelCtx.globalAlpha = 1.0;
+                const logoSize = wheelCanvas.width * 0.8;
+                wheelCtx.drawImage(wheelLogo, radius - logoSize / 2, radius - logoSize / 2, logoSize, logoSize);
+
+                // Numerology Canvas
+                numCtx.clearRect(0, 0, numCanvas.width, numCanvas.height);
+                numCtx.globalAlpha = 1.0;
+                numCtx.drawImage(wheelLogo, radius - logoSize / 2, radius - logoSize / 2, logoSize, logoSize);
+            }
+        }
+
         function drawAstrologyWheel(spinAngle) {
             const canvas = document.getElementById('astrologyWheelCanvas');
             const ctx = canvas.getContext('2d');
             const radius = canvas.width / 2;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+            // Draw transparent logo in background
             if (wheelLogo.complete) {
                 ctx.save();
                 ctx.globalAlpha = 0.2;
@@ -813,7 +867,7 @@
                 ctx.fillStyle = 'white';
                 ctx.font = '20px Nunito';
                 ctx.textAlign = 'center';
-                ctx.fillText(zodiac.symbol, 0, -radius + 30);
+                ctx.fillText(zodiac.symbol, 0, -radius + 30); // Position symbol near outer edge
                 ctx.restore();
             });
 
@@ -876,6 +930,15 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const tileSize = canvas.width / 3;
+
+            // Draw transparent logo in background
+            if (wheelLogo.complete) {
+                ctx.save();
+                ctx.globalAlpha = 0.2;
+                const logoSize = canvas.width * 0.8;
+                ctx.drawImage(wheelLogo, canvas.width / 2 - logoSize / 2, canvas.height / 2 - logoSize / 2, logoSize, logoSize);
+                ctx.restore();
+            }
 
             for (let i = 0; i < 3; i++) {
                 for (let j = 0; j < 3; j++) {
