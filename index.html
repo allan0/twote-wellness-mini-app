@@ -38,6 +38,18 @@
             z-index: 9999;
         }
 
+        #preloader img {
+            width: 100px; /* Adjust size as needed */
+            height: 100px;
+            animation: breathe 2s infinite ease-in-out;
+        }
+
+        @keyframes breathe {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0.8); }
+        }
+
         #background-video {
             position: fixed;
             top: 0;
@@ -260,9 +272,9 @@
     </style>
 </head>
 <body>
-    <!-- Preloader -->
+    <!-- Preloader with Breathing Logo -->
     <div id="preloader">
-        <i class="fas fa-spinner fa-spin" style="font-size: 3rem; color: #D4AF37;"></i>
+        <img src="logo.png" alt="Loading Logo">
     </div>
 
     <video id="background-video" autoplay loop muted playsinline>
@@ -428,12 +440,12 @@
             <h2 id="gameWelcome"></h2>
             <div>
                 <button class="btn btn-custom" onclick="startAstrologyWheelGame()">Spin Astrology Wheel</button>
-                <canvas id="astrologyWheelCanvas" width="300" height="300"></canvas>
+                <canvas id="astrologyWheelCanvas" width="400" height="400"></canvas>
                 <p id="astrologyMessage"></p>
             </div>
             <div>
                 <button class="btn btn-custom" onclick="startNumerologyGame()">Play Number Path</button>
-                <canvas id="numerologyCanvas" width="300" height="300"></canvas>
+                <canvas id="numerologyCanvas" width="400" height="400"></canvas>
                 <p id="numerologyMessage"></p>
             </div>
         </div>
@@ -839,7 +851,7 @@
                 : `Welcome, ${userName}! Enter your birthdate to play. Energy: ${currentEnergy}%`;
         }
 
-        // Initialize Canvases with Logo
+        // Initialize Canvases with Circular Logo
         function initializeCanvases() {
             const wheelCanvas = document.getElementById('astrologyWheelCanvas');
             const numCanvas = document.getElementById('numerologyCanvas');
@@ -850,14 +862,17 @@
             if (wheelLogo.complete) {
                 // Astrology Wheel
                 wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
-                wheelCtx.globalAlpha = 1.0;
-                const logoSize = wheelCanvas.width * 0.8;
-                wheelCtx.drawImage(wheelLogo, radius - logoSize / 2, radius - logoSize / 2, logoSize, logoSize);
+                wheelCtx.beginPath();
+                wheelCtx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                wheelCtx.clip();
+                wheelCtx.drawImage(wheelLogo, 0, 0, wheelCanvas.width, wheelCanvas.height);
 
                 // Numerology Canvas
                 numCtx.clearRect(0, 0, numCanvas.width, numCanvas.height);
-                numCtx.globalAlpha = 1.0;
-                numCtx.drawImage(wheelLogo, radius - logoSize / 2, radius - logoSize / 2, logoSize, logoSize);
+                numCtx.beginPath();
+                numCtx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                numCtx.clip();
+                numCtx.drawImage(wheelLogo, 0, 0, numCanvas.width, numCanvas.height);
             }
         }
 
@@ -867,12 +882,14 @@
             const radius = canvas.width / 2;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Draw transparent logo in background
+            // Draw circular logo as background
             if (wheelLogo.complete) {
                 ctx.save();
+                ctx.beginPath();
+                ctx.arc(radius, radius, radius, 0, 2 * Math.PI);
+                ctx.clip();
                 ctx.globalAlpha = 0.2;
-                const logoSize = canvas.width * 0.8;
-                ctx.drawImage(wheelLogo, radius - logoSize / 2, radius - logoSize / 2, logoSize, logoSize);
+                ctx.drawImage(wheelLogo, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
             }
 
@@ -890,9 +907,9 @@
                 ctx.translate(radius, radius);
                 ctx.rotate(i * angleStep + angleStep / 2);
                 ctx.fillStyle = 'white';
-                ctx.font = '20px Nunito';
+                ctx.font = '24px Nunito';
                 ctx.textAlign = 'center';
-                ctx.fillText(zodiac.symbol, 0, -radius + 30); // Position symbol near outer edge
+                ctx.fillText(zodiac.symbol, 0, -radius + 40); // Adjusted for larger canvas
                 ctx.restore();
             });
 
@@ -956,12 +973,14 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const tileSize = canvas.width / 3;
 
-            // Draw transparent logo in background
+            // Draw circular logo as background
             if (wheelLogo.complete) {
                 ctx.save();
+                ctx.beginPath();
+                ctx.arc(canvas.width / 2, canvas.height / 2, canvas.width / 2, 0, 2 * Math.PI);
+                ctx.clip();
                 ctx.globalAlpha = 0.2;
-                const logoSize = canvas.width * 0.8;
-                ctx.drawImage(wheelLogo, canvas.width / 2 - logoSize / 2, canvas.height / 2 - logoSize / 2, logoSize, logoSize);
+                ctx.drawImage(wheelLogo, 0, 0, canvas.width, canvas.height);
                 ctx.restore();
             }
 
@@ -974,7 +993,7 @@
                     ctx.strokeStyle = '#fff';
                     ctx.stroke();
                     ctx.fillStyle = 'white';
-                    ctx.font = '20px Nunito';
+                    ctx.font = '24px Nunito';
                     ctx.textAlign = 'center';
                     ctx.fillText(numerologyGrid[i][j], j * tileSize + tileSize / 2, i * tileSize + tileSize / 2 + 5);
                 }
