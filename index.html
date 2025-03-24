@@ -10,9 +10,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #1a1a2e;
-            --text-color: #6B451D;
-            --button-color: #BDB76B;
+            --bg-color: #4E342E; /* Brown */
+            --text-color: #FFD700; /* Gold */
+            --button-color: #FFD700; /* Gold */
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -20,6 +20,16 @@
             color: var(--text-color);
             overflow-x: hidden;
             padding-bottom: 60px; /* Space for fixed nav bar */
+        }
+        /* Background Video Styling */
+        #backgroundVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Behind all content */
         }
         .container {
             width: 100%;
@@ -50,7 +60,7 @@
         }
         .btn-custom {
             background: var(--button-color);
-            color: white;
+            color: #4E342E; /* Brown text for contrast */
         }
         .locked {
             opacity: 0.5;
@@ -119,6 +129,12 @@
     </style>
 </head>
 <body>
+    <!-- Background Video -->
+    <video id="backgroundVideo" autoplay muted loop>
+        <source src="cosmic.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
     <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 9999;">
         <p style="color: white;">Loading...</p>
     </div>
@@ -126,7 +142,7 @@
         <!-- Header with Title, Logo, and Profile -->
         <header class="d-flex justify-content-between align-items-center py-3">
             <div class="d-flex align-items-center">
-                <img src="logo.png" alt="Logo" style="width: 40px; height: 40px; margin-right: 10px;">
+                <img src="logo.webp" alt="Logo" style="width: 40px; height: 40px; margin-right: 10px;">
                 <h1 style="font-size: 1.5rem; margin: 0;">Third Eye</h1>
             </div>
             <div class="d-flex align-items-center" id="profileLink">
@@ -357,9 +373,9 @@
             function setTheme() {
                 const theme = Telegram.WebApp.themeParams;
                 if (theme) {
-                    document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#1a1a2e');
-                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#6B451D');
-                    document.documentElement.style.setProperty('--button-color', theme.button_color || '#BDB76B');
+                    document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#4E342E');
+                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#FFD700');
+                    document.documentElement.style.setProperty('--button-color', theme.button_color || '#FFD700');
                 }
             }
 
@@ -394,8 +410,6 @@
                     if (!state.birthdate && startParam) {
                         state.referrer = startParam;
                         await Telegram.WebApp.CloudStorage.setItem('referrer', startParam);
-                        // Note: In a real app, award points to the referrer here via a backend
-                        // Example: await awardPointsToReferrer(startParam, 50);
                     }
 
                     updateUI();
