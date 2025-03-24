@@ -67,6 +67,7 @@
             height: 40px;
             object-fit: cover;
             border-radius: 50%;
+            cursor: pointer;
         }
         /* Text Visibility in Sections */
         .section h2, .section p, .section h3, .section h4 {
@@ -80,7 +81,7 @@
             width: 100%;
             background: var(--bg-color);
             padding: 10px 0;
-            z-index: 1000; /* Ensure it's on top */
+            z-index: 1000;
             display: flex;
             justify-content: space-around;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
@@ -122,35 +123,64 @@
         <p style="color: white;">Loading...</p>
     </div>
     <div class="container">
+        <!-- Header with Title, Logo, and Profile -->
         <header class="d-flex justify-content-between align-items-center py-3">
-            <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
-            <span id="profileNameDisplay">Guest</span>
-            <button id="headerProfileButton" class="btn btn-custom">Profile</button>
+            <div class="d-flex align-items-center">
+                <img src="logo.png" alt="Logo" style="width: 40px; height: 40px; margin-right: 10px;">
+                <h1 style="font-size: 1.5rem; margin: 0;">Third Eye</h1>
+            </div>
+            <div class="d-flex align-items-center" id="profileLink">
+                <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
+                <span id="profileNameDisplay" style="margin-left: 10px;">Guest</span>
+            </div>
         </header>
 
+        <!-- Horoscope Form Section -->
         <div id="horoscopeForm" class="section" style="display: none;">
             <h2>Enter Your Birthdate</h2>
             <input type="date" id="birthdate" class="form-control">
             <button class="btn btn-custom mt-2" id="saveHoroscopeBtn">Save & Continue</button>
         </div>
 
+        <!-- Wellness Manager Section -->
         <div id="wellnessManager" class="section" style="display: none;">
             <h2>Wellness Manager</h2>
             <p>Embark on a journey of mindfulness.</p>
             <div id="challengeOptions"></div>
         </div>
 
+        <!-- Daily Challenges Section -->
         <div id="dailyChallenges" class="section" style="display: none;">
             <h2 id="challengeTitle"></h2>
             <div id="dailyChallengeList"></div>
         </div>
 
+        <!-- Tasks Section -->
+        <div id="tasksSection" class="section" style="display: none;">
+            <h2>Tasks</h2>
+            <div id="socialMediaTasks">
+                <h3>Social Media Tasks</h3>
+                <ul>
+                    <li>Follow us on Twitter: <a href="https://twitter.com/youraccount" target="_blank">Twitter</a> <button class="btn btn-custom" id="twitterTaskBtn" onclick="completeTask('twitter')">Complete</button></li>
+                    <li>Join our Telegram group: <a href="https://t.me/yourgroup" target="_blank">Telegram</a> <button class="btn btn-custom" id="telegramTaskBtn" onclick="completeTask('telegram')">Complete</button></li>
+                </ul>
+            </div>
+            <div id="referralTask">
+                <h3>Referral Task</h3>
+                <p>Share your referral link to earn points when someone joins!</p>
+                <input type="text" id="referralLink" readonly>
+                <button class="btn btn-custom" onclick="copyReferralLink()">Copy Link</button>
+            </div>
+        </div>
+
+        <!-- Game Page Section -->
         <div id="gamePage" class="section" style="display: none;">
             <h2>Games</h2>
             <button class="btn btn-custom" id="playHoroscopeWheel">Play Horoscope Wheel</button>
             <button class="btn btn-custom" id="playNumerologyPath">Play Numerology Path</button>
         </div>
 
+        <!-- Horoscope Wheel Page Section -->
         <div id="horoscopeWheelPage" class="section" style="display: none;">
             <h2>Horoscope Wheel</h2>
             <canvas id="astrologyWheelCanvas" width="400" height="400"></canvas>
@@ -158,16 +188,21 @@
             <button class="btn btn-custom" id="spinWheel">Spin the Wheel</button>
         </div>
 
+        <!-- Numerology Path Page Section -->
         <div id="numerologyPathPage" class="section" style="display: none;">
             <h2>Numerology Path</h2>
             <p id="numerologyMessage">Select a number to reveal your path!</p>
             <div id="numberGrid"></div>
         </div>
 
+        <!-- Player Profile Section -->
         <div id="playerProfile" class="section" style="display: none;">
             <h2>Player Profile</h2>
             <p>Welcome, <span id="profileNameDisplayInner">Guest</span>!</p>
             <div id="energyLevel">Energy Level: <span id="energyValue">0</span>%</div>
+            <div id="pointsDisplay">Points: <span id="pointsValue">0</span></div>
+            <button class="btn btn-custom mt-3" id="connectWalletBtn">Connect Wallet</button>
+            <button class="btn btn-custom mt-3" id="airdropWithdrawBtn">Airdrop Withdraw</button>
             <button class="btn btn-danger mt-3" id="deleteProgressBtn">Delete Progress</button>
             <h3 class="mt-3">Challenge History</h3>
             <table class="table">
@@ -177,11 +212,11 @@
         </div>
     </div>
 
-    <!-- Footer Nav Bar -->
+    <!-- Footer Navigation Bar -->
     <nav class="footer-nav">
         <a href="#" id="navHome"><i class="fas fa-home"></i>Home</a>
+        <a href="#" id="navTasks"><i class="fas fa-tasks"></i>Tasks</a>
         <a href="#" id="navGame"><i class="fas fa-gamepad"></i>Games</a>
-        <a href="#" id="navProfile"><i class="fas fa-user"></i>Profile</a>
     </nav>
 
     <!-- Energy Log Modal -->
@@ -244,20 +279,24 @@
             7: "Wisdom shapes path.", 8: "Power drives ambition.", 9: "Completion nears now."
         };
 
-        const sections = ['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'gamePage', 'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile'];
+        const sections = ['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage', 'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile'];
 
         // State
         let state = {
+            userId: null,
             userName: "Guest",
             userPhoto: "https://via.placeholder.com/40",
             energyLevel: 0,
+            points: 0,
             challenges: [],
             challengeHistory: [],
             birthdate: null,
             gamePlayed: false,
             currentChallengeDay: null,
             currentChallengeDuration: null,
-            energyBefore: null
+            energyBefore: null,
+            referrer: null,
+            completedTasks: []
         };
 
         let sectionStack = [];
@@ -269,6 +308,7 @@
                 profileNameDisplay: document.getElementById('profileNameDisplay'),
                 profileNameDisplayInner: document.getElementById('profileNameDisplayInner'),
                 energyValue: document.getElementById('energyValue'),
+                pointsValue: document.getElementById('pointsValue'),
                 challengeOptions: document.getElementById('challengeOptions'),
                 dailyChallengeList: document.getElementById('dailyChallengeList'),
                 challengeTitle: document.getElementById('challengeTitle'),
@@ -285,7 +325,8 @@
                 profileHistory: document.getElementById('profileHistory'),
                 astrologyMessage: document.getElementById('astrologyMessage'),
                 numerologyMessage: document.getElementById('numerologyMessage'),
-                numberGrid: document.getElementById('numberGrid')
+                numberGrid: document.getElementById('numberGrid'),
+                referralLink: document.getElementById('referralLink')
             };
         }
 
@@ -300,6 +341,7 @@
                     Telegram.WebApp.expand();
                     const user = Telegram.WebApp.initDataUnsafe.user;
                     if (user) {
+                        state.userId = user.id;
                         state.userName = user.first_name || "Guest";
                         state.userPhoto = user.photo_url || "https://via.placeholder.com/40";
                     }
@@ -325,22 +367,35 @@
             async function init() {
                 document.getElementById('loading').style.display = 'flex';
                 try {
-                    const keys = ['userName', 'userPhoto', 'energyLevel', 'challenges', 'challengeHistory', 'birthdate', 'gamePlayed'];
+                    const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'gamePlayed', 'referrer', 'completedTasks'];
                     const values = await Promise.all(keys.map(key => 
                         Telegram.WebApp.CloudStorage.getItem(key).catch(() => null)
                     ));
                     
-                    state.userName = values[0] || state.userName;
-                    state.userPhoto = values[1] || state.userPhoto;
-                    state.energyLevel = parseInt(values[2]) || 0;
-                    state.challenges = JSON.parse(values[3] || '[]');
-                    state.challengeHistory = JSON.parse(values[4] || '[]');
-                    state.birthdate = values[5] || null;
-                    state.gamePlayed = values[6] === 'true';
+                    state.userId = values[0] || state.userId;
+                    state.userName = values[1] || state.userName;
+                    state.userPhoto = values[2] || state.userPhoto;
+                    state.energyLevel = parseInt(values[3]) || 0;
+                    state.points = parseInt(values[4]) || 0;
+                    state.challenges = JSON.parse(values[5] || '[]');
+                    state.challengeHistory = JSON.parse(values[6] || '[]');
+                    state.birthdate = values[7] || null;
+                    state.gamePlayed = values[8] === 'true';
+                    state.referrer = values[9] || null;
+                    state.completedTasks = JSON.parse(values[10] || '[]');
 
                     if (!state.challenges.length) {
                         state.challenges = initializeChallenges();
                         await Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges));
+                    }
+
+                    // Handle Referral Logic
+                    const startParam = Telegram.WebApp.initDataUnsafe.start_param;
+                    if (!state.birthdate && startParam) {
+                        state.referrer = startParam;
+                        await Telegram.WebApp.CloudStorage.setItem('referrer', startParam);
+                        // Note: In a real app, award points to the referrer here via a backend
+                        // Example: await awardPointsToReferrer(startParam, 50);
                     }
 
                     updateUI();
@@ -355,13 +410,17 @@
 
             // Fallback Initialization with Local Storage
             function initLocal() {
+                state.userId = localStorage.getItem('userId') || null;
                 state.userName = localStorage.getItem('userName') || state.userName;
                 state.userPhoto = localStorage.getItem('userPhoto') || state.userPhoto;
                 state.energyLevel = parseInt(localStorage.getItem('energyLevel') || '0');
+                state.points = parseInt(localStorage.getItem('points') || '0');
                 state.challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
                 state.challengeHistory = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
                 state.birthdate = localStorage.getItem('birthdate') || null;
                 state.gamePlayed = localStorage.getItem('gamePlayed') === 'true';
+                state.referrer = localStorage.getItem('referrer') || null;
+                state.completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
 
                 if (!state.challenges.length) {
                     state.challenges = initializeChallenges();
@@ -372,11 +431,17 @@
                 showSection(state.birthdate ? 'wellnessManager' : 'horoscopeForm');
             }
 
+            // Update UI
             function updateUI() {
                 domElements.profilePhoto.src = state.userPhoto;
                 domElements.profileNameDisplay.textContent = state.userName;
                 domElements.profileNameDisplayInner.textContent = state.userName;
                 domElements.energyValue.textContent = state.energyLevel;
+                domElements.pointsValue.textContent = state.points;
+                if (state.userId) {
+                    const botUsername = "your_bot"; // Replace with your bot's username
+                    domElements.referralLink.value = `https://t.me/${botUsername}/app?start=${state.userId}`;
+                }
             }
 
             // Utility Functions
@@ -393,6 +458,7 @@
                 }
                 if (sectionId === 'wellnessManager') loadChallenges();
                 if (sectionId === 'dailyChallenges') displayDailyChallenges(state.currentChallengeDuration);
+                if (sectionId === 'tasksSection') updateTaskButtons();
                 if (sectionId === 'playerProfile') loadProfileHistory();
                 if (sectionId === 'horoscopeWheelPage') drawAstrologyWheel();
                 if (sectionId === 'numerologyPathPage') initNumerologyPath();
@@ -707,16 +773,62 @@
                 }
             }
 
+            // Tasks Functions
+            function updateTaskButtons() {
+                const twitterBtn = document.getElementById('twitterTaskBtn');
+                const telegramBtn = document.getElementById('telegramTaskBtn');
+                if (state.completedTasks.includes('twitter')) {
+                    twitterBtn.disabled = true;
+                    twitterBtn.textContent = 'Completed';
+                }
+                if (state.completedTasks.includes('telegram')) {
+                    telegramBtn.disabled = true;
+                    telegramBtn.textContent = 'Completed';
+                }
+            }
+
+            async function completeTask(task) {
+                if (!state.completedTasks.includes(task)) {
+                    state.completedTasks.push(task);
+                    state.points += 10; // Award 10 points per task
+                    if (window.Telegram?.WebApp) {
+                        await Promise.all([
+                            Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks)),
+                            Telegram.WebApp.CloudStorage.setItem('points', state.points.toString())
+                        ]);
+                    } else {
+                        localStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
+                        localStorage.setItem('points', state.points);
+                    }
+                    updateUI();
+                    updateTaskButtons();
+                    Telegram.WebApp?.showAlert('Task completed! +10 points') || alert('Task completed! +10 points');
+                }
+            }
+
+            function copyReferralLink() {
+                const referralLink = document.getElementById('referralLink');
+                referralLink.select();
+                document.execCommand('copy');
+                Telegram.WebApp?.showAlert('Referral link copied to clipboard!') || alert('Referral link copied to clipboard!');
+            }
+
             // Event Listeners
-            document.getElementById('headerProfileButton').addEventListener('click', () => showSection('playerProfile'));
+            document.getElementById('profileLink').addEventListener('click', () => showSection('playerProfile'));
             document.getElementById('saveHoroscopeBtn').addEventListener('click', saveHoroscope);
             document.getElementById('navHome').addEventListener('click', e => { e.preventDefault(); showSection('wellnessManager'); });
+            document.getElementById('navTasks').addEventListener('click', e => { e.preventDefault(); showSection('tasksSection'); });
             document.getElementById('navGame').addEventListener('click', e => { e.preventDefault(); showSection('gamePage'); });
-            document.getElementById('navProfile').addEventListener('click', e => { e.preventDefault(); showSection('playerProfile'); });
             document.getElementById('playHoroscopeWheel').addEventListener('click', () => showSection('horoscopeWheelPage'));
             document.getElementById('playNumerologyPath').addEventListener('click', () => showSection('numerologyPathPage'));
             document.getElementById('spinWheel').addEventListener('click', spinWheel);
             document.getElementById('deleteProgressBtn').addEventListener('click', deleteProgress);
+            document.getElementById('connectWalletBtn').addEventListener('click', () => {
+                Telegram.WebApp?.showAlert('Wallet connection coming soon!') || alert('Wallet connection coming soon!');
+            });
+            document.getElementById('airdropWithdrawBtn').addEventListener('click', () => {
+                Telegram.WebApp?.showAlert('Airdrop withdraw coming soon!') || alert('Airdrop withdraw coming soon!');
+            });
 
             // Start the app
             initializeApp();
