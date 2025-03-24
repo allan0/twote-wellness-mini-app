@@ -43,7 +43,7 @@
             z-index: -1;
         }
 
-        #header, #horoscopeForm, #wellnessManager, #tasksPage, #leaderboardPage, #gamePage {
+        #header, #horoscopeForm, #wellnessManager, #tasksPage, #leaderboardPage, #gamePage, #playerProfile {
             background-color: #FFF8DC;
             padding: 20px;
             border-radius: 10px;
@@ -132,11 +132,6 @@
             font-size: 1.2em;
         }
 
-        .fa-microphone {
-            cursor: pointer;
-            margin-left: 10px;
-        }
-
         .challenge-card {
             background-color: #FFF8DC;
             border: 1px solid #BDB76B;
@@ -216,6 +211,11 @@
             z-index: -1;
             opacity: 0.5;
         }
+
+        #profileHistory img {
+            max-width: 100px;
+            margin: 5px;
+        }
     </style>
 </head>
 <body>
@@ -225,7 +225,7 @@
     <div class="container">
         <div id="header">
             <h1>The World of Third Eye</h1>
-            <button id="profileButton">
+            <button id="profileButton" onclick="showSection('playerProfile')">
                 <img id="profilePhoto" src="https://via.placeholder.com/30" alt="Profile Photo">
                 <span id="profileName">Guest</span>
             </button>
@@ -330,13 +330,13 @@
                                 <audio id="binauralBeats" src="binaural.mp3"></audio>
                                 <button class="btn btn-custom" id="playMeditation" onclick="playMeditation()">Play Meditation</button>
                                 <p><strong>Task 1:</strong> <span id="task1Text"></span></p>
-                                <input type="file" id="task1Proof" accept="image/*">
+                                <input type="file" id="task1Proof" accept="image/*" onchange="checkUploads()">
                                 <p><strong>Task 2:</strong> <span id="task2Text"></span></p>
-                                <input type="file" id="task2Proof" accept="image/*">
+                                <input type="file" id="task2Proof" accept="image/*" onchange="checkUploads()">
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button class="btn btn-custom" id="submitEnergyLog" onclick="submitEnergyLog()">Submit</button>
+                            <button class="btn btn-custom" id="submitEnergyLog" onclick="submitEnergyLog()" disabled>Submit</button>
                         </div>
                     </div>
                 </div>
@@ -380,6 +380,25 @@
             </div>
         </div>
 
+        <div id="playerProfile" style="display:none;">
+            <h2>Player Profile</h2>
+            <p>Welcome, <span id="profileNameDisplay">Guest</span>!</p>
+            <h3>Challenge History</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Day</th>
+                        <th>Goal</th>
+                        <th>Energy Before</th>
+                        <th>Energy After</th>
+                        <th>Task 1 Proof</th>
+                        <th>Task 2 Proof</th>
+                    </tr>
+                </thead>
+                <tbody id="profileHistory"></tbody>
+            </table>
+        </div>
+
         <div id="footer">
             <a href="#" onclick="showSection('wellnessManager')"><i class="fas fa-home"></i></a>
             <a href="#" onclick="showSection('tasksPage')"><i class="fas fa-tasks"></i></a>
@@ -418,8 +437,9 @@
 
         document.getElementById('profileName').innerText = userName;
         document.getElementById('profilePhoto').src = userPhoto;
+        document.getElementById('profileNameDisplay').innerText = userName;
 
-        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'leaderboardPage', 'gamePage'];
+        const sections = ['horoscopeForm', 'wellnessManager', 'tasksPage', 'leaderboardPage', 'gamePage', 'playerProfile'];
 
         // Show a specific section
         function showSection(sectionId) {
@@ -430,6 +450,8 @@
                 loadChallenges();
             } else if (sectionId === 'gamePage') {
                 updateGameWelcome();
+            } else if (sectionId === 'playerProfile') {
+                loadProfileHistory();
             }
         }
 
@@ -483,7 +505,9 @@
             currentEnergy = Math.min(currentEnergy + amount, 100);
             localStorage.setItem('energyLevel', currentEnergy);
             energyValue.innerText = currentEnergy;
+            localStorage.setItem('gamePlayed', 'true'); // Flag to unlock current/previous days
             updateGameWelcome();
+            loadChallenges();
         }
 
         // Initialize challenges
@@ -497,8 +521,7 @@
                     meditation: goalData.meditation,
                     task1: goalData.task1,
                     task2: goalData.task2,
-                    completed: false,
-                    lastCompleted: null
+                    completed: false
                 };
             });
             return challenges;
@@ -522,30 +545,33 @@
             container.innerHTML = '';
             let challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
             const selectedChallenges = challenges.slice(0, days);
-            let nextAvailableDay = 1;
-            selectedChallenges.forEach(challenge => {
+            const gamePlayed = localStorage.getItem('gamePlayed') === 'true';
+            let nextLockedDay = null;
+
+            selectedChallenges.forEach((challenge, index) => {
                 const card = document.createElement('div');
                 card.className = 'challenge-card';
-                const now = new Date().getTime();
-                const lockTime = challenge.lastCompleted ? challenge.lastCompleted + 24 * 60 * 60 * 1000 : 0;
-                const isLocked = challenge.completed && now < lockTime;
-                const timeLeft = isLocked ? Math.ceil((lockTime - now) / (60 * 60 * 1000)) : 0;
+                const prevDayCompleted = index === 0 || selectedChallenges[index - 1].completed;
+                const isCurrentOrPrevious = index === 0 || (index === selectedChallenges.findIndex(c => !c.completed) - 1);
 
-                if (challenge.day > nextAvailableDay) {
-                    card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete Day ${nextAvailableDay} first.</p>`;
-                } else if (isLocked) {
+                if (!prevDayCompleted && !gamePlayed) {
+                    if (nextLockedDay === null) nextLockedDay = challenge.day;
                     card.innerHTML = `
                         <h4>Day ${challenge.day}: ${challenge.goal}</h4>
-                        <p>Locked for ${timeLeft} hours. Play a <a href="#" onclick="showSection('gamePage')">game</a> to boost energy by 1% while you wait!</p>
+                        <p>Complete Day ${challenge.day - 1} first. Play a <a href="#" onclick="showSection('gamePage')">game</a> to unlock this and the previous day!</p>
+                    `;
+                } else if (challenge.completed) {
+                    card.innerHTML = `
+                        <h4>Day ${challenge.day}: ${challenge.goal}</h4>
+                        <p>Completed</p>
                     `;
                 } else {
                     card.innerHTML = `
                         <h4>Day ${challenge.day}: ${challenge.goal}</h4>
                         <button class="btn btn-custom" onclick="startChallenge(${challenge.day}, '${containerId}')">
-                            ${challenge.completed ? 'Completed' : 'Start Day ' + challenge.day}
+                            Start Day ${challenge.day}
                         </button>
                     `;
-                    if (!challenge.completed) nextAvailableDay = challenge.day + 1;
                 }
                 container.appendChild(card);
             });
@@ -565,11 +591,19 @@
             document.getElementById('energySliderValue').innerText = '50%';
             document.getElementById('challengeTasks').style.display = 'none';
             document.getElementById('submitEnergyLog').setAttribute('data-stage', 'before');
+            document.getElementById('submitEnergyLog').disabled = true;
             modal.show();
 
             document.getElementById('energySlider').oninput = function() {
                 document.getElementById('energySliderValue').innerText = this.value + '%';
+                document.getElementById('submitEnergyLog').disabled = false;
             };
+        }
+
+        function checkUploads() {
+            const task1Proof = document.getElementById('task1Proof').files.length > 0;
+            const task2Proof = document.getElementById('task2Proof').files.length > 0;
+            document.getElementById('submitEnergyLog').disabled = !(task1Proof && task2Proof);
         }
 
         function submitEnergyLog() {
@@ -587,16 +621,41 @@
                 document.getElementById('task1Text').innerText = challenge.task1;
                 document.getElementById('task2Text').innerText = challenge.task2;
                 document.getElementById('submitEnergyLog').setAttribute('data-stage', 'after');
+                document.getElementById('submitEnergyLog').disabled = true;
             } else if (stage === 'after') {
                 const energyAfter = sliderValue;
-                updateEnergyLevel(energyBefore, energyAfter);
-                let challenges = JSON.parse(localStorage.getItem('challenges'));
-                const challenge = challenges.find(c => c.day === currentChallengeDay);
-                challenge.completed = true;
-                challenge.lastCompleted = new Date().getTime();
-                localStorage.setItem('challenges', JSON.stringify(challenges));
-                modal.hide();
-                loadChallenges();
+                const task1File = document.getElementById('task1Proof').files[0];
+                const task2File = document.getElementById('task2Proof').files[0];
+                const reader1 = new FileReader();
+                const reader2 = new FileReader();
+
+                reader1.onload = function(e) {
+                    const task1Image = e.target.result;
+                    reader2.onload = function(e) {
+                        const task2Image = e.target.result;
+                        updateEnergyLevel(energyBefore, energyAfter);
+                        let challenges = JSON.parse(localStorage.getItem('challenges'));
+                        const challenge = challenges.find(c => c.day === currentChallengeDay);
+                        challenge.completed = true;
+                        localStorage.setItem('challenges', JSON.stringify(challenges));
+
+                        let history = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
+                        history.push({
+                            day: currentChallengeDay,
+                            goal: challenge.goal,
+                            energyBefore,
+                            energyAfter,
+                            task1Image,
+                            task2Image
+                        });
+                        localStorage.setItem('challengeHistory', JSON.stringify(history));
+
+                        modal.hide();
+                        loadChallenges();
+                    };
+                    reader2.readAsDataURL(task2File);
+                };
+                reader1.readAsDataURL(task1File);
             }
         }
 
@@ -609,6 +668,25 @@
                 audio.pause();
                 document.getElementById('playMeditation').innerText = 'Play Meditation';
             }
+        }
+
+        // Load profile history
+        function loadProfileHistory() {
+            const history = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
+            const tbody = document.getElementById('profileHistory');
+            tbody.innerHTML = '';
+            history.forEach(entry => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${entry.day}</td>
+                    <td>${entry.goal}</td>
+                    <td>${entry.energyBefore}%</td>
+                    <td>${entry.energyAfter}%</td>
+                    <td><img src="${entry.task1Image}" alt="Task 1 Proof"></td>
+                    <td><img src="${entry.task2Image}" alt="Task 2 Proof"></td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
         // Generate referral code
