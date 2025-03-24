@@ -19,6 +19,7 @@
             background: var(--bg-color);
             color: var(--text-color);
             overflow-x: hidden;
+            padding-bottom: 60px; /* Space for fixed nav bar */
         }
         .container {
             width: 100%;
@@ -58,6 +59,42 @@
             display: block;
             margin: 0 auto;
             max-width: 100%;
+            height: auto;
+        }
+        /* Profile Picture Styling */
+        #profilePhoto {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        /* Text Visibility in Sections */
+        .section h2, .section p, .section h3, .section h4 {
+            color: #333; /* Darker text for better visibility */
+        }
+        /* Footer Nav Bar Styling */
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--bg-color);
+            padding: 10px 0;
+            z-index: 1000; /* Ensure it's on top */
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.2);
+        }
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 14px;
+            text-align: center;
+        }
+        .footer-nav a i {
+            display: block;
+            font-size: 20px;
+            margin-bottom: 5px;
         }
         /* Mobile-specific adjustments */
         @media (max-width: 768px) {
@@ -86,16 +123,10 @@
     </div>
     <div class="container">
         <header class="d-flex justify-content-between align-items-center py-3">
-            <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile" style="border-radius: 50%;">
+            <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
             <span id="profileNameDisplay">Guest</span>
             <button id="headerProfileButton" class="btn btn-custom">Profile</button>
         </header>
-
-        <nav class="nav nav-pills justify-content-center mb-3">
-            <a class="nav-link" href="#" id="navHome">Home</a>
-            <a class="nav-link" href="#" id="navGame">Games</a>
-            <a class="nav-link" href="#" id="navProfile">Profile</a>
-        </nav>
 
         <div id="horoscopeForm" class="section" style="display: none;">
             <h2>Enter Your Birthdate</h2>
@@ -146,6 +177,14 @@
         </div>
     </div>
 
+    <!-- Footer Nav Bar -->
+    <nav class="footer-nav">
+        <a href="#" id="navHome"><i class="fas fa-home"></i>Home</a>
+        <a href="#" id="navGame"><i class="fas fa-gamepad"></i>Games</a>
+        <a href="#" id="navProfile"><i class="fas fa-user"></i>Profile</a>
+    </nav>
+
+    <!-- Energy Log Modal -->
     <div class="modal fade" id="energyLogModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
