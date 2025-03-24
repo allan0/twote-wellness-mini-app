@@ -6,51 +6,55 @@
     <title>Third Eye</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Nunito', sans-serif; background: #1a1a2e; color: #6B451D; overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column; }
-        #background-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.7; }
-        .container { width: 90%; max-width: 800px; margin: 20px auto; position: relative; z-index: 1; flex-grow: 1; }
-        .section { background: rgba(255, 248, 220, 0.75); padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); animation: fadeIn 0.5s ease-in; overflow-x: auto; position: relative; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        #header .header-content { display: flex; align-items: center; gap: 10px; }
-        #header .header-logo { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-        #header h1 { font-size: 2rem; font-weight: 700; color: #D4AF37; margin: 0; }
+        #background-video { position: fixed; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.8; }
+        .container { width: 90%; max-width: 900px; margin: 30px auto; position: relative; z-index: 1; flex-grow: 1; }
+        .section { background: rgba(255, 248, 220, 0.85); padding: 25px; border-radius: 20px; margin-bottom: 25px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); animation: fadeIn 0.5s ease-in; position: relative; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        h1 { font-size: 28px; font-weight: 700; color: #D4AF37; margin-bottom: 15px; }
+        h2 { font-size: 22px; font-weight: 600; color: #6B451D; margin-bottom: 20px; }
+        p { font-size: 16px; font-weight: 400; color: #6B451D; line-height: 1.5; }
+        #header .header-content { display: flex; align-items: center; gap: 15px; }
+        #header .header-logo { width: 35px; height: 35px; border-radius: 50%; object-fit: cover; }
         #headerProfileButton { background: none; border: 2px solid #D4AF37; border-radius: 50%; padding: 0; cursor: pointer; transition: transform 0.3s ease; margin-left: auto; }
-        #headerProfileButton:hover { transform: scale(1.1); }
-        #headerProfileButton img { width: 40px; height: 40px; border-radius: 50%; }
-        .btn-custom { background: #BDB76B; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; z-index: 10; }
-        .btn-custom:hover { background: #8B864E; transform: translateY(-2px); }
-        .btn-custom:disabled { background: #8FBC8F; cursor: not-allowed; }
-        .btn-danger-custom { background: #D9534F; color: #fff; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; transition: all 0.3s ease; }
-        .btn-danger-custom:hover { background: #C9302C; transform: translateY(-2px); }
-        .challenge-div { background: rgba(255, 248, 220, 0.75); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin: 15px 0; text-align: center; position: relative; z-index: 5; opacity: 0; transition: opacity 0.5s ease, transform 0.5s ease; }
+        #headerProfileButton:hover { transform: scale(1.05); }
+        #headerProfileButton img { width: 45px; height: 45px; border-radius: 50%; }
+        .btn-custom { background: linear-gradient(135deg, #D4AF37, #BDB76B); color: #fff; border: none; padding: 10px 25px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .btn-custom:hover { background: linear-gradient(135deg, #BDB76B, #D4AF37); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); }
+        .btn-custom:disabled { background: #8FBC8F; cursor: not-allowed; box-shadow: none; }
+        .btn-secondary { background: linear-gradient(135deg, #4A7C6F, #6B9C8F); color: #fff; }
+        .btn-secondary:hover { background: linear-gradient(135deg, #6B9C8F, #4A7C6F); }
+        .btn-danger-custom { background: linear-gradient(135deg, #D9534F, #C9302C); color: #fff; border: none; padding: 10px 25px; border-radius: 12px; font-size: 14px; font-weight: 700; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); transition: all 0.3s ease; }
+        .btn-danger-custom:hover { background: linear-gradient(135deg, #C9302C, #D9534F); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15); }
+        .challenge-div { background: rgba(255, 248, 220, 0.9); border: 2px solid #D4AF37; border-radius: 15px; padding: 20px; margin: 20px 0; text-align: center; position: relative; z-index: 5; opacity: 0; transition: all 0.5s ease; }
         .challenge-div.visible { opacity: 1; transform: translateX(0) translateY(0); }
-        .challenge-div.locked { opacity: 0.6; position: relative; }
-        .challenge-div.locked .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); color: white; display: flex; justify-content: center; align-items: center; z-index: 6; font-size: 1.1rem; border-radius: 15px; }
-        .challenge-icon { font-size: 2.5rem; color: #D4AF37; margin-bottom: 10px; }
-        .challenge-div h3 { margin: 10px 0; color: #6B451D; }
-        .challenge-div p { font-size: 0.9rem; color: #6B451D; margin-bottom: 15px; }
-        .challenge-card { background: #FFF8DC; border: 1px solid #BDB76B; border-radius: 8px; padding: 15px; margin: 10px 0; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
-        #footer { background: #D2B48C; padding: 10px; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1); z-index: 100; }
-        #footer a { color: #6B451D; font-size: 1.5rem; padding: 10px; transition: all 0.3s ease; }
-        #footer a:hover { color: #FFD700; transform: scale(1.1); }
+        .challenge-div.locked { opacity: 0.7; position: relative; }
+        .challenge-div.locked .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); color: #fff; display: flex; justify-content: center; align-items: center; z-index: 6; font-size: 1.1rem; border-radius: 15px; }
+        .challenge-icon { font-size: 2.8rem; color: #D4AF37; margin-bottom: 15px; }
+        .challenge-div h3 { font-size: 20px; font-weight: 600; margin: 10px 0; }
+        .challenge-div p { font-size: 14px; margin-bottom: 15px; }
+        .challenge-card { background: #FFF8DC; border: 1px solid #D4AF37; border-radius: 10px; padding: 15px; margin: 15px 0; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1); }
+        #footer { background: #D2B48C; padding: 15px; position: fixed; bottom: 0; left: 0; width: 100%; display: flex; justify-content: space-around; box-shadow: 0 -3px 15px rgba(0, 0, 0, 0.1); z-index: 100; }
+        #footer a { color: #6B451D; font-size: 1.8rem; padding: 10px; transition: all 0.3s ease; }
+        #footer a:hover { color: #D4AF37; transform: scale(1.1); }
         .modal { z-index: 2000; }
         .modal-backdrop { z-index: 1999; }
-        .modal-content { background: rgba(255, 248, 220, 0.75); border-radius: 15px; position: relative; }
-        #astrologyWheelCanvas, #numerologyCanvas { background: #000; border-radius: 50%; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); margin: 20px auto; display: block; }
-        .energy-slider { width: 100%; height: 10px; border-radius: 5px; background: linear-gradient(to right, #FF6347, #FFD700, #32CD32); outline: none; opacity: 0.9; -webkit-appearance: none; }
-        .energy-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #6B451D; cursor: pointer; }
-        #reflectionVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.5; }
-        #profileHistory img { max-width: 50px; border-radius: 5px; }
-        #energyLevel { background: #D2B48C; color: #6B451D; border-radius: 5px; padding: 5px 10px; text-align: center; margin-top: 10px; }
-        .table tr { cursor: pointer; }
-        .table tr:hover { background: rgba(212, 175, 55, 0.2); }
-        .back-button { position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; background: #1a1a2e; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; cursor: pointer; z-index: 10; }
-        .back-button:hover { background: #2e2e4e; }
-        @media (max-width: 768px) { h1 { font-size: 1.6rem; } .btn-custom, .btn-danger-custom { width: 100%; margin: 5px 0; } .container { width: 95%; padding: 10px; } #astrologyWheelCanvas, #numerologyCanvas { width: 100%; height: auto; max-width: 300px; } .section { padding: 15px; } #headerProfileButton img, #header .header-logo { width: 25px; height: 25px; } .challenge-icon { font-size: 2rem; } }
+        .modal-content { background: rgba(255, 248, 220, 0.9); border: 1px solid #D4AF37; border-radius: 15px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); position: relative; overflow: hidden; }
+        #astrologyWheelCanvas, #numerologyCanvas { background: #1a1a2e; border-radius: 50%; box-shadow: 0 0 25px rgba(212, 175, 55, 0.4); margin: 25px auto; display: block; }
+        .energy-slider { width: 100%; height: 12px; border-radius: 6px; background: linear-gradient(to right, #FF6347, #FFD700, #4A7C6F); outline: none; opacity: 0.9; -webkit-appearance: none; }
+        .energy-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #6B451D; cursor: pointer; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); }
+        #reflectionVideo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: -1; opacity: 0.4; }
+        #profileHistory img { max-width: 60px; border-radius: 8px; border: 1px solid #D4AF37; }
+        #energyLevel { background: #D2B48C; color: #6B451D; border-radius: 8px; padding: 8px 15px; text-align: center; margin-top: 15px; font-size: 14px; }
+        .table tr { cursor: pointer; transition: background 0.2s ease; }
+        .table tr:hover { background: rgba(212, 175, 55, 0.15); }
+        .back-button { position: absolute; top: 15px; left: 15px; width: 32px; height: 32px; background: #1a1a2e; color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; z-index: 10; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); transition: background 0.3s ease; }
+        .back-button:hover { background: #4A7C6F; }
+        @media (max-width: 768px) { h1 { font-size: 24px; } h2 { font-size: 20px; } p { font-size: 14px; } .btn-custom, .btn-danger-custom { width: 100%; padding: 8px 20px; font-size: 13px; } .container { width: 95%; margin: 20px auto; } #astrologyWheelCanvas, #numerologyCanvas { width: 100%; height: auto; max-width: 320px; } .section { padding: 20px; } #headerProfileButton img, #header .header-logo { width: 30px; height: 30px; } .challenge-icon { font-size: 2.2rem; } .back-button { width: 28px; height: 28px; font-size: 14px; } }
         .slide-left { animation: slideLeft 0.5s ease-out forwards; }
         .slide-right { animation: slideRight 0.5s ease-out forwards; }
         .slide-top { animation: slideTop 0.5s ease-out forwards; }
@@ -77,13 +81,13 @@
             <h2>Enter Your Birthdate</h2>
             <div class="form-group">
                 <label for="birthdate">Birthdate:</label>
-                <input type="date" id="birthdate" name="birthdate" class="form-control">
+                <input type="date" id="birthdate" name="birthdate" class="form-control" style="border-radius: 10px;">
             </div>
-            <button class="btn btn-custom" id="saveHoroscopeBtn">Save & Continue</button>
+            <button class="btn btn-custom mt-3" id="saveHoroscopeBtn">Save & Continue</button>
         </div>
         <div id="wellnessManager" class="section">
             <h2>Wellness Manager</h2>
-            <p style="text-align: center; margin-bottom: 20px;">Embark on a journey of mindfulness.</p>
+            <p style="text-align: center;">Embark on a journey of mindfulness and self-discovery.</p>
             <div id="challengeOptions">
                 <div class="challenge-div slide-left" id="challenge7">
                     <i class="fas fa-lotus-position challenge-icon"></i>
@@ -131,7 +135,7 @@
                             <div id="modalDailyChallenges7"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -147,7 +151,7 @@
                             <div id="modalDailyChallenges21"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -163,7 +167,7 @@
                             <div id="modalDailyChallenges41"></div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         </div>
                     </div>
                 </div>
@@ -214,12 +218,12 @@
         </div>
         <div id="gamePage" class="section" style="display: none;">
             <h2 id="gameWelcome"></h2>
-            <div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
                 <button class="btn btn-custom" id="spinWheel">Spin Astrology Wheel</button>
                 <canvas id="astrologyWheelCanvas" width="400" height="400"></canvas>
                 <p id="astrologyMessage"></p>
             </div>
-            <div>
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 20px;">
                 <button class="btn btn-custom" id="playNumber">Play Number Path</button>
                 <canvas id="numerologyCanvas" width="400" height="400"></canvas>
                 <p id="numerologyMessage"></p>
@@ -230,7 +234,7 @@
             <p>Welcome, <span id="profileNameDisplay">Guest</span>!</p>
             <div id="energyLevel">Energy Level: <span id="energyValue">0</span>%</div>
             <button class="btn btn-danger-custom mt-3" data-bs-toggle="modal" data-bs-target="#deleteProgressModal">Delete Progress</button>
-            <h3 class="mt-3">Challenge History</h3>
+            <h3 class="mt-4">Challenge History</h3>
             <table class="table">
                 <thead><tr><th>Day</th><th>Goal</th><th>Energy Before</th><th>Energy After</th><th>Task 1 Proof</th><th>Task 2 Proof</th></tr></thead>
                 <tbody id="profileHistory"></tbody>
@@ -246,7 +250,7 @@
                             <p>This will reset all your progress and history. This action cannot be undone.</p>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-custom" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="button" class="btn btn-danger-custom" id="confirmDelete">Delete</button>
                         </div>
                     </div>
@@ -378,11 +382,11 @@
 
         // Add Back Button to Sections
         sections.forEach(id => {
-            if (id !== 'wellnessManager' && id !== 'header') { // Exclude main page and header
+            if (id !== 'wellnessManager' && id !== 'header') {
                 const section = document.getElementById(id);
                 const backBtn = document.createElement('div');
                 backBtn.className = 'back-button';
-                backBtn.textContent = '<';
+                backBtn.innerHTML = '<i class="fas fa-arrow-left"></i>';
                 backBtn.addEventListener('click', () => showSection('wellnessManager'));
                 section.appendChild(backBtn);
             }
@@ -798,6 +802,13 @@
                 e.preventDefault();
                 showSection(link.dataset.section);
             });
+        });
+
+        // Fallback for unclickable issue
+        document.body.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-backdrop')) {
+                document.querySelector('.modal-backdrop')?.remove();
+            }
         });
     </script>
 </body>
