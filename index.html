@@ -21,9 +21,10 @@
             overflow-x: hidden;
         }
         .container {
-            width: 90%;
+            width: 100%;
             max-width: 800px;
-            margin: 20px auto;
+            margin: 0 auto;
+            padding: 0 15px;
         }
         .section {
             background: rgba(255, 248, 220, 0.75);
@@ -56,6 +57,26 @@
         canvas {
             display: block;
             margin: 0 auto;
+            max-width: 100%;
+        }
+        /* Mobile-specific adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 10px;
+            }
+            .section {
+                padding: 15px;
+            }
+            .challenge-div {
+                padding: 10px;
+            }
+            .challenge-icon {
+                font-size: 1.5em;
+            }
+            .btn-custom {
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
