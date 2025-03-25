@@ -338,6 +338,9 @@
         </div>
     </div>
 
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     <script>
         const dailyGoals = [
@@ -373,7 +376,6 @@
         const sections = ['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage', 'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile'];
 
         let state = {};
-
         let sectionStack = [];
 
         function getDomElements() {
@@ -432,8 +434,35 @@
                     dailyCheckInDone: false,
                     completedTasks: [],
                     workshopAccess: false,
-                    leaderboard: []
+                    leaderboard: [
+                        { userId: 'dummy1', name: 'Alice', points: 100 },
+                        { userId: 'dummy2', name: 'Bob', points: 90 },
+                        { userId: 'dummy3', name: 'Charlie', points: 80 },
+                        { userId: 'dummy4', name: 'David', points: 70 },
+                        { userId: 'dummy5', name: 'Eve', points: 60 }
+                    ]
                 };
+            }
+
+            // Show Notification Using Bootstrap Toast
+            function showNotification(message) {
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                toast.setAttribute('role', 'alert');
+                toast.setAttribute('aria-live', 'assertive');
+                toast.setAttribute('aria-atomic', 'true');
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <strong class="me-auto">Notification</strong>
+                        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                `;
+                document.querySelector('.toast-container').appendChild(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
             }
 
             function initializeApp() {
@@ -470,15 +499,13 @@
                 try {
                     const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
                     const values = await Promise.all(keys.map(key => 
-                        Telegram.WebApp.CloudStorage.getItem(key)
-                            .then(val => val === undefined ? null : val)
-                            .catch(err => {
-                                console.error(`Error fetching ${key}:`, err);
-                                return null;
-                            })
+IWebApp.CloudStorage.getItem(key)
+                        .then(val => val === undefined ? null : val)
+                        .catch(err => {
+                            console.error(`Error fetching ${key}:`, err);
+                            return null;
+                        })
                     ));
-
-                    console.log("Loaded from CloudStorage:", values);
 
                     state.userId = values[0] || state.userId;
                     state.userName = values[1] || state.userName;
@@ -490,7 +517,7 @@
                     state.birthdate = values[7] || state.birthdate;
                     state.consecutiveDays = values[8] !== null ? parseInt(values[8]) : state.consecutiveDays;
                     state.lastPlayedDate = values[9] || state.lastPlayedDate;
-                    state.dailyCheckInDone = values[10] === 'true' ? true : false;
+                    state.dailyCheckInDone = values[10] === 'true';
                     state.completedTasks = values[11] ? JSON.parse(values[11]) : state.completedTasks;
                     state.workshopAccess = values[12] === 'true';
                     state.leaderboard = values[13] ? JSON.parse(values[13]) : state.leaderboard;
@@ -532,12 +559,6 @@
                 state.completedTasks = localStorage.getItem('completedTasks') ? JSON.parse(localStorage.getItem('completedTasks')) : state.completedTasks;
                 state.workshopAccess = localStorage.getItem('workshopAccess') === 'true';
                 state.leaderboard = localStorage.getItem('leaderboard') ? JSON.parse(localStorage.getItem('leaderboard')) : state.leaderboard;
-
-                console.log("Loaded from localStorage:", {
-                    points: state.points,
-                    dailyCheckInDone: state.dailyCheckInDone,
-                    lastPlayedDate: state.lastPlayedDate
-                });
 
                 if (!state.challenges.length) {
                     state.challenges = initializeChallenges();
@@ -610,7 +631,7 @@
                     }
                     showSection('wellnessManager');
                 } else {
-                    Telegram.WebApp?.showAlert('Please enter your birthdate.') || alert('Please enter your birthdate.');
+                    showNotification('Please enter your birthdate.');
                 }
             }
 
@@ -632,23 +653,19 @@
                 if (player) player.points = state.points;
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
-                        Telegram.WebApp.CloudStorage.setItem('points', state.points.toString())
-                            .then(() => console.log(`Saved points: ${state.points}`))
-                            .catch(err => console.error('Error saving points:', err)),
+                        Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
                         Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
-                            .then(() => console.log('Saved leaderboard'))
-                            .catch(err => console.error('Error saving leaderboard:', err))
                     ]);
                 } else {
                     localStorage.setItem('points', state.points);
                     localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
-                    console.log(`Saved locally - points: ${state.points}`);
                 }
                 updateUI();
+                showNotification(`+${amount} $twote earned!`);
             }
 
             function checkDailyStreak() {
-                const today = new Date("2025-03-25").toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
                 const lastPlayed = state.lastPlayedDate ? state.lastPlayedDate : null;
                 if (!lastPlayed) return;
 
@@ -663,17 +680,14 @@
                     state.consecutiveDays = 0;
                     state.dailyCheckInDone = false;
                 } else if (diffDays === 0) {
-                    state.dailyCheckInDone = true;
-                } else {
-                    state.dailyCheckInDone = false;
+                    // Do nothing, keep dailyCheckInDone as is
                 }
-                console.log(`CheckDailyStreak - today: ${today}, lastPlayed: ${lastPlayed}, diffDays: ${diffDays}, dailyCheckInDone: ${state.dailyCheckInDone}`);
             }
 
             async function dailyCheckIn() {
-                const today = new Date("2025-03-25").toISOString().split('T')[0];
+                const today = new Date().toISOString().split('T')[0];
                 if (state.lastPlayedDate === today && state.dailyCheckInDone) {
-                    Telegram.WebApp?.showAlert('You already checked in today!') || alert('You already checked in today!');
+                    showNotification('You already checked in today!');
                     return;
                 }
 
@@ -685,24 +699,17 @@
 
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
-                        Telegram.WebApp.CloudStorage.setItem('lastPlayedDate', state.lastPlayedDate)
-                            .then(() => console.log(`Saved lastPlayedDate: ${state.lastPlayedDate}`))
-                            .catch(err => console.error('Error saving lastPlayedDate:', err)),
-                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString())
-                            .then(() => console.log(`Saved consecutiveDays: ${state.consecutiveDays}`))
-                            .catch(err => console.error('Error saving consecutiveDays:', err)),
-                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', state.dailyCheckInDone.toString())
-                            .then(() => console.log(`Saved dailyCheckInDone: ${state.dailyCheckInDone}`))
-                            .catch(err => console.error('Error saving dailyCheckInDone:', err))
+                        Telegram.WebApp.CloudStorage.setItem('lastPlayedDate', state.lastPlayedDate),
+                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString()),
+                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'true')
                     ]);
                 } else {
                     localStorage.setItem('lastPlayedDate', state.lastPlayedDate);
                     localStorage.setItem('consecutiveDays', state.consecutiveDays);
-                    localStorage.setItem('dailyCheckInDone', state.dailyCheckInDone.toString());
-                    console.log(`Saved locally - lastPlayedDate: ${state.lastPlayedDate}, dailyCheckInDone: ${state.dailyCheckInDone}`);
+                    localStorage.setItem('dailyCheckInDone', 'true');
                 }
                 updateUI();
-                Telegram.WebApp?.showAlert(`Checked in! +5 $twote. Day ${state.consecutiveDays}`) || alert(`Checked in! +5 $twote. Day ${state.consecutiveDays}`);
+                showNotification(`Checked in! +5 $twote. Day ${state.consecutiveDays}`);
             }
 
             function initializeChallenges() {
@@ -834,7 +841,7 @@
                     const task1File = domElements.task1Proof.files[0];
                     const task2File = domElements.task2Proof.files[0];
                     if (!task1File || !task2File) {
-                        Telegram.WebApp?.showAlert('Please upload proof for both tasks.') || alert('Please upload proof for both tasks.');
+                        showNotification('Please upload proof for both tasks.');
                         return;
                     }
 
@@ -908,7 +915,7 @@
 
             async function enroll(days) {
                 if (state.energyLevel < 70) {
-                    Telegram.WebApp?.showAlert('Energy level must be 70 or higher to enroll!') || alert('Energy level must be 70 or higher to enroll!');
+                    showNotification('Energy level must be 70 or higher to enroll!');
                     return;
                 }
                 state.workshopAccess = true;
@@ -919,7 +926,7 @@
                 }
                 bootstrap.Modal.getInstance(document.getElementById('enrollModal')).hide();
                 loadChallenges();
-                Telegram.WebApp?.showAlert(`Enrolled for ${days}-Day Challenge!`) || alert(`Enrolled for ${days}-Day Challenge!`);
+                showNotification(`Enrolled for ${days}-Day Challenge!`);
             }
 
             function showCodeModal(days) {
@@ -939,9 +946,9 @@
                     }
                     bootstrap.Modal.getInstance(document.getElementById('codeModal')).hide();
                     loadChallenges();
-                    Telegram.WebApp?.showAlert(`Access granted for ${days}-Day Challenge!`) || alert(`Access granted for ${days}-Day Challenge!`);
+                    showNotification(`Access granted for ${days}-Day Challenge!`);
                 } else {
-                    Telegram.WebApp?.showAlert('Invalid code! Use "Wellness"') || alert('Invalid code! Use "Wellness"');
+                    showNotification('Invalid code! Use "Wellness"');
                 }
             }
 
@@ -974,7 +981,7 @@
 
             function spinWheel() {
                 if (!state.dailyCheckInDone) {
-                    Telegram.WebApp?.showAlert('Please check in first!') || alert('Please check in first!');
+                    showNotification('Please check in first!');
                     return;
                 }
                 const canvas = document.getElementById('astrologyWheelCanvas');
@@ -1010,7 +1017,7 @@
 
             function initNumerologyPath() {
                 if (!state.dailyCheckInDone) {
-                    Telegram.WebApp?.showAlert('Please check in first!') || alert('Please check in first!');
+                    showNotification('Please check in first!');
                     return;
                 }
                 domElements.numberGrid.innerHTML = '';
@@ -1044,7 +1051,7 @@
             function updateLeaderboard() {
                 state.leaderboard.sort((a, b) => b.points - a.points);
                 domElements.leaderboard.innerHTML = state.leaderboard.slice(0, 100).map((player, index) => `
-                    <tr>
+                    <tr class="${player.userId === state.userId ? 'table-primary' : ''}">
                         <td>${index + 1}</td>
                         <td>${player.name}</td>
                         <td>${player.points}</td>
@@ -1113,16 +1120,13 @@
                     state.completedTasks.push(task);
                     await awardPoints(10);
                     if (window.Telegram?.WebApp) {
-                        await Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks))
-                            .then(() => console.log(`Saved completedTasks: ${state.completedTasks}`))
-                            .catch(err => console.error('Error saving completedTasks:', err));
+                        await Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
                     } else {
                         localStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
-                        console.log(`Saved locally - completedTasks: ${state.completedTasks}`);
                     }
                     updateUI();
                     updateTaskButtons();
-                    Telegram.WebApp?.showAlert('Task completed! +10 $twote') || alert('Task completed! +10 $twote');
+                    showNotification('Task completed! +10 $twote');
                 }
             }
 
@@ -1130,7 +1134,7 @@
                 const referralLink = document.getElementById('referralLink');
                 referralLink.select();
                 document.execCommand('copy');
-                Telegram.WebApp?.showAlert('Referral link copied to clipboard!') || alert('Referral link copied to clipboard!');
+                showNotification('Referral link copied to clipboard!');
             }
 
             document.getElementById('profileLink').addEventListener('click', () => showSection('playerProfile'));
@@ -1142,12 +1146,8 @@
             document.getElementById('playNumerologyPath').addEventListener('click', () => showSection('numerologyPathPage'));
             document.getElementById('spinWheel').addEventListener('click', spinWheel);
             document.getElementById('deleteProgressBtn').addEventListener('click', deleteProgress);
-            document.getElementById('connectWalletBtn').addEventListener('click', () => {
-                Telegram.WebApp?.showAlert('Wallet connection coming soon!') || alert('Wallet connection coming soon!');
-            });
-            document.getElementById('airdropWithdrawBtn').addEventListener('click', () => {
-                Telegram.WebApp?.showAlert('Airdrop withdraw coming soon!') || alert('Airdrop withdraw coming soon!');
-            });
+            document.getElementById('connectWalletBtn').addEventListener('click', () => showNotification('Wallet connection coming soon!'));
+            document.getElementById('airdropWithdrawBtn').addEventListener('click', () => showNotification('Airdrop withdraw coming soon!'));
             document.getElementById('dailyCheckInBtn').addEventListener('click', dailyCheckIn);
 
             initializeApp();
