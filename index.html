@@ -53,11 +53,15 @@
             margin-bottom: 15px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: #333; /* Added for text visibility */
         }
         .challenge-icon {
             font-size: 2.5em;
             margin-bottom: 10px;
             color: var(--text-color);
+        }
+        .challenge-div .challenge-icon {
+            color: #333; /* Added for icon visibility */
         }
         .modal-content {
             background: var(--bg-color);
@@ -433,7 +437,7 @@
                     birthdate: null,
                     consecutiveDays: 0,
                     lastPlayedDate: null,
-                    lastCheckInTime: null, // Timestamp for last check-in
+                    lastCheckInTime: null,
                     dailyCheckInDone: false,
                     completedTasks: [],
                     workshopAccess: false,
@@ -447,7 +451,6 @@
                 };
             }
 
-            // Show Notification Using Bootstrap Toast
             function showNotification(message) {
                 const toast = document.createElement('div');
                 toast.className = 'toast';
@@ -798,13 +801,21 @@
 
             function loadChallenges() {
                 const challengeDurations = [7, 21, 41, 66, 150];
+                const challengeIcons = {
+                    7: 'fas fa-sun',
+                    21: 'fas fa-leaf',
+                    41: 'fas fa-star',
+                    66: 'fas fa-moon',
+                    150: 'fas fa-trophy'
+                };
                 domElements.challengeOptions.innerHTML = '';
                 challengeDurations.forEach(days => {
                     const isUnlocked = isChallengeUnlocked(days);
+                    const iconClass = challengeIcons[days] || 'fas fa-star';
                     const div = document.createElement('div');
                     div.className = `challenge-div ${isUnlocked ? '' : 'locked'}`;
                     div.innerHTML = `
-                        <i class="fas fa-star challenge-icon"></i>
+                        <i class="${iconClass} challenge-icon"></i>
                         <h3>${days}-Day Challenge</h3>
                         ${isUnlocked ? 
                             `<button class="btn btn-custom start-challenge-btn" data-days="${days}">Start Challenge</button>` : 
@@ -870,7 +881,7 @@
                 domElements.energyLogPrompt.textContent = "How positive is your mind frame?";
                 domElements.energySlider.value = 50;
                 domElements.energySliderValue.textContent = '50%';
-                domElements.challengeTasks.style.display = 'none';
+                domElements.challengeTasks.style.display = 'block';
                 domElements.submitEnergyLog.setAttribute('data-stage', 'before');
                 domElements.submitEnergyLog.disabled = false;
                 new bootstrap.Modal(document.getElementById('energyLogModal')).show();
