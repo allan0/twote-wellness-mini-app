@@ -235,6 +235,7 @@
         <div id="gamePage" class="section" style="display: none;">
             <h2>Games</h2>
             <button class="btn btn-custom" id="dailyCheckInBtn">Daily Check-In</button>
+            <p id="countdownDisplay" style="color: var(--text-color);"></p>
             <button class="btn btn-custom" id="playHoroscopeWheel">📊 Play Horoscope Wheel</button>
             <button class="btn btn-custom" id="playNumerologyPath">🔢 Play Numerology Path</button>
         </div>
@@ -406,6 +407,7 @@
                 numberGrid: document.getElementById('numberGrid'),
                 referralLink: document.getElementById('referralLink'),
                 dailyCheckInBtn: document.getElementById('dailyCheckInBtn'),
+                countdownDisplay: document.getElementById('countdownDisplay'),
                 leaderboard: document.getElementById('leaderboard'),
                 enrollName: document.getElementById('enrollName'),
                 enrollHoroscope: document.getElementById('enrollHoroscope'),
@@ -431,6 +433,7 @@
                     birthdate: null,
                     consecutiveDays: 0,
                     lastPlayedDate: null,
+                    lastCheckInTime: null, // Timestamp for last check-in
                     dailyCheckInDone: false,
                     completedTasks: [],
                     workshopAccess: false,
@@ -495,16 +498,16 @@
 
             async function init() {
                 document.getElementById('loading').style.display = 'flex';
-                state = initializeState(); // Start with defaults
+                state = initializeState();
                 try {
-                    const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
+                    const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'lastCheckInTime', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
                     const values = await Promise.all(keys.map(key => 
-IWebApp.CloudStorage.getItem(key)
-                        .then(val => val === undefined ? null : val)
-                        .catch(err => {
-                            console.error(`Error fetching ${key}:`, err);
-                            return null;
-                        })
+                        Telegram.WebApp.CloudStorage.getItem(key)
+                            .then(val => val === undefined ? null : val)
+                            .catch(err => {
+                                console.error(`Error fetching ${key}:`, err);
+                                return null;
+                            })
                     ));
 
                     state.userId = values[0] || state.userId;
@@ -517,10 +520,11 @@ IWebApp.CloudStorage.getItem(key)
                     state.birthdate = values[7] || state.birthdate;
                     state.consecutiveDays = values[8] !== null ? parseInt(values[8]) : state.consecutiveDays;
                     state.lastPlayedDate = values[9] || state.lastPlayedDate;
-                    state.dailyCheckInDone = values[10] === 'true';
-                    state.completedTasks = values[11] ? JSON.parse(values[11]) : state.completedTasks;
-                    state.workshopAccess = values[12] === 'true';
-                    state.leaderboard = values[13] ? JSON.parse(values[13]) : state.leaderboard;
+                    state.lastCheckInTime = values[10] ? parseInt(values[10]) : null;
+                    state.dailyCheckInDone = values[11] === 'true';
+                    state.completedTasks = values[12] ? JSON.parse(values[12]) : state.completedTasks;
+                    state.workshopAccess = values[13] === 'true';
+                    state.leaderboard = values[14] ? JSON.parse(values[14]) : state.leaderboard;
 
                     if (!state.challenges.length) {
                         state.challenges = initializeChallenges();
@@ -534,6 +538,7 @@ IWebApp.CloudStorage.getItem(key)
 
                     checkDailyStreak();
                     updateUI();
+                    startCountdown();
                     showSection(state.birthdate ? 'wellnessManager' : 'horoscopeForm');
                 } catch (error) {
                     console.error('Initialization error:', error);
@@ -555,6 +560,7 @@ IWebApp.CloudStorage.getItem(key)
                 state.birthdate = localStorage.getItem('birthdate') || state.birthdate;
                 state.consecutiveDays = localStorage.getItem('consecutiveDays') !== null ? parseInt(localStorage.getItem('consecutiveDays')) : state.consecutiveDays;
                 state.lastPlayedDate = localStorage.getItem('lastPlayedDate') || state.lastPlayedDate;
+                state.lastCheckInTime = localStorage.getItem('lastCheckInTime') ? parseInt(localStorage.getItem('lastCheckInTime')) : null;
                 state.dailyCheckInDone = localStorage.getItem('dailyCheckInDone') === 'true';
                 state.completedTasks = localStorage.getItem('completedTasks') ? JSON.parse(localStorage.getItem('completedTasks')) : state.completedTasks;
                 state.workshopAccess = localStorage.getItem('workshopAccess') === 'true';
@@ -572,6 +578,7 @@ IWebApp.CloudStorage.getItem(key)
 
                 checkDailyStreak();
                 updateUI();
+                startCountdown();
                 showSection(state.birthdate ? 'wellnessManager' : 'horoscopeForm');
             }
 
@@ -587,9 +594,18 @@ IWebApp.CloudStorage.getItem(key)
                     const botUsername = "ThirdEyeBot";
                     domElements.referralLink.value = `https://t.me/${botUsername}/app?start=${state.userId}`;
                 }
-                domElements.dailyCheckInBtn.disabled = state.dailyCheckInDone;
-                domElements.dailyCheckInBtn.textContent = state.dailyCheckInDone ? "Checked In" : "Daily Check-In";
+                updateDailyCheckInButton();
                 updateLeaderboard();
+            }
+
+            function updateDailyCheckInButton() {
+                if (state.dailyCheckInDone && state.lastCheckInTime) {
+                    domElements.dailyCheckInBtn.disabled = true;
+                    domElements.dailyCheckInBtn.textContent = "Checked In";
+                } else {
+                    domElements.dailyCheckInBtn.disabled = false;
+                    domElements.dailyCheckInBtn.textContent = "Daily Check-In";
+                }
             }
 
             function showSection(sectionId) {
@@ -651,6 +667,7 @@ IWebApp.CloudStorage.getItem(key)
                 state.points += amount;
                 const player = state.leaderboard.find(p => p.userId === state.userId);
                 if (player) player.points = state.points;
+                else state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
                         Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
@@ -666,8 +683,11 @@ IWebApp.CloudStorage.getItem(key)
 
             function checkDailyStreak() {
                 const today = new Date().toISOString().split('T')[0];
-                const lastPlayed = state.lastPlayedDate ? state.lastPlayedDate : null;
-                if (!lastPlayed) return;
+                const lastPlayed = state.lastPlayedDate;
+                if (!lastPlayed) {
+                    state.consecutiveDays = 0;
+                    return;
+                }
 
                 const todayDate = new Date(today);
                 const lastPlayedDate = new Date(lastPlayed);
@@ -678,21 +698,22 @@ IWebApp.CloudStorage.getItem(key)
                     state.consecutiveDays++;
                 } else if (diffDays > 1) {
                     state.consecutiveDays = 0;
-                    state.dailyCheckInDone = false;
-                } else if (diffDays === 0) {
-                    // Do nothing, keep dailyCheckInDone as is
                 }
             }
 
             async function dailyCheckIn() {
-                const today = new Date().toISOString().split('T')[0];
-                if (state.lastPlayedDate === today && state.dailyCheckInDone) {
-                    showNotification('You already checked in today!');
+                const now = Date.now();
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (state.lastCheckInTime && (now - state.lastCheckInTime < twentyFourHours)) {
+                    showNotification('You can check in again after the 24-hour cooldown.');
                     return;
                 }
 
+                const today = new Date().toISOString().split('T')[0];
                 state.lastPlayedDate = today;
                 state.dailyCheckInDone = true;
+                state.lastCheckInTime = now;
                 state.consecutiveDays++;
 
                 await awardPoints(5);
@@ -700,16 +721,57 @@ IWebApp.CloudStorage.getItem(key)
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
                         Telegram.WebApp.CloudStorage.setItem('lastPlayedDate', state.lastPlayedDate),
-                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString()),
-                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'true')
+                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'true'),
+                        Telegram.WebApp.CloudStorage.setItem('lastCheckInTime', state.lastCheckInTime.toString()),
+                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString())
                     ]);
                 } else {
                     localStorage.setItem('lastPlayedDate', state.lastPlayedDate);
-                    localStorage.setItem('consecutiveDays', state.consecutiveDays);
                     localStorage.setItem('dailyCheckInDone', 'true');
+                    localStorage.setItem('lastCheckInTime', state.lastCheckInTime.toString());
+                    localStorage.setItem('consecutiveDays', state.consecutiveDays);
                 }
+
                 updateUI();
+                startCountdown();
                 showNotification(`Checked in! +5 $twote. Day ${state.consecutiveDays}`);
+            }
+
+            function startCountdown() {
+                if (!state.lastCheckInTime || !state.dailyCheckInDone) return;
+
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+                const endTime = state.lastCheckInTime + twentyFourHours;
+
+                function updateCountdown() {
+                    const now = Date.now();
+                    const timeLeft = endTime - now;
+
+                    if (timeLeft <= 0) {
+                        state.dailyCheckInDone = false;
+                        state.lastCheckInTime = null;
+                        if (window.Telegram?.WebApp) {
+                            Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'false');
+                            Telegram.WebApp.CloudStorage.removeItem('lastCheckInTime');
+                        } else {
+                            localStorage.setItem('dailyCheckInDone', 'false');
+                            localStorage.removeItem('lastCheckInTime');
+                        }
+                        updateUI();
+                        domElements.countdownDisplay.textContent = '';
+                        return;
+                    }
+
+                    const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                    domElements.countdownDisplay.textContent = `Next check-in in: ${hours}h ${minutes}m ${seconds}s`;
+                    domElements.dailyCheckInBtn.disabled = true;
+
+                    setTimeout(updateCountdown, 1000);
+                }
+
+                updateCountdown();
             }
 
             function initializeChallenges() {
@@ -1071,6 +1133,7 @@ IWebApp.CloudStorage.getItem(key)
                             Telegram.WebApp.CloudStorage.setItem('consecutiveDays', '0'),
                             Telegram.WebApp.CloudStorage.removeItem('lastPlayedDate'),
                             Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'false'),
+                            Telegram.WebApp.CloudStorage.removeItem('lastCheckInTime'),
                             Telegram.WebApp.CloudStorage.setItem('workshopAccess', 'false'),
                             Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
                         ]);
@@ -1082,6 +1145,7 @@ IWebApp.CloudStorage.getItem(key)
                         localStorage.setItem('consecutiveDays', '0');
                         localStorage.removeItem('lastPlayedDate');
                         localStorage.setItem('dailyCheckInDone', 'false');
+                        localStorage.removeItem('lastCheckInTime');
                         localStorage.setItem('workshopAccess', 'false');
                         localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                     }
