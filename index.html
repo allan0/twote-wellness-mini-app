@@ -14,6 +14,8 @@
             --text-color: #FFF8E1;
             --button-color: #FFD700;
             --button-text-color: #3E2723;
+            --wellness-manager-color: #3E2723; /* Dark brown */
+            --warning-color: #8B0000; /* Deep red */
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -53,7 +55,7 @@
             margin-bottom: 15px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            color: #333; /* Added for text visibility */
+            color: #333;
         }
         .challenge-icon {
             font-size: 2.5em;
@@ -61,7 +63,7 @@
             color: var(--text-color);
         }
         .challenge-div .challenge-icon {
-            color: #333; /* Added for icon visibility */
+            color: #333;
         }
         .modal-content {
             background: var(--bg-color);
@@ -85,7 +87,7 @@
             background-color: var(--button-color);
         }
         .btn-danger {
-            background-color: #D32F2F;
+            background-color: var(--warning-color); /* Changed to deep red */
             color: #fff;
             border: none;
             box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.2);
@@ -119,6 +121,9 @@
         }
         h1, h2, h3, h4, p {
             color: var(--text-color);
+        }
+        #wellnessManager h2 {
+            color: var(--wellness-manager-color); /* Dark brown for Wellness Manager */
         }
         .footer-nav {
             position: fixed;
