@@ -11,7 +11,7 @@
     <style>
         :root {
             --bg-color: #4E342E; /* Brown */
-            --text-color: #FFD700; /* Gold */
+            --text-color: #3E2723; /* Dark Brown */
             --button-color: #FFD700; /* Gold */
         }
         body {
@@ -21,7 +21,7 @@
             overflow-x: hidden;
             padding-bottom: 60px; /* Space for fixed nav bar */
         }
-        /* Background Video Styling */
+        /* Background Video Styling with Gold/Brown Tint */
         #backgroundVideo {
             position: fixed;
             top: 0;
@@ -30,6 +30,7 @@
             height: 100%;
             object-fit: cover;
             z-index: -1; /* Behind all content */
+            filter: sepia(1) hue-rotate(40deg) brightness(1.2); /* Gold and brown tint */
         }
         .container {
             width: 100%;
@@ -59,8 +60,19 @@
             color: var(--text-color);
         }
         .btn-custom {
-            background: var(--button-color);
-            color: #4E342E; /* Brown text for contrast */
+            background: linear-gradient(135deg, #FFD700, #DAA520); /* Golden gradient */
+            background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAGUlEQVQYV2NkYGD4z8DAwMgABXAGNgYGBgYGZgAAQQAAYgAAAABJRU5ErkJggg=='); /* Subtle texture */
+            background-blend-mode: overlay;
+            color: #3E2723; /* Dark Brown text */
+            border: none;
+            padding: 8px 16px;
+        }
+        .btn-custom:hover {
+            background: linear-gradient(135deg, #DAA520, #FFD700);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #D32F2F, #B71C1C);
+            color: #fff;
         }
         .locked {
             opacity: 0.5;
@@ -88,7 +100,7 @@
         }
         /* Text Visibility in Sections */
         .section h2, .section p, .section h3, .section h4 {
-            color: #333; /* Darker text for better visibility */
+            color: var(--text-color); /* Dark Brown */
         }
         /* Footer Nav Bar Styling */
         .footer-nav {
@@ -421,7 +433,7 @@
                 const theme = Telegram.WebApp.themeParams;
                 if (theme) {
                     document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#4E342E');
-                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#FFD700');
+                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#3E2723');
                     document.documentElement.style.setProperty('--button-color', theme.button_color || '#FFD700');
                 }
             }
