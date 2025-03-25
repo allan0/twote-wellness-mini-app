@@ -10,9 +10,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #4E342E;
-            --text-color: #3E2723;
-            --button-color: #FFD700;
+            --bg-color: #4E342E; /* Brown */
+            --text-color: #FFF8E1; /* Soft cream for better contrast */
+            --button-color: #FFD700; /* Gold */
+            --button-text-color: #3E2723; /* Dark brown for button text */
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -56,6 +57,7 @@
         .challenge-icon {
             font-size: 2.5em;
             margin-bottom: 10px;
+            color: var(--text-color);
         }
         .modal-content {
             background: var(--bg-color);
@@ -64,17 +66,19 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         .btn-custom {
-            background-color: #FFD700;
-            color: #3E2723;
+            background-color: var(--button-color);
+            color: var(--button-text-color);
             border: none;
             padding: 10px 20px;
             border-radius: 10px;
             box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.2);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        .btn-custom:hover {
+        .btn-custom:hover, .btn-custom:active, .btn-custom:focus {
             transform: scale(1.05);
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.3);
+            color: var(--button-text-color); /* Ensure text stays visible */
+            background-color: var(--button-color);
         }
         .btn-danger {
             background-color: #D32F2F;
@@ -82,9 +86,10 @@
             border: none;
             box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.2);
         }
-        .btn-danger:hover {
+        .btn-danger:hover, .btn-danger:active, .btn-danger:focus {
             transform: scale(1.05);
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.3);
+            color: #fff;
         }
         .locked {
             opacity: 0.5;
@@ -108,12 +113,7 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        h1 { font-size: 2rem; font-weight: 700; }
-        h2 { font-size: 1.75rem; font-weight: 700; }
-        h3 { font-size: 1.5rem; font-weight: 700; }
-        h4 { font-size: 1.25rem; font-weight: 700; }
-        p { font-size: 1rem; }
-        .section h2, .section p, .section h3, .section h4 {
+        h1, h2, h3, h4, p {
             color: var(--text-color);
         }
         .footer-nav {
@@ -171,10 +171,6 @@
             .challenge-div { padding: 10px; }
             .challenge-icon { font-size: 2em; }
             .btn-custom { width: 100%; margin-bottom: 15px; }
-            h1 { font-size: 1.75rem; }
-            h2 { font-size: 1.5rem; }
-            h3 { font-size: 1.25rem; }
-            h4 { font-size: 1rem; }
         }
     </style>
 </head>
@@ -458,8 +454,9 @@
                 const theme = Telegram.WebApp.themeParams;
                 if (theme) {
                     document.documentElement.style.setProperty('--bg-color', theme.bg_color || '#4E342E');
-                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#3E2723');
+                    document.documentElement.style.setProperty('--text-color', '#FFF8E1');
                     document.documentElement.style.setProperty('--button-color', theme.button_color || '#FFD700');
+                    document.documentElement.style.setProperty('--button-text-color', '#3E2723');
                 }
             }
 
@@ -475,7 +472,7 @@
                     state.userName = values[1] || state.userName;
                     state.userPhoto = values[2] || state.userPhoto;
                     state.energyLevel = parseInt(values[3]) || 0;
-                    state.points = parseInt(values[4]) || 0;
+                    state.points = parseInt(values[4]) || 0; // Persist points from storage
                     state.challenges = JSON.parse(values[5] || '[]');
                     state.challengeHistory = JSON.parse(values[6] || '[]');
                     state.birthdate = values[7] || null;
@@ -511,7 +508,7 @@
                 state.userName = localStorage.getItem('userName') || state.userName;
                 state.userPhoto = localStorage.getItem('userPhoto') || state.userPhoto;
                 state.energyLevel = parseInt(localStorage.getItem('energyLevel') || '0');
-                state.points = parseInt(localStorage.getItem('points') || '0');
+                state.points = parseInt(localStorage.getItem('points') || '0'); // Persist points from storage
                 state.challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
                 state.challengeHistory = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
                 state.birthdate = localStorage.getItem('birthdate') || null;
@@ -700,23 +697,37 @@
                         <i class="fas fa-star challenge-icon"></i>
                         <h3>${days}-Day Challenge</h3>
                         ${isUnlocked ? 
-                            `<button class="btn btn-custom" data-days="${days}">Start Challenge</button>` : 
+                            `<button class="btn btn-custom start-challenge-btn" data-days="${days}">Start Challenge</button>` : 
                             days > 41 ? 
                             `<p>Requires workshop participation</p>
-                             <button class="btn btn-custom" data-days="${days}" onclick="showEnrollModal(${days})">Enroll</button>
-                             <button class="btn btn-custom mt-2" data-days="${days}" onclick="showCodeModal(${days})">Already Attended</button>` : 
+                             <button class="btn btn-custom enroll-btn" data-days="${days}">Enroll</button>
+                             <button class="btn btn-custom mt-2 attended-btn" data-days="${days}">Already Attended</button>` : 
                             `<p>Complete ${days === 21 ? '7-Day' : '21-Day'} Challenge first</p>`}
                     `;
                     domElements.challengeOptions.appendChild(div);
                 });
 
-                document.querySelectorAll('#challengeOptions button[data-days]').forEach(btn => {
+                document.querySelectorAll('.start-challenge-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         const days = parseInt(btn.getAttribute('data-days'));
                         if (isChallengeUnlocked(days)) {
                             state.currentChallengeDuration = days;
                             showSection('dailyChallenges');
                         }
+                    });
+                });
+
+                document.querySelectorAll('.enroll-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const days = parseInt(btn.getAttribute('data-days'));
+                        showEnrollModal(days);
+                    });
+                });
+
+                document.querySelectorAll('.attended-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const days = parseInt(btn.getAttribute('data-days'));
+                        showCodeModal(days);
                     });
                 });
             }
@@ -1004,7 +1015,7 @@
                 if (confirm('Are you sure you want to delete your progress?')) {
                     state.challenges = initializeChallenges();
                     state.energyLevel = 0;
-                    state.points = 0;
+                    state.points = 0; // Reset points only here
                     state.challengeHistory = [];
                     state.consecutiveDays = 0;
                     state.lastPlayedDate = null;
@@ -1069,20 +1080,11 @@
             async function completeTask(task) {
                 if (!state.completedTasks.includes(task)) {
                     state.completedTasks.push(task);
-                    state.points += 10;
-                    const player = state.leaderboard.find(p => p.userId === state.userId);
-                    if (player) player.points = state.points;
-
+                    await awardPoints(10);
                     if (window.Telegram?.WebApp) {
-                        await Promise.all([
-                            Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks)),
-                            Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
-                            Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
-                        ]);
+                        await Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
                     } else {
                         localStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
-                        localStorage.setItem('points', state.points);
-                        localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                     }
                     updateUI();
                     updateTaskButtons();
