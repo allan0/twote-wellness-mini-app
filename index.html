@@ -466,25 +466,31 @@
 
             async function init() {
                 document.getElementById('loading').style.display = 'flex';
-                state = initializeState(); // Initialize with defaults
+                state = initializeState(); // Start with defaults
                 try {
                     const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
                     const values = await Promise.all(keys.map(key => 
-                        Telegram.WebApp.CloudStorage.getItem(key).then(val => val || null).catch(() => null)
+                        Telegram.WebApp.CloudStorage.getItem(key)
+                            .then(val => val === undefined ? null : val)
+                            .catch(err => {
+                                console.error(`Error fetching ${key}:`, err);
+                                return null;
+                            })
                     ));
 
-                    // Load state from storage, only overriding defaults if values exist
+                    console.log("Loaded from CloudStorage:", values);
+
                     state.userId = values[0] || state.userId;
                     state.userName = values[1] || state.userName;
                     state.userPhoto = values[2] || state.userPhoto;
                     state.energyLevel = values[3] !== null ? parseInt(values[3]) : state.energyLevel;
-                    state.points = values[4] !== null ? parseInt(values[4]) : state.points; // Persist points
+                    state.points = values[4] !== null ? parseInt(values[4]) : state.points;
                     state.challenges = values[5] ? JSON.parse(values[5]) : state.challenges;
                     state.challengeHistory = values[6] ? JSON.parse(values[6]) : state.challengeHistory;
                     state.birthdate = values[7] || state.birthdate;
                     state.consecutiveDays = values[8] !== null ? parseInt(values[8]) : state.consecutiveDays;
                     state.lastPlayedDate = values[9] || state.lastPlayedDate;
-                    state.dailyCheckInDone = values[10] === 'true';
+                    state.dailyCheckInDone = values[10] === 'true' ? true : false;
                     state.completedTasks = values[11] ? JSON.parse(values[11]) : state.completedTasks;
                     state.workshopAccess = values[12] === 'true';
                     state.leaderboard = values[13] ? JSON.parse(values[13]) : state.leaderboard;
@@ -511,12 +517,12 @@
             }
 
             function initLocal() {
-                state = initializeState(); // Initialize with defaults
+                state = initializeState();
                 state.userId = localStorage.getItem('userId') || state.userId;
                 state.userName = localStorage.getItem('userName') || state.userName;
                 state.userPhoto = localStorage.getItem('userPhoto') || state.userPhoto;
                 state.energyLevel = localStorage.getItem('energyLevel') !== null ? parseInt(localStorage.getItem('energyLevel')) : state.energyLevel;
-                state.points = localStorage.getItem('points') !== null ? parseInt(localStorage.getItem('points')) : state.points; // Persist points
+                state.points = localStorage.getItem('points') !== null ? parseInt(localStorage.getItem('points')) : state.points;
                 state.challenges = localStorage.getItem('challenges') ? JSON.parse(localStorage.getItem('challenges')) : state.challenges;
                 state.challengeHistory = localStorage.getItem('challengeHistory') ? JSON.parse(localStorage.getItem('challengeHistory')) : state.challengeHistory;
                 state.birthdate = localStorage.getItem('birthdate') || state.birthdate;
@@ -526,6 +532,12 @@
                 state.completedTasks = localStorage.getItem('completedTasks') ? JSON.parse(localStorage.getItem('completedTasks')) : state.completedTasks;
                 state.workshopAccess = localStorage.getItem('workshopAccess') === 'true';
                 state.leaderboard = localStorage.getItem('leaderboard') ? JSON.parse(localStorage.getItem('leaderboard')) : state.leaderboard;
+
+                console.log("Loaded from localStorage:", {
+                    points: state.points,
+                    dailyCheckInDone: state.dailyCheckInDone,
+                    lastPlayedDate: state.lastPlayedDate
+                });
 
                 if (!state.challenges.length) {
                     state.challenges = initializeChallenges();
@@ -620,35 +632,47 @@
                 if (player) player.points = state.points;
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
-                        Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
+                        Telegram.WebApp.CloudStorage.setItem('points', state.points.toString())
+                            .then(() => console.log(`Saved points: ${state.points}`))
+                            .catch(err => console.error('Error saving points:', err)),
                         Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
+                            .then(() => console.log('Saved leaderboard'))
+                            .catch(err => console.error('Error saving leaderboard:', err))
                     ]);
                 } else {
                     localStorage.setItem('points', state.points);
                     localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
+                    console.log(`Saved locally - points: ${state.points}`);
                 }
                 updateUI();
             }
 
             function checkDailyStreak() {
-                const today = new Date("2025-03-25");
-                const lastPlayed = state.lastPlayedDate ? new Date(state.lastPlayedDate) : null;
+                const today = new Date("2025-03-25").toISOString().split('T')[0];
+                const lastPlayed = state.lastPlayedDate ? state.lastPlayedDate : null;
                 if (!lastPlayed) return;
 
-                const diffTime = today - lastPlayed;
+                const todayDate = new Date(today);
+                const lastPlayedDate = new Date(lastPlayed);
+                const diffTime = todayDate - lastPlayedDate;
                 const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays === 1) {
                     state.consecutiveDays++;
                 } else if (diffDays > 1) {
                     state.consecutiveDays = 0;
+                    state.dailyCheckInDone = false;
+                } else if (diffDays === 0) {
+                    state.dailyCheckInDone = true;
+                } else {
+                    state.dailyCheckInDone = false;
                 }
-                state.dailyCheckInDone = diffDays === 0;
+                console.log(`CheckDailyStreak - today: ${today}, lastPlayed: ${lastPlayed}, diffDays: ${diffDays}, dailyCheckInDone: ${state.dailyCheckInDone}`);
             }
 
             async function dailyCheckIn() {
                 const today = new Date("2025-03-25").toISOString().split('T')[0];
-                if (state.lastPlayedDate === today) {
+                if (state.lastPlayedDate === today && state.dailyCheckInDone) {
                     Telegram.WebApp?.showAlert('You already checked in today!') || alert('You already checked in today!');
                     return;
                 }
@@ -656,18 +680,26 @@
                 state.lastPlayedDate = today;
                 state.dailyCheckInDone = true;
                 state.consecutiveDays++;
+
                 await awardPoints(5);
 
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
-                        Telegram.WebApp.CloudStorage.setItem('lastPlayedDate', state.lastPlayedDate),
-                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString()),
-                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'true')
+                        Telegram.WebApp.CloudStorage.setItem('lastPlayedDate', state.lastPlayedDate)
+                            .then(() => console.log(`Saved lastPlayedDate: ${state.lastPlayedDate}`))
+                            .catch(err => console.error('Error saving lastPlayedDate:', err)),
+                        Telegram.WebApp.CloudStorage.setItem('consecutiveDays', state.consecutiveDays.toString())
+                            .then(() => console.log(`Saved consecutiveDays: ${state.consecutiveDays}`))
+                            .catch(err => console.error('Error saving consecutiveDays:', err)),
+                        Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', state.dailyCheckInDone.toString())
+                            .then(() => console.log(`Saved dailyCheckInDone: ${state.dailyCheckInDone}`))
+                            .catch(err => console.error('Error saving dailyCheckInDone:', err))
                     ]);
                 } else {
                     localStorage.setItem('lastPlayedDate', state.lastPlayedDate);
                     localStorage.setItem('consecutiveDays', state.consecutiveDays);
-                    localStorage.setItem('dailyCheckInDone', 'true');
+                    localStorage.setItem('dailyCheckInDone', state.dailyCheckInDone.toString());
+                    console.log(`Saved locally - lastPlayedDate: ${state.lastPlayedDate}, dailyCheckInDone: ${state.dailyCheckInDone}`);
                 }
                 updateUI();
                 Telegram.WebApp?.showAlert(`Checked in! +5 $twote. Day ${state.consecutiveDays}`) || alert(`Checked in! +5 $twote. Day ${state.consecutiveDays}`);
@@ -1022,7 +1054,7 @@
 
             async function deleteProgress() {
                 if (confirm('Are you sure you want to delete your progress?')) {
-                    state = initializeState(); // Reset everything, including points
+                    state = initializeState();
                     if (window.Telegram?.WebApp) {
                         await Promise.all([
                             Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges)),
@@ -1081,9 +1113,12 @@
                     state.completedTasks.push(task);
                     await awardPoints(10);
                     if (window.Telegram?.WebApp) {
-                        await Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
+                        await Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks))
+                            .then(() => console.log(`Saved completedTasks: ${state.completedTasks}`))
+                            .catch(err => console.error('Error saving completedTasks:', err));
                     } else {
                         localStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
+                        console.log(`Saved locally - completedTasks: ${state.completedTasks}`);
                     }
                     updateUI();
                     updateTaskButtons();
