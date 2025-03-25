@@ -1,0 +1,1741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Third Eye</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --bg-color: #4E342E;
+            --text-color: #FFF8E1;
+            --button-color: #FFD700;
+            --button-text-color: #3E2723;
+            --challenge-div-bg: #fff; /* Background for challenge divs */
+            --challenge-div-text-color: #3E2723; /* Dark brown for text/icons in challenge divs */
+            --warning-color: #8B0000; /* Deep red */
+        }
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            padding-bottom: 80px; /* Increased for footer */
+        }
+        #backgroundVideo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.7; /* Slightly reduce video opacity */
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+        .section {
+            background: rgba(255, 248, 220, 0.15); /* Slightly less transparent */
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        /* Specific styles for challenge selection divs */
+        #wellnessManager .challenge-div {
+            background: var(--challenge-div-bg);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            color: var(--challenge-div-text-color); /* Default text color inside */
+        }
+        #wellnessManager .challenge-div h3,
+        #wellnessManager .challenge-div p {
+             color: var(--challenge-div-text-color); /* Explicitly set text color */
+        }
+        #wellnessManager .challenge-div .challenge-icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: var(--challenge-div-text-color); /* Dark icon color inside */
+        }
+        /* General icon style (e.g., footer, tasks) */
+         .challenge-icon, .task-icon, .footer-nav i {
+             color: var(--text-color); /* Keep general icons light */
+         }
+        .modal-content {
+            background: var(--bg-color);
+            color: var(--text-color);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-custom {
+            background-color: var(--button-color);
+            color: var(--button-text-color);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
+        }
+        .btn-custom:hover, .btn-custom:active, .btn-custom:focus {
+            transform: translateY(-2px) scale(1.02); /* Subtle lift and scale */
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.15);
+            color: var(--button-text-color);
+            background-color: #FFEC8B; /* Slightly lighter gold on hover */
+        }
+         .btn-custom:disabled {
+            background-color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.1);
+         }
+        .btn-danger {
+            background-color: var(--warning-color); /* Deep red for warnings */
+            color: #fff;
+            border: none;
+            box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.2);
+        }
+        .btn-danger:hover, .btn-danger:active, .btn-danger:focus {
+            transform: scale(1.05);
+            box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.3);
+            color: #fff;
+            background-color: #A52A2A; /* Slightly darker red */
+        }
+        .locked {
+            opacity: 0.6;
+            filter: grayscale(50%);
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 50%;
+        }
+        header img[src="logo.webp"] {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        #profilePhoto {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        h1, h2, h3, h4, p {
+            color: var(--text-color); /* Default text color */
+        }
+        .warning-text {
+            color: var(--warning-color); /* Deep red for warnings */
+            font-weight: bold;
+        }
+        .footer-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(78, 52, 46, 0.8); /* Semi-transparent background */
+            backdrop-filter: blur(5px);
+            padding: 15px 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-around;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+        }
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s, color 0.2s;
+        }
+        .footer-nav a:hover {
+            transform: scale(1.1);
+            color: var(--button-color); /* Highlight on hover */
+        }
+        .footer-nav a i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        .task-icon {
+            font-size: 1.75em;
+            margin-right: 10px;
+            /* color already handled by general icon style */
+        }
+        #socialMediaTasks ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        #socialMediaTasks li {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Align button to the right */
+            margin-bottom: 20px;
+            flex-wrap: wrap; /* Allow wrapping on small screens */
+        }
+         #socialMediaTasks li div { /* Group icon and text */
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px; /* Space below text if button wraps */
+         }
+        #socialMediaTasks a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-left: 5px; /* Space after icon */
+        }
+        #socialMediaTasks a:hover {
+            text-decoration: underline;
+        }
+         #socialMediaTasks button {
+             margin-left: auto; /* Push button to the right */
+             flex-shrink: 0; /* Prevent button from shrinking */
+         }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container { padding: 0 10px; }
+            .section { padding: 15px; }
+            .challenge-div { padding: 10px; }
+            #wellnessManager .challenge-div .challenge-icon { font-size: 2em; }
+            .btn-custom {
+                /* width: 100%; Removed, let buttons size naturally unless needed */
+                margin-bottom: 10px;
+                padding: 12px 15px; /* Good tap area */
+            }
+             #socialMediaTasks button {
+                 width: auto; /* Allow smaller buttons */
+                 padding: 8px 15px;
+             }
+            h1, h2 { font-size: 1.5rem; }
+            h3, h4 { font-size: 1.2rem; }
+            p { font-size: 0.95rem; }
+            .warning-text { font-size: 0.9rem; }
+        }
+        @media (max-width: 576px) {
+            .footer-nav a { font-size: 14px; }
+            .footer-nav a i { font-size: 20px; }
+            h1, h2 { font-size: 1.3rem; }
+            h3, h4 { font-size: 1.1rem; }
+            p { font-size: 0.875rem; }
+            #wellnessManager .challenge-div .challenge-icon { font-size: 1.75em; }
+             #socialMediaTasks li {
+                flex-direction: column; /* Stack elements vertically */
+                align-items: flex-start; /* Align items to the start */
+             }
+             #socialMediaTasks button {
+                 margin-left: 0; /* Remove left margin */
+                 margin-top: 10px; /* Add space above button */
+                 width: 100%; /* Make button full width */
+             }
+        }
+    </style>
+</head>
+<body>
+    <video id="backgroundVideo" autoplay muted loop playsinline>
+        <source src="cosmic.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999;">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p style="color: white; margin-top: 15px;">Initializing Universe...</p>
+    </div>
+
+    <div class="container">
+         <header class="d-flex justify-content-between align-items-center py-3 mb-3">
+            <div class="d-flex align-items-center">
+                <img src="logo.webp" alt="Logo" class="me-2">
+                <h1 class="h3 mb-0" style="font-weight: 700;">Third Eye</h1>
+            </div>
+            <div class="d-flex align-items-center text-end" id="profileLink" style="cursor: pointer;">
+                 <div class="me-2">
+                    <span id="profileNameDisplay" class="d-block" style="font-weight: 700;">Guest</span>
+                    <span id="pointsDisplay" style="font-size: 0.9rem;">0 $twote</span>
+                 </div>
+                <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
+            </div>
+        </header>
+
+        <!-- Sections -->
+        <div id="horoscopeForm" class="section" style="display: none;">
+            <h2><i class="fas fa-calendar-alt me-2"></i>Enter Your Birthdate</h2>
+            <p>Your birthdate helps personalize your cosmic journey.</p>
+            <input type="date" id="birthdate" class="form-control mb-2">
+            <button class="btn btn-custom w-100" id="saveHoroscopeBtn">Save & Begin</button>
+        </div>
+
+        <div id="wellnessManager" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-spa me-2"></i>Wellness Manager</h2>
+            <p>Choose your path to mindfulness and growth. Complete challenges to unlock more.</p>
+            <div id="challengeOptions" class="mt-3"></div>
+        </div>
+
+        <div id="dailyChallenges" class="section" style="display: none;">
+            <h2 id="challengeTitle" class="mb-3"></h2>
+            <div id="dailyChallengeList"></div>
+        </div>
+
+        <div id="tasksSection" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-list-check me-2"></i>Tasks</h2>
+            <div id="socialMediaTasks">
+                <h3 class="h5 mb-3">Engage & Earn</h3>
+                <ul>
+                    <li><div><i class="fab fa-twitter task-icon"></i>Follow on <a href="https://twitter.com/ThirdEyeApp" target="_blank">Twitter</a></div><button class="btn btn-sm btn-custom" data-task="twitter">Claim</button></li>
+                    <li><div><i class="fab fa-telegram-plane task-icon"></i>Join <a href="https://t.me/ThirdEyeCommunity" target="_blank">Telegram</a></div><button class="btn btn-sm btn-custom" data-task="telegram">Claim</button></li>
+                    <li><div><i class="fab fa-instagram task-icon"></i>Follow on <a href="https://instagram.com/ThirdEyeApp" target="_blank">Instagram</a></div><button class="btn btn-sm btn-custom" data-task="instagram">Claim</button></li>
+                    <li><div><i class="fab fa-youtube task-icon"></i>Subscribe on <a href="https://youtube.com/@ThirdEyeChannel" target="_blank">YouTube</a></div><button class="btn btn-sm btn-custom" data-task="youtube">Claim</button></li>
+                </ul>
+            </div>
+            <div id="referralTask" class="mt-4">
+                <h3 class="h5 mb-3">Invite Friends</h3>
+                <p>Share your link. Both you and your friend earn $twote!</p>
+                <div class="input-group">
+                    <input type="text" id="referralLink" class="form-control" readonly>
+                    <button class="btn btn-custom" onclick="copyReferralLink()">Copy</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="gamePage" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-dice-d6 me-2"></i>Mini Games</h2>
+             <div class="mb-3 text-center">
+                 <button class="btn btn-custom w-100 mb-2" id="dailyCheckInBtn">Daily Check-In</button>
+                 <p id="countdownDisplay" style="color: var(--text-color); font-size: 0.9rem;"></p>
+             </div>
+            <div class="d-grid gap-2">
+                <button class="btn btn-custom" id="playHoroscopeWheel"><i class="fas fa-chart-pie me-2"></i>Play Horoscope Wheel</button>
+                <button class="btn btn-custom" id="playNumerologyPath"><i class="fas fa-calculator me-2"></i>Play Numerology Path</button>
+            </div>
+             <p class="mt-3 text-center" style="font-size: 0.85rem;">Complete Daily Check-in to play games!</p>
+        </div>
+
+        <div id="horoscopeWheelPage" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Horoscope Wheel</h2>
+            <canvas id="astrologyWheelCanvas" width="300" height="300"></canvas> <!-- Slightly smaller canvas -->
+            <p id="astrologyMessage" class="text-center mt-3"></p>
+            <button class="btn btn-custom w-100 mt-2" id="spinWheel">Spin the Wheel</button>
+        </div>
+
+        <div id="numerologyPathPage" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-calculator me-2"></i>Numerology Path</h2>
+            <p id="numerologyMessage" class="text-center">Select a number to reveal your path's insight!</p>
+            <div id="numberGrid" class="text-center mt-3"></div>
+        </div>
+
+        <div id="playerProfile" class="section" style="display: none;">
+            <h2 class="mb-3"><i class="fas fa-user-astronaut me-2"></i>Player Profile</h2>
+            <p>Welcome back, <strong id="profileNameDisplayInner">Guest</strong>!</p>
+            <div class="mb-1">Energy Level: <span class="badge bg-info" id="energyValue">0</span>%</div>
+            <div class="mb-1">Points: <span class="badge bg-warning text-dark" id="pointsValue">0</span> $twote</div>
+            <div class="mb-3">Consecutive Days: <span class="badge bg-success" id="consecutiveDaysValue">0</span> <i class="fas fa-fire"></i></div>
+
+             <div class="d-grid gap-2 mb-4">
+                <button class="btn btn-outline-light btn-sm" id="connectWalletBtn"><i class="fas fa-wallet me-1"></i> Connect Wallet (Soon)</button>
+                <button class="btn btn-outline-light btn-sm" id="airdropWithdrawBtn"><i class="fas fa-parachute-box me-1"></i> Airdrop Withdraw (Soon)</button>
+            </div>
+
+            <h3 class="mt-4 h5">Challenge History</h3>
+            <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                 <table class="table table-sm table-dark table-striped">
+                    <thead><tr><th>Day</th><th>Goal</th><th>NRG In</th><th>NRG Out</th><th>Proof 1</th><th>Proof 2</th></tr></thead>
+                    <tbody id="profileHistory"></tbody>
+                </table>
+            </div>
+
+            <h3 class="mt-4 h5">Leaderboard <small>(Top 100)</small></h3>
+             <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                <table class="table table-sm table-dark table-hover">
+                    <thead><tr><th>Rank</th><th>Name</th><th>Points ($twote)</th></tr></thead>
+                    <tbody id="leaderboard"></tbody>
+                </table>
+            </div>
+
+             <button class="btn btn-danger mt-4 w-100" id="deleteProgressBtn"><i class="fas fa-trash me-1"></i> Delete All Progress</button>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <nav class="footer-nav">
+        <a href="#" id="navHome"><i class="fas fa-home"></i>Home</a>
+        <a href="#" id="navTasks"><i class="fas fa-tasks"></i>Tasks</a>
+        <a href="#" id="navGame"><i class="fas fa-gamepad"></i>Games</a>
+        <a href="#" id="navProfile"><i class="fas fa-user"></i>Profile</a> <!-- Added Profile Link -->
+    </nav>
+
+    <!-- Modals -->
+    <div class="modal fade" id="energyLogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Energy Log</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="energyLogPrompt">How positive is your mind frame?</p>
+                    <label for="energySlider" class="form-label">Energy Level: <span id="energySliderValue">50%</span></label>
+                    <input type="range" min="0" max="100" value="50" class="form-range" id="energySlider">
+
+                    <div id="challengeTasks" style="display: none; margin-top: 20px;">
+                        <p><strong>Meditation:</strong> <span id="meditationTask"></span></p>
+                        <hr>
+                        <p><strong>Task 1:</strong> <span id="task1Text"></span></p>
+                        <input type="file" class="form-control form-control-sm mb-2" id="task1Proof" accept="image/*">
+                        <p><strong>Task 2:</strong> <span id="task2Text"></span></p>
+                        <input type="file" class="form-control form-control-sm mb-2" id="task2Proof" accept="image/*">
+                        <small class="d-block text-muted">Upload image proof for both tasks.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-custom" id="submitEnergyLog" disabled>Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enrollModal" tabindex="-1" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enroll in Workshop</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Unlock advanced challenges by enrolling. Requires <strong>70%</strong> energy.</p>
+                    <p><strong>Name:</strong> <span id="enrollName"></span></p>
+                    <p><strong>Horoscope:</strong> <span id="enrollHoroscope"></span></p>
+                    <p><strong>Current Energy:</strong> <span id="enrollEnergy"></span>%</p>
+                </div>
+                 <div class="modal-footer">
+                    <button class="btn btn-custom w-100" id="submitEnrollment" disabled>Enroll Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="codeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Workshop Code</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>If you've attended a workshop, enter the code provided:</p>
+                    <input type="text" id="workshopCode" class="form-control" placeholder="Workshop Code">
+                </div>
+                 <div class="modal-footer">
+                     <button class="btn btn-custom mt-2 w-100" id="submitCode">Submit Code</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    <script>
+        // --- Constants ---
+        const USE_CLOUD_STORAGE = window.Telegram?.WebApp?.CloudStorage;
+        const DEFAULT_PHOTO = "https://via.placeholder.com/40";
+        const BOT_USERNAME = "ThirdEyeBot"; // Replace with your actual bot username if needed
+
+        const POINTS = {
+            DAILY_CHECK_IN_BASE: 5,
+            SOCIAL_TASK: 10,
+            CHALLENGE_BASE: 5, // Base points for daily goals, adjusted below
+            REFERRAL_BONUS: 20 // Example
+        };
+
+        const TASKS = {
+            TWITTER: 'twitter',
+            TELEGRAM: 'telegram',
+            INSTAGRAM: 'instagram',
+            YOUTUBE: 'youtube'
+        };
+
+        const WORKSHOP_CODE = "Wellness"; // The code to unlock later challenges
+
+        const dailyGoals = [
+            { goal: "Wealth", meditation: "Visualize wealth flowing.", task1: "Write 3 financial affirmations.", task2: "Research one investment.", points: POINTS.CHALLENGE_BASE + 2 },
+            { goal: "Peace", meditation: "Breathe in peace, breathe out tension.", task1: "List 5 things you're grateful for.", task2: "Listen to calming music for 5 min.", points: POINTS.CHALLENGE_BASE },
+            { goal: "Focus", meditation: "Sharpen your mental focus.", task1: "Plan your top 3 tasks for tomorrow.", task2: "Work uninterrupted for 15 min.", points: POINTS.CHALLENGE_BASE + 1 },
+            { goal: "Creativity", meditation: "Open your mind to new ideas.", task1: "Write down 5 random words.", task2: "Combine 2 words into an idea.", points: POINTS.CHALLENGE_BASE + 1 },
+            { goal: "Confidence", meditation: "Embrace your inner strength.", task1: "Recall a past success.", task2: "Stand tall, breathe deeply for 1 min.", points: POINTS.CHALLENGE_BASE + 2 },
+            { goal: "Energy", meditation: "Visualize vibrant energy.", task1: "Do 10 jumping jacks.", task2: "Drink a full glass of water.", points: POINTS.CHALLENGE_BASE },
+            { goal: "Gratitude", meditation: "Feel thankful for the present.", task1: "Identify 3 small joys today.", task2: "Tell someone you appreciate them.", points: POINTS.CHALLENGE_BASE + 1 }
+        ];
+
+        const zodiacOrder = [
+            { sign: "Aries", symbol: "♈", points: 5 }, { sign: "Taurus", symbol: "♉", points: 4 }, { sign: "Gemini", symbol: "♊", points: 3 },
+            { sign: "Cancer", symbol: "♋", points: 2 }, { sign: "Leo", symbol: "♌", points: 5 }, { sign: "Virgo", symbol: "♍", points: 4 },
+            { sign: "Libra", symbol: "♎", points: 3 }, { sign: "Scorpio", symbol: "♏", points: 2 }, { sign: "Sagittarius", symbol: "♐", points: 5 },
+            { sign: "Capricorn", symbol: "♑", points: 4 }, { sign: "Aquarius", symbol: "♒", points: 3 }, { sign: "Pisces", symbol: "♓", points: 2 }
+        ];
+
+        const astrologyInsights = {
+            "Aries": "Bold moves bring rewards.", "Taurus": "Patience is your ally.", "Gemini": "Connect and communicate.",
+            "Cancer": "Trust your intuition.", "Leo": "Let your creativity shine.", "Virgo": "Organize for clarity.",
+            "Libra": "Seek harmony in relationships.", "Scorpio": "Embrace transformation.", "Sagittarius": "Explore new horizons.",
+            "Capricorn": "Discipline leads to success.", "Aquarius": "Innovate and inspire.", "Pisces": "Dream and manifest."
+        };
+
+        const numerologyInsights = {
+            1: "Lead with confidence.", 2: "Cooperate for success.", 3: "Express your creativity.",
+            4: "Build a solid foundation.", 5: "Embrace change and freedom.", 6: "Nurture relationships.",
+            7: "Seek wisdom within.", 8: "Manifest abundance.", 9: "Complete cycles gracefully."
+        };
+
+        const sections = ['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage', 'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile'];
+        const domElements = {}; // Will be populated by getDomElements
+        let state = {}; // App state
+        let sectionStack = []; // For navigation history
+        let isLoading = false; // Prevent double-clicks during async ops
+        let checkinCountdownInterval = null; // Store interval ID
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            Object.assign(domElements, getDomElements()); // Populate DOM elements cache
+            initializeApp();
+        });
+
+        async function initializeApp() {
+            showLoading(true, "Initializing Universe...");
+            if (window.Telegram?.WebApp) {
+                Telegram.WebApp.ready();
+                Telegram.WebApp.expand();
+                setTheme();
+                await initCloud();
+            } else {
+                console.warn("Telegram WebApp not available. Using local storage.");
+                await initLocal(); // Make local init async too for consistency
+            }
+            setupEventListeners();
+            showLoading(false);
+        }
+
+        function setTheme() {
+            try {
+                const theme = Telegram.WebApp.themeParams;
+                if (theme) {
+                     if(theme.bg_color) document.documentElement.style.setProperty('--bg-color', theme.bg_color);
+                     if(theme.text_color) document.documentElement.style.setProperty('--text-color', theme.text_color);
+                     if(theme.button_color) document.documentElement.style.setProperty('--button-color', theme.button_color);
+                     if(theme.button_text_color) document.documentElement.style.setProperty('--button-text-color', theme.button_text_color);
+                     // Adjust challenge div colors based on theme for contrast
+                     const bgColor = theme.bg_color || '#4E342E';
+                     const isDarkBg = isColorDark(bgColor);
+                     document.documentElement.style.setProperty('--challenge-div-bg', isDarkBg ? '#FFF' : '#EEE');
+                     document.documentElement.style.setProperty('--challenge-div-text-color', isDarkBg ? '#3E2723' : '#000');
+                }
+            } catch (error) {
+                console.error("Error setting theme:", error);
+            }
+        }
+
+        // --- State Management (Cloud & Local) ---
+
+        function initializeState(tgUser = null) {
+            const defaultState = {
+                userId: tgUser?.id || `localUser_${Date.now()}`,
+                userName: tgUser?.first_name || "Guest",
+                userPhoto: tgUser?.photo_url || DEFAULT_PHOTO,
+                energyLevel: 0,
+                points: 0,
+                challenges: [], // Will be populated if empty
+                challengeHistory: [],
+                birthdate: null,
+                consecutiveDays: 0,
+                lastPlayedDate: null, // YYYY-MM-DD format
+                lastCheckInTime: null, // Timestamp (ms)
+                dailyCheckInDone: false,
+                completedTasks: [], // Array of task keys (e.g., ['twitter', 'telegram'])
+                workshopAccess: false,
+                leaderboard: [], // Array of { userId, name, points }
+                currentChallengeDuration: null, // Track selected challenge (7, 21, etc.)
+                currentChallengeDay: null, // Track day being worked on
+                energyBefore: null // Temp storage for energy log
+            };
+            // Add some dummy leaderboard data if empty for demo
+            if (!defaultState.leaderboard.length) {
+                defaultState.leaderboard = [
+                    { userId: 'dummy1', name: 'Cosmic Voyager', points: 155 },
+                    { userId: 'dummy2', name: 'Starlight Seeker', points: 120 },
+                    { userId: 'dummy3', name: 'Nebula Navigator', points: 95 },
+                ];
+            }
+            return defaultState;
+        }
+
+        async function loadStateVariable(key, defaultValue) {
+            try {
+                if (USE_CLOUD_STORAGE) {
+                    const value = await Telegram.WebApp.CloudStorage.getItem(key);
+                    if (value === undefined || value === null || value === "") {
+                        return defaultValue;
+                    }
+                    try {
+                        if ((value.startsWith('{') && value.endsWith('}')) || (value.startsWith('[') && value.endsWith(']'))) {
+                            return JSON.parse(value);
+                        }
+                        if (value === 'true') return true;
+                        if (value === 'false') return false;
+                         if (!isNaN(value)) return Number(value);
+                    } catch (e) { /* Ignore parsing error, return raw */ }
+                    return value;
+                } else {
+                    const value = localStorage.getItem(key);
+                    if (value === null) return defaultValue;
+                    try {
+                        return JSON.parse(value);
+                    } catch (e) {
+                        return value;
+                    }
+                }
+            } catch (error) {
+                console.error(`Error loading state variable "${key}":`, error);
+                showNotification(`Error loading ${key}. Using default.`);
+                return defaultValue;
+            }
+        }
+
+         async function saveStateVariable(key, value) {
+            try {
+                const valueToSave = (typeof value === 'object' || typeof value === 'boolean') ? JSON.stringify(value) : String(value);
+                if (USE_CLOUD_STORAGE) {
+                    return new Promise((resolve, reject) => {
+                         Telegram.WebApp.CloudStorage.setItem(key, valueToSave, (error, success) => {
+                            if (error) {
+                                console.error(`Error saving state variable "${key}" to CloudStorage:`, error);
+                                showNotification(`Error saving ${key}.`);
+                                reject(error);
+                            } else {
+                                // Assume success if no error, even if success is not explicitly true
+                                // console.log(`Saved ${key} to CloudStorage.`);
+                                resolve(true);
+                            }
+                        });
+                    });
+                } else {
+                    localStorage.setItem(key, valueToSave);
+                    // console.log(`Saved ${key} to LocalStorage.`);
+                    return Promise.resolve(true);
+                }
+            } catch (error) {
+                console.error(`Error saving state variable "${key}":`, error);
+                showNotification(`Error saving ${key}.`);
+                return Promise.reject(error);
+            }
+        }
+
+        async function initCloud() {
+            const tgUser = Telegram.WebApp.initDataUnsafe?.user;
+            state = initializeState(tgUser);
+            const keysToLoad = Object.keys(state);
+            try {
+                const loadedValues = await Promise.all(keysToLoad.map(key => loadStateVariable(key, state[key])));
+                 keysToLoad.forEach((key, index) => { state[key] = loadedValues[index]; });
+
+                 if (!state.challenges || state.challenges.length === 0) {
+                    state.challenges = initializeChallenges();
+                    await saveStateVariable('challenges', state.challenges);
+                }
+                 if (!state.leaderboard.find(p => p.userId === state.userId)) {
+                     state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+                     // No immediate save needed, done on point change
+                 }
+
+                checkDailyStreak();
+                await Promise.all([
+                    saveStateVariable('consecutiveDays', state.consecutiveDays),
+                    saveStateVariable('lastPlayedDate', state.lastPlayedDate)
+                ]);
+
+                updateUI();
+                startCountdown();
+                showInitialSection();
+
+            } catch (error) {
+                console.error('Cloud Initialization error:', error);
+                showNotification("Error loading cloud data. Using defaults.");
+                updateUI();
+                showInitialSection();
+            }
+        }
+
+        async function initLocal() { // Make async
+            state = initializeState();
+            Object.keys(state).forEach(key => {
+                const savedValue = localStorage.getItem(key);
+                if (savedValue !== null) {
+                    try { state[key] = JSON.parse(savedValue); } catch (e) { state[key] = savedValue; }
+                }
+            });
+
+             if (!state.challenges || state.challenges.length === 0) {
+                state.challenges = initializeChallenges();
+                await saveStateVariable('challenges', state.challenges);
+            }
+            if (!state.leaderboard.find(p => p.userId === state.userId)) {
+                state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+                await saveStateVariable('leaderboard', state.leaderboard);
+            }
+
+            checkDailyStreak();
+            await Promise.all([
+                saveStateVariable('consecutiveDays', state.consecutiveDays),
+                saveStateVariable('lastPlayedDate', state.lastPlayedDate)
+            ]);
+
+            updateUI();
+            startCountdown();
+            showInitialSection();
+        }
+
+        function showInitialSection() {
+            showSection(state.birthdate ? 'wellnessManager' : 'horoscopeForm');
+        }
+
+        // --- UI Update Functions ---
+
+        function getDomElements() {
+            const elements = {};
+            const ids = [
+                'loading', 'profilePhoto', 'profileNameDisplay', 'profileNameDisplayInner', 'pointsDisplay',
+                'pointsValue', 'consecutiveDaysValue', 'energyValue', 'challengeOptions',
+                'dailyChallengeList', 'challengeTitle', 'energyLogPrompt', 'energySlider', 'energySliderValue',
+                'challengeTasks', 'meditationTask', 'task1Text', 'task2Text', 'task1Proof', 'task2Proof',
+                'submitEnergyLog', 'profileHistory', 'astrologyMessage', 'numerologyMessage', 'numberGrid',
+                'referralLink', 'dailyCheckInBtn', 'countdownDisplay', 'leaderboard', 'enrollName',
+                'enrollHoroscope', 'enrollEnergy', 'submitEnrollment', 'workshopCode', 'submitCode',
+                'horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage',
+                'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile', 'socialMediaTasks',
+                'profileLink', 'saveHoroscopeBtn', 'navHome', 'navTasks', 'navGame', 'navProfile',
+                'playHoroscopeWheel', 'playNumerologyPath', 'spinWheel', 'deleteProgressBtn',
+                'connectWalletBtn', 'airdropWithdrawBtn', 'energyLogModal', 'enrollModal', 'codeModal' // Added Modals
+            ];
+            ids.forEach(id => elements[id] = document.getElementById(id));
+            return elements;
+        }
+
+        function updateUI() {
+            if (!domElements.profilePhoto) return;
+
+            domElements.profilePhoto.src = state.userPhoto || DEFAULT_PHOTO;
+            domElements.profileNameDisplay.textContent = state.userName || "Guest";
+            domElements.profileNameDisplayInner.textContent = state.userName || "Guest";
+            domElements.pointsDisplay.textContent = `${state.points} $twote`;
+            domElements.pointsValue.textContent = state.points;
+            domElements.consecutiveDaysValue.textContent = state.consecutiveDays;
+            domElements.energyValue.textContent = state.energyLevel;
+
+            if (state.userId && domElements.referralLink) {
+                domElements.referralLink.value = `https://t.me/${BOT_USERNAME}?start=${state.userId}`;
+            }
+            updateDailyCheckInButton();
+            updateLeaderboard();
+            updateTaskButtons();
+        }
+
+        function updateDailyCheckInButton() {
+            if (!domElements.dailyCheckInBtn) return;
+            const now = Date.now();
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            // Check if check-in time exists AND if 24 hours have passed
+            const available = !state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours);
+
+            if (available) {
+                // If available, make sure dailyCheckInDone is false
+                if(state.dailyCheckInDone) {
+                    state.dailyCheckInDone = false;
+                    // Optional: save this change if strict consistency is needed immediately
+                    // saveStateVariable('dailyCheckInDone', state.dailyCheckInDone);
+                }
+                domElements.dailyCheckInBtn.disabled = false;
+                const potentialStreakBonus = Math.floor((state.lastPlayedDate === new Date().toISOString().split('T')[0] ? state.consecutiveDays : state.consecutiveDays + 1) / 3); // Preview next bonus
+                const potentialPoints = POINTS.DAILY_CHECK_IN_BASE + potentialStreakBonus;
+                domElements.dailyCheckInBtn.innerHTML = `<i class="fas fa-calendar-check me-1"></i> Daily Check-In (+${potentialPoints})`;
+                domElements.countdownDisplay.textContent = "Check-in available!";
+            } else {
+                 // If not available, ensure dailyCheckInDone is true
+                 if(!state.dailyCheckInDone) {
+                    state.dailyCheckInDone = true;
+                    // saveStateVariable('dailyCheckInDone', state.dailyCheckInDone);
+                 }
+                domElements.dailyCheckInBtn.disabled = true;
+                domElements.dailyCheckInBtn.innerHTML = `<i class="fas fa-clock me-1"></i> Checked In`;
+                startCountdown(); // Ensure countdown is running/updated
+            }
+        }
+
+
+        function showSection(sectionId) {
+            if (isLoading) return;
+
+            sections.forEach(id => {
+                const el = domElements[id];
+                if (el) el.style.display = 'none';
+            });
+
+             const targetEl = domElements[sectionId];
+             if (targetEl) {
+                targetEl.style.display = 'block';
+                if (!sectionStack.length || sectionStack[sectionStack.length - 1] !== sectionId) {
+                    sectionStack.push(sectionId);
+                }
+                if (window.Telegram?.WebApp) {
+                    Telegram.WebApp.BackButton[sectionStack.length > 1 ? 'show' : 'hide']();
+                }
+             } else {
+                 console.error(`Section with id "${sectionId}" not found.`);
+                 showSection('wellnessManager'); // Fallback
+                 return;
+             }
+
+            switch (sectionId) {
+                case 'wellnessManager': loadChallenges(); break;
+                case 'dailyChallenges': displayDailyChallenges(state.currentChallengeDuration); break;
+                case 'tasksSection': updateTaskButtons(); break;
+                case 'playerProfile': loadProfileHistory(); updateLeaderboard(); break;
+                case 'horoscopeWheelPage': drawAstrologyWheel(); break;
+                case 'numerologyPathPage': initNumerologyPath(); break;
+            }
+        }
+
+        function goBack() {
+            if (isLoading || sectionStack.length <= 1) return;
+            sectionStack.pop();
+            const previousSection = sectionStack[sectionStack.length - 1];
+            showSection(previousSection);
+        }
+
+        function showLoading(show, message = "Loading...") {
+            if (!domElements.loading) return;
+            isLoading = show; // Update global loading state
+            if (show) {
+                 domElements.loading.style.display = 'flex';
+                 domElements.loading.querySelector('p').textContent = message;
+            } else {
+                domElements.loading.style.display = 'none';
+            }
+        }
+
+        function showNotification(message, type = 'info') {
+             console.log(`Notification (${type}): ${message}`);
+             const toastContainer = document.querySelector('.toast-container');
+             if (!toastContainer || !window.bootstrap) return;
+
+            const toastId = `toast-${Date.now()}`;
+            const bgClass = type === 'error' ? 'bg-danger' : (type === 'success' ? 'bg-success' : 'bg-primary');
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="3000">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            `;
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+            const toastElement = document.getElementById(toastId);
+             if (toastElement) {
+                const bsToast = new bootstrap.Toast(toastElement);
+                bsToast.show();
+                toastElement.addEventListener('hidden.bs.toast', () => { toastElement.remove(); });
+            }
+        }
+
+        // --- Core Logic Functions ---
+
+        async function handleAsyncAction(actionFn, loadingMessage = "Processing...") {
+            if (isLoading) {
+                console.warn("Attempted action while already loading.");
+                return;
+            }
+            showLoading(true, loadingMessage);
+            // Disable all major action buttons during processing
+            const buttonsToDisable = document.querySelectorAll('.btn-custom, .btn-danger');
+            buttonsToDisable.forEach(btn => btn.disabled = true);
+
+            try {
+                await actionFn();
+            } catch (error) {
+                console.error("Error during async action:", error);
+                showNotification("An error occurred. Please try again.", "error");
+            } finally {
+                showLoading(false);
+                // Re-enable buttons (respecting their original disabled state if needed - simple re-enable here)
+                buttonsToDisable.forEach(btn => btn.disabled = false);
+                updateUI(); // Refresh UI fully after action
+            }
+        }
+
+        async function saveHoroscope() {
+             const birthdate = domElements.birthdate.value;
+             if (birthdate) {
+                 await handleAsyncAction(async () => {
+                    state.birthdate = birthdate;
+                    await saveStateVariable('birthdate', state.birthdate);
+                    showNotification("Birthdate saved!", "success");
+                    showSection('wellnessManager');
+                 }, "Saving birthdate...");
+             } else {
+                 showNotification('Please select your birthdate.', 'error');
+             }
+        }
+
+        async function updateEnergyLevel(before = null, after = null) {
+            if (before !== null && after !== null) {
+                const newEnergy = Math.min(Math.max(0, Math.round((before + after) / 2)), 100);
+                 if(newEnergy !== state.energyLevel) {
+                    state.energyLevel = newEnergy;
+                    await saveStateVariable('energyLevel', state.energyLevel);
+                    // UI update is handled by the main updateUI call in handleAsyncAction finally block
+                 }
+            }
+        }
+
+        async function awardPoints(amount, source = "Challenge") {
+             if (amount === 0) return;
+            state.points += amount;
+
+             let playerEntry = state.leaderboard.find(p => p.userId === state.userId);
+             if (playerEntry) {
+                 playerEntry.points = state.points;
+             } else {
+                 state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+             }
+             state.leaderboard.sort((a, b) => b.points - a.points);
+
+             await Promise.all([
+                 saveStateVariable('points', state.points),
+                 saveStateVariable('leaderboard', state.leaderboard)
+             ]);
+
+             // UI update handled by handleAsyncAction
+             showNotification(`+${amount} $twote from ${source}! Total: ${state.points}`, "success");
+        }
+
+         function checkDailyStreak() {
+            const today = new Date().toISOString().split('T')[0];
+            const lastPlayed = state.lastPlayedDate;
+
+            if (!lastPlayed) {
+                state.consecutiveDays = 0;
+                // Don't set lastPlayedDate here, set it upon successful check-in
+            } else if (lastPlayed !== today) {
+                const todayDate = new Date(today);
+                const lastPlayedDate = new Date(lastPlayed);
+                const diffTime = todayDate - lastPlayedDate;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 1) {
+                    console.log(`Streak reset. Last played: ${lastPlayed}, Today: ${today}, Diff: ${diffDays} days`);
+                    state.consecutiveDays = 0;
+                }
+                 // If diffDays === 1, streak continues (incremented on check-in)
+                 // If diffDays === 0 (lastPlayed === today), do nothing
+            }
+         }
+
+
+        async function dailyCheckIn() {
+            await handleAsyncAction(async () => {
+                const now = Date.now();
+                const twentyFourHours = 24 * 60 * 60 * 1000;
+
+                if (state.lastCheckInTime && (now - state.lastCheckInTime < twentyFourHours)) {
+                    showNotification('Already checked in today. Wait for the timer.');
+                    return;
+                }
+
+                // Check and potentially reset streak *before* incrementing
+                checkDailyStreak();
+
+                const today = new Date().toISOString().split('T')[0];
+                const isContinuingStreak = state.lastPlayedDate && (new Date(today) - new Date(state.lastPlayedDate)) / (1000 * 60 * 60 * 24) === 1;
+
+                // Increment streak only if it's a new day following the last played day
+                if (state.lastPlayedDate !== today) {
+                    if (isContinuingStreak) {
+                        state.consecutiveDays++;
+                    } else {
+                         state.consecutiveDays = 1; // Start a new streak of 1 day
+                    }
+                } // If lastPlayedDate IS today, streak doesn't change yet.
+
+                const streakBonus = Math.floor(state.consecutiveDays / 3);
+                const pointsToAward = POINTS.DAILY_CHECK_IN_BASE + streakBonus;
+
+                // Update state *after* calculations
+                state.lastPlayedDate = today; // Mark today as played
+                state.dailyCheckInDone = true;
+                state.lastCheckInTime = now;
+
+                await awardPoints(pointsToAward, "Daily Check-in");
+
+                await Promise.all([
+                    saveStateVariable('lastPlayedDate', state.lastPlayedDate),
+                    saveStateVariable('dailyCheckInDone', state.dailyCheckInDone),
+                    saveStateVariable('lastCheckInTime', state.lastCheckInTime),
+                    saveStateVariable('consecutiveDays', state.consecutiveDays) // Save the potentially updated streak
+                ]);
+
+                startCountdown(); // Update countdown display
+                showNotification(`Checked in! Day ${state.consecutiveDays} streak. ${streakBonus > 0 ? `(+${streakBonus} streak bonus)` : ''}`, "success");
+            }, "Checking in...");
+        }
+
+
+        function startCountdown() {
+            // Clear existing interval first
+            if (checkinCountdownInterval) {
+                clearInterval(checkinCountdownInterval);
+                checkinCountdownInterval = null;
+            }
+
+            if (!state.lastCheckInTime || !state.dailyCheckInDone) {
+                 updateDailyCheckInButton(); // Ensure button is correct state (Available)
+                 domElements.countdownDisplay.textContent = "Check-in available!";
+                 return;
+            }
+
+            const twentyFourHours = 24 * 60 * 60 * 1000;
+            const endTime = state.lastCheckInTime + twentyFourHours;
+
+            function updateCountdownDisplay() {
+                const now = Date.now();
+                const timeLeft = endTime - now;
+
+                if (timeLeft <= 0) {
+                    if (checkinCountdownInterval) {
+                        clearInterval(checkinCountdownInterval);
+                        checkinCountdownInterval = null;
+                    }
+                    // Only update state if it needs changing
+                    if (state.dailyCheckInDone || state.lastCheckInTime !== null) {
+                         state.dailyCheckInDone = false;
+                         state.lastCheckInTime = null;
+                         // Optionally save state immediately for robustness
+                         // Promise.all([
+                         //     saveStateVariable('dailyCheckInDone', false),
+                         //     saveStateVariable('lastCheckInTime', null)
+                         // ]);
+                         updateDailyCheckInButton(); // Update button state and text
+                    }
+                    domElements.countdownDisplay.textContent = "Check-in available!";
+                    return;
+                }
+
+                const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                domElements.countdownDisplay.textContent = `Next check-in: ${hours}h ${minutes}m ${seconds}s`;
+                domElements.dailyCheckInBtn.disabled = true; // Ensure disabled during countdown
+            }
+
+            updateCountdownDisplay(); // Initial call
+            checkinCountdownInterval = setInterval(updateCountdownDisplay, 1000); // Update every second
+        }
+
+        // --- Challenge Logic ---
+
+         function initializeChallenges() {
+            return Array.from({ length: 150 }, (_, i) => {
+                const goalIndex = i % dailyGoals.length;
+                const goalData = dailyGoals[goalIndex];
+                return {
+                    day: i + 1, goal: goalData.goal, meditation: goalData.meditation,
+                    task1: goalData.task1, task2: goalData.task2, points: goalData.points,
+                    completed: false, energyBefore: null, energyAfter: null,
+                    task1ProofUrl: null, task2ProofUrl: null
+                };
+            });
+        }
+
+         function isChallengeUnlocked(days) {
+             const completedCount = state.challenges.filter(ch => ch.completed).length;
+             switch(days) {
+                case 7: return true;
+                case 21: return completedCount >= 7;
+                case 41: return completedCount >= 21;
+                case 66: return completedCount >= 41 && state.workshopAccess;
+                case 150: return completedCount >= 66 && state.workshopAccess;
+                default: return false;
+             }
+         }
+
+         function loadChallenges() {
+            const challengeDurations = [7, 21, 41, 66, 150];
+            const challengeIcons = { 7: 'fas fa-seedling', 21: 'fas fa-leaf', 41: 'fas fa-tree', 66: 'fas fa-mountain', 150: 'fas fa-meteor' };
+            const fragment = document.createDocumentFragment();
+
+             challengeDurations.forEach(days => {
+                const isUnlocked = isChallengeUnlocked(days);
+                const iconClass = challengeIcons[days] || 'fas fa-star';
+                const div = document.createElement('div');
+                div.className = `challenge-div mb-3 ${isUnlocked ? '' : 'locked'}`;
+
+                 let buttonsHTML = '';
+                 let reason = '';
+                 if (isUnlocked) {
+                     buttonsHTML = `<button class="btn btn-custom start-challenge-btn mt-2 w-100" data-days="${days}">Begin ${days}-Day Journey</button>`;
+                 } else {
+                    if (days === 21 && !isChallengeUnlocked(21)) reason = `Complete the 7-Day challenge first.`;
+                    else if (days === 41 && !isChallengeUnlocked(41)) reason = `Complete the 21-Day challenge first.`;
+                    else if ((days === 66 || days === 150) && !state.workshopAccess) {
+                        reason = `Requires workshop access.`;
+                        buttonsHTML = `
+                            <button class="btn btn-sm btn-outline-secondary enroll-btn mt-2 me-1" data-days="${days}">Enroll (70% NRG)</button>
+                            <button class="btn btn-sm btn-outline-secondary attended-btn mt-2 ms-1" data-days="${days}">Enter Code</button>
+                        `;
+                    } else if ((days === 66 && !isChallengeUnlocked(66))) reason = `Complete the 41-Day challenge first.`;
+                    else if ((days === 150 && !isChallengeUnlocked(150))) reason = `Complete the 66-Day challenge first.`;
+                     if (reason) buttonsHTML = `<p class="warning-text mt-2 mb-1" style="font-size: 0.85rem;">${reason}</p>` + buttonsHTML;
+                 }
+
+                div.innerHTML = `
+                    <i class="${iconClass} challenge-icon"></i>
+                    <h3 class="h5">${days}-Day Challenge</h3>
+                    ${buttonsHTML}
+                `;
+                fragment.appendChild(div);
+             });
+
+             domElements.challengeOptions.innerHTML = '';
+             domElements.challengeOptions.appendChild(fragment);
+
+            domElements.challengeOptions.querySelectorAll('.start-challenge-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const days = parseInt(e.target.getAttribute('data-days'));
+                    if (isChallengeUnlocked(days)) {
+                        state.currentChallengeDuration = days;
+                        showSection('dailyChallenges');
+                    } else { showNotification("Challenge not yet unlocked.", "error"); }
+                });
+            });
+            domElements.challengeOptions.querySelectorAll('.enroll-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => showEnrollModal(parseInt(e.target.getAttribute('data-days'))));
+            });
+             domElements.challengeOptions.querySelectorAll('.attended-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => showCodeModal(parseInt(e.target.getAttribute('data-days'))));
+            });
+         }
+
+         function displayDailyChallenges(days) {
+            if (!days) {
+                showNotification("No challenge selected.", "error");
+                showSection('wellnessManager'); return;
+            }
+             domElements.challengeTitle.textContent = `${days}-Day Challenge`;
+            const fragment = document.createDocumentFragment();
+            const challengesToShow = state.challenges.slice(0, days);
+
+             challengesToShow.forEach((challenge, index) => {
+                const card = document.createElement('div');
+                card.className = 'list-group-item list-group-item-action mb-2 rounded';
+                 card.style.backgroundColor = 'rgba(255, 255, 255, 0.85)';
+                 card.style.color = '#333';
+
+                let contentHTML = '';
+                const prevDayCompleted = index === 0 || challengesToShow[index - 1].completed;
+
+                if (challenge.completed) {
+                    contentHTML = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1"><i class="fas fa-check-circle text-success me-2"></i>Day ${challenge.day}: ${challenge.goal}</h5>
+                            <small class="text-muted">${challenge.points} $twote</small>
+                        </div>
+                        <small class="text-muted">Completed. NRG: ${challenge.energyBefore ?? 'N/A'}% → ${challenge.energyAfter ?? 'N/A'}%</small>
+                    `;
+                } else if (!prevDayCompleted) {
+                    contentHTML = `
+                         <div class="d-flex w-100 justify-content-between">
+                             <h5 class="mb-1 text-muted"><i class="fas fa-lock me-2"></i>Day ${challenge.day}: ${challenge.goal}</h5>
+                             <small class="text-muted">Locked</small>
+                         </div>
+                         <small class="warning-text" style="color: var(--warning-color);">Complete Day ${challenge.day - 1} first.</small>
+                    `;
+                    card.classList.add('locked');
+                } else {
+                    contentHTML = `
+                         <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">Day ${challenge.day}: ${challenge.goal}</h5>
+                         </div>
+                         <p class="mb-1 small">${challenge.meditation}</p>
+                         <button class="btn btn-sm btn-custom mt-1 start-day-btn" data-day="${challenge.day}"><i class="fas fa-play me-1"></i> Start Day ${challenge.day}</button>
+                    `;
+                }
+                 card.innerHTML = contentHTML;
+                 fragment.appendChild(card);
+            });
+
+             domElements.dailyChallengeList.innerHTML = '';
+             domElements.dailyChallengeList.appendChild(fragment);
+
+            domElements.dailyChallengeList.querySelectorAll('.start-day-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => startChallengeDay(parseInt(e.target.getAttribute('data-day'))));
+            });
+         }
+
+         function startChallengeDay(day) {
+             state.currentChallengeDay = day;
+             state.energyBefore = null;
+
+             const challenge = state.challenges.find(c => c.day === day);
+             if (!challenge) { showNotification("Challenge data not found.", "error"); return; }
+
+             domElements.energyLogPrompt.textContent = `Day ${day}: ${challenge.goal}. Log your starting energy:`;
+             domElements.energySlider.value = state.energyLevel;
+             domElements.energySliderValue.textContent = `${state.energyLevel}%`;
+             domElements.challengeTasks.style.display = 'none';
+             domElements.submitEnergyLog.setAttribute('data-stage', 'before');
+             domElements.submitEnergyLog.disabled = false;
+             domElements.submitEnergyLog.textContent = "Log Energy & View Tasks";
+             domElements.task1Proof.value = '';
+             domElements.task2Proof.value = '';
+
+             const energyModal = bootstrap.Modal.getOrCreateInstance(domElements.energyLogModal);
+             energyModal.show();
+         }
+
+         async function submitEnergyLog() {
+            const sliderValue = parseInt(domElements.energySlider.value);
+            const stage = domElements.submitEnergyLog.getAttribute('data-stage');
+            const challenge = state.challenges.find(c => c.day === state.currentChallengeDay);
+
+            if (!challenge) { showNotification("Error: Current challenge not found.", "error"); return; }
+
+            if (stage === 'before') {
+                state.energyBefore = sliderValue;
+                domElements.energyLogPrompt.textContent = `Complete tasks for Day ${challenge.day} & log final energy:`;
+                domElements.challengeTasks.style.display = 'block';
+                domElements.meditationTask.textContent = challenge.meditation;
+                domElements.task1Text.textContent = challenge.task1;
+                domElements.task2Text.textContent = challenge.task2;
+                domElements.energySlider.value = sliderValue;
+                domElements.energySliderValue.textContent = `${sliderValue}%`;
+                domElements.submitEnergyLog.setAttribute('data-stage', 'after');
+                domElements.submitEnergyLog.disabled = true;
+                domElements.submitEnergyLog.textContent = "Upload Proof & Submit";
+
+                const checkFiles = () => {
+                    domElements.submitEnergyLog.disabled = !(domElements.task1Proof.files[0] && domElements.task2Proof.files[0]);
+                };
+                domElements.task1Proof.onchange = checkFiles;
+                domElements.task2Proof.onchange = checkFiles;
+
+            } else if (stage === 'after') {
+                const energyAfter = sliderValue;
+                const task1File = domElements.task1Proof.files[0];
+                const task2File = domElements.task2Proof.files[0];
+
+                if (!task1File || !task2File) { showNotification('Please upload image proof for both tasks.', 'error'); return; }
+
+                 await handleAsyncAction(async () => {
+                     const task1ProofDataUrl = await readFileAsDataURL(task1File);
+                     const task2ProofDataUrl = await readFileAsDataURL(task2File);
+
+                     challenge.completed = true;
+                     challenge.energyBefore = state.energyBefore;
+                     challenge.energyAfter = energyAfter;
+                     // Storing large data URLs in state/history is not ideal for production.
+                     // Store identifiers or URLs from a proper storage service instead.
+                     // For this demo, we store truncated versions in the challenge object.
+                     challenge.task1ProofUrl = task1ProofDataUrl.substring(0, 50) + "...";
+                     challenge.task2ProofUrl = task2ProofDataUrl.substring(0, 50) + "...";
+
+                     // Keep full DataURLs for the profile history display (temporary display only)
+                     state.challengeHistory.push({
+                        day: challenge.day, goal: challenge.goal,
+                        energyBefore: challenge.energyBefore, energyAfter: challenge.energyAfter,
+                        task1Image: task1ProofDataUrl, task2Image: task2ProofDataUrl
+                     });
+                     // Limit history size if needed
+                     if (state.challengeHistory.length > 50) { state.challengeHistory.shift(); }
+
+                     await updateEnergyLevel(state.energyBefore, energyAfter);
+                     await awardPoints(challenge.points, `Day ${challenge.day}`);
+
+                     await Promise.all([
+                         saveStateVariable('challenges', state.challenges),
+                         saveStateVariable('challengeHistory', state.challengeHistory)
+                     ]);
+
+                     bootstrap.Modal.getInstance(domElements.energyLogModal).hide();
+                     displayDailyChallenges(state.currentChallengeDuration); // Refresh list
+                     showNotification(`Day ${challenge.day} completed! Well done!`, "success");
+                 }, "Completing challenge...");
+            }
+         }
+
+        function readFileAsDataURL(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = e => resolve(e.target.result);
+                reader.onerror = e => reject(e);
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // --- Workshop/Enrollment Logic ---
+
+         function getHoroscope(birthdate) {
+            if (!birthdate) return "Unknown";
+            try {
+                const date = new Date(birthdate);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                 if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Aries";
+                 if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Taurus";
+                 if ((month == 5 && day >= 21) || (month == 6 && day <= 21)) return "Gemini";
+                 if ((month == 6 && day >= 22) || (month == 7 && day <= 22)) return "Cancer";
+                 if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leo";
+                 if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgo";
+                 if ((month == 9 && day >= 23) || (month == 10 && day <= 23)) return "Libra";
+                 if ((month == 10 && day >= 24) || (month == 11 && day <= 21)) return "Scorpio";
+                 if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittarius";
+                 if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricorn";
+                 if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
+                 if ((month == 2 && day >= 19) || (month == 3 && day <= 20)) return "Pisces";
+            } catch (e) { console.error("Error parsing birthdate:", e); }
+            return "Unknown";
+         }
+
+         function showEnrollModal(days) {
+             domElements.enrollName.textContent = state.userName;
+             domElements.enrollHoroscope.textContent = getHoroscope(state.birthdate);
+             domElements.enrollEnergy.textContent = state.energyLevel;
+             domElements.submitEnrollment.disabled = state.energyLevel < 70;
+             domElements.submitEnrollment.setAttribute('data-days', days);
+             bootstrap.Modal.getOrCreateInstance(domElements.enrollModal).show();
+         }
+
+         async function enroll() {
+             const days = parseInt(domElements.submitEnrollment.getAttribute('data-days'));
+             if (state.energyLevel < 70) { showNotification('Energy level must be 70% or higher!', 'error'); return; }
+
+             await handleAsyncAction(async () => {
+                 state.workshopAccess = true;
+                 await saveStateVariable('workshopAccess', state.workshopAccess);
+                 bootstrap.Modal.getInstance(domElements.enrollModal).hide();
+                 loadChallenges();
+                 showNotification(`Enrollment successful! Access granted.`, "success");
+             }, "Processing enrollment...");
+         }
+
+         function showCodeModal(days) {
+             domElements.workshopCode.value = '';
+             domElements.submitCode.setAttribute('data-days', days);
+             bootstrap.Modal.getOrCreateInstance(domElements.codeModal).show();
+         }
+
+         async function submitWorkshopCode() {
+             const code = domElements.workshopCode.value.trim();
+             if (code.toLowerCase() === WORKSHOP_CODE.toLowerCase()) {
+                 await handleAsyncAction(async () => {
+                     state.workshopAccess = true;
+                     await saveStateVariable('workshopAccess', state.workshopAccess);
+                     bootstrap.Modal.getInstance(domElements.codeModal).hide();
+                     loadChallenges();
+                     showNotification(`Code accepted! Access granted.`, "success");
+                 }, "Verifying code...");
+             } else {
+                 showNotification('Invalid workshop code.', 'error');
+             }
+         }
+
+        // --- Game Mechanics ---
+
+         function drawAstrologyWheel() {
+             const canvas = domElements.astrologyWheelCanvas;
+             if (!canvas) return;
+             const ctx = canvas.getContext('2d');
+             const centerX = canvas.width / 2;
+             const centerY = canvas.height / 2;
+             const radius = Math.min(centerX, centerY) - 15;
+             const segments = zodiacOrder.length;
+
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             ctx.font = `${radius * 0.15}px Nunito`;
+             ctx.textAlign = 'center';
+             ctx.textBaseline = 'middle';
+
+             zodiacOrder.forEach((zodiac, index) => {
+                 const startAngle = (index / segments) * 2 * Math.PI - (Math.PI / 2) - (Math.PI/segments); // Offset start for pointer at top
+                 const endAngle = ((index + 1) / segments) * 2 * Math.PI - (Math.PI/2) - (Math.PI/segments);
+                 const midAngle = (startAngle + endAngle) / 2;
+
+                 ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.arc(centerX, centerY, radius, startAngle, endAngle); ctx.closePath();
+                 ctx.fillStyle = `hsl(${(index * 360 / segments) + 30}, 60%, 60%)`; ctx.fill();
+                 ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'; ctx.lineWidth = 1; ctx.stroke();
+
+                 const textX = centerX + Math.cos(midAngle) * (radius * 0.7);
+                 const textY = centerY + Math.sin(midAngle) * (radius * 0.7);
+                 ctx.fillStyle = '#fff'; ctx.fillText(zodiac.symbol, textX, textY);
+             });
+            drawWheelPointer(ctx, canvas.width, canvas.height, radius); // Draw pointer last
+         }
+        function drawWheelPointer(ctx, width, height, radius){
+             // Draw pointer at the top
+             ctx.beginPath();
+             ctx.moveTo(width / 2 - radius * 0.08, height / 2 - radius * 1.1); // Base left
+             ctx.lineTo(width / 2 + radius * 0.08, height / 2 - radius * 1.1); // Base right
+             ctx.lineTo(width / 2, height / 2 - radius * 0.9); // Tip
+             ctx.closePath();
+             ctx.fillStyle = 'gold'; ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2;
+             ctx.fill();
+             ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0; // Reset shadow
+             ctx.strokeStyle = 'black'; ctx.lineWidth = 1; ctx.stroke();
+        }
+
+         async function spinWheel() {
+             if (!state.dailyCheckInDone) { showNotification('Please complete Daily Check-in first!', 'error'); return; }
+             if (isLoading) return;
+
+             await handleAsyncAction(async () => {
+                 const canvas = domElements.astrologyWheelCanvas;
+                 const ctx = canvas.getContext('2d');
+                 const segments = zodiacOrder.length;
+                 const spinDuration = 4000;
+                 const baseRotations = 5;
+                 const randomStopAngle = Math.random() * 2 * Math.PI;
+                 const streakInfluence = (state.consecutiveDays % segments) * (2 * Math.PI / segments) * 0.05; // Reduced influence
+                 const totalAngle = (baseRotations * 2 * Math.PI) + randomStopAngle + streakInfluence;
+                 const startTime = Date.now();
+                 const radius = Math.min(canvas.width / 2, canvas.height / 2) - 15;
+
+                 domElements.astrologyMessage.textContent = "Spinning...";
+
+                 return new Promise(resolve => {
+                     let animationFrameId = null;
+                     function animateSpin() {
+                         const elapsed = Date.now() - startTime;
+                         const progress = Math.min(elapsed / spinDuration, 1);
+                         const easedProgress = 1 - Math.pow(1 - progress, 4);
+                         const currentAngle = easedProgress * totalAngle;
+
+                         ctx.clearRect(0, 0, canvas.width, canvas.height);
+                         ctx.save();
+                         ctx.translate(canvas.width / 2, canvas.height / 2);
+                         ctx.rotate(currentAngle);
+                         ctx.translate(-canvas.width / 2, -canvas.height / 2);
+                         drawAstrologyWheel(); // Redraw wheel rotated
+                         ctx.restore();
+                         drawWheelPointer(ctx, canvas.width, canvas.height, radius); // Redraw fixed pointer
+
+                         if (progress < 1) {
+                             animationFrameId = requestAnimationFrame(animateSpin);
+                         } else {
+                             cancelAnimationFrame(animationFrameId); // Stop animation loop
+                             const finalRotation = currentAngle % (2 * Math.PI);
+                             const pointerAngle = Math.PI / 2; // Pointer is at the top (points down visually, angle is PI/2 from positive X)
+                             const effectiveAngle = (2 * Math.PI - finalRotation + pointerAngle) % (2 * Math.PI);
+                             const segmentAngle = 2 * Math.PI / segments;
+                             const selectedIndex = Math.floor(effectiveAngle / segmentAngle);
+
+                             const selectedSign = zodiacOrder[selectedIndex];
+                             const randomBonus = Math.floor(Math.random() * 3) - 1; // -1, 0, +1
+                             const pointsAwarded = Math.max(1, (selectedSign?.points || 1) + randomBonus);
+
+                             if (selectedSign) {
+                                domElements.astrologyMessage.textContent = `Landed on ${selectedSign.sign} (${selectedSign.symbol}): ${astrologyInsights[selectedSign.sign]}`;
+                                awardPoints(pointsAwarded, "Horoscope Wheel");
+                             } else {
+                                 domElements.astrologyMessage.textContent = "Spin resulted in an unknown sign.";
+                                 console.error("Could not determine selected sign for index:", selectedIndex);
+                             }
+                             resolve(); // Resolve the outer promise
+                         }
+                     }
+                     animateSpin();
+                 });
+             }, "Spinning the wheel...");
+         }
+
+         function initNumerologyPath() {
+             if (!state.dailyCheckInDone) {
+                 showNotification('Please complete Daily Check-in first!', 'error');
+                 domElements.numberGrid.innerHTML = '<p class="text-muted mt-3">Complete Daily Check-in to play.</p>';
+                 return;
+             }
+             if (isLoading) return;
+
+             domElements.numberGrid.innerHTML = '';
+             domElements.numerologyMessage.textContent = "Select a number to reveal your path's insight!";
+             const fragment = document.createDocumentFragment();
+             const maxNumbers = Math.max(3, 9 - Math.floor(state.consecutiveDays / 5));
+
+             for (let i = 1; i <= maxNumbers; i++) {
+                 const button = document.createElement('button');
+                 button.className = 'btn btn-lg btn-custom m-1 shadow-sm'; // Added shadow
+                 button.textContent = i;
+                 button.onclick = async () => {
+                     if (isLoading) return;
+
+                      await handleAsyncAction(async () => {
+                         // Disable all buttons immediately after click
+                         domElements.numberGrid.querySelectorAll('button').forEach(btn => btn.disabled = true);
+
+                         const streakBonus = Math.floor(state.consecutiveDays / 5);
+                         const pointsAwarded = (i * 2) + streakBonus;
+                         domElements.numerologyMessage.textContent = `Number ${i}: ${numerologyInsights[i]}`;
+                         await awardPoints(pointsAwarded, "Numerology Path");
+                         showNotification(`Insight revealed! ${streakBonus > 0 ? `(+${streakBonus} streak bonus)` : ''}`, "success");
+                      }, "Revealing insight...");
+                 };
+                 fragment.appendChild(button);
+             }
+             domElements.numberGrid.appendChild(fragment);
+         }
+
+
+        // --- Profile & Leaderboard ---
+
+        function loadProfileHistory() {
+             const fragment = document.createDocumentFragment();
+             if (state.challengeHistory && state.challengeHistory.length > 0) {
+                 [...state.challengeHistory].reverse().slice(0, 50).forEach(entry => { // Limit displayed history
+                     const row = document.createElement('tr');
+                     // Use placeholders or icons instead of full Data URLs in table
+                     const proof1Icon = entry.task1Image ? '<i class="fas fa-image text-info" title="Proof Uploaded"></i>' : '-';
+                     const proof2Icon = entry.task2Image ? '<i class="fas fa-image text-info" title="Proof Uploaded"></i>' : '-';
+                     row.innerHTML = `
+                        <td>${entry.day}</td>
+                        <td>${entry.goal}</td>
+                        <td>${entry.energyBefore ?? '-'}%</td>
+                        <td>${entry.energyAfter ?? '-'}%</td>
+                        <td class="text-center">${proof1Icon}</td>
+                        <td class="text-center">${proof2Icon}</td>
+                     `;
+                     fragment.appendChild(row);
+                 });
+             } else {
+                 const row = document.createElement('tr');
+                 row.innerHTML = '<td colspan="6" class="text-center text-muted">No challenge history yet.</td>';
+                 fragment.appendChild(row);
+             }
+             domElements.profileHistory.innerHTML = '';
+             domElements.profileHistory.appendChild(fragment);
+        }
+
+        function updateLeaderboard() {
+             const fragment = document.createDocumentFragment();
+             if (state.leaderboard && state.leaderboard.length > 0) {
+                 state.leaderboard
+                    .sort((a, b) => b.points - a.points)
+                    .slice(0, 100)
+                    .forEach((player, index) => {
+                        const row = document.createElement('tr');
+                        const isCurrentUser = player.userId === state.userId;
+                        row.className = isCurrentUser ? 'table-active' : '';
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${player.name || 'Anonymous'} ${isCurrentUser ? '<span class="badge bg-primary ms-1">You</span>' : ''}</td>
+                            <td>${player.points}</td>
+                        `;
+                        fragment.appendChild(row);
+                 });
+             } else {
+                 const row = document.createElement('tr');
+                 row.innerHTML = '<td colspan="3" class="text-center text-muted">Leaderboard is empty.</td>';
+                 fragment.appendChild(row);
+             }
+             domElements.leaderboard.innerHTML = '';
+             domElements.leaderboard.appendChild(fragment);
+        }
+
+         async function deleteProgress() {
+             const confirmAction = async (message) => {
+                 return new Promise((resolve) => {
+                    if (window.Telegram?.WebApp?.showConfirm) {
+                        Telegram.WebApp.showConfirm(message, (confirmed) => resolve(confirmed));
+                    } else {
+                        resolve(confirm(message));
+                    }
+                 });
+             };
+
+             const confirmed = await confirmAction('⚠️ Reset ALL progress? This cannot be undone!');
+
+             if (confirmed) {
+                 await handleAsyncAction(async () => {
+                     showLoading(true, "Resetting progress...");
+
+                     const keysToClear = Object.keys(initializeState());
+                     if (USE_CLOUD_STORAGE) {
+                         await new Promise((resolve, reject) => {
+                             Telegram.WebApp.CloudStorage.deleteKeys(keysToClear, (error, success) => {
+                                 if (error) { console.error("CloudStorage deleteKeys error:", error); reject(error); }
+                                 else { console.log("CloudStorage keys cleared."); resolve(); }
+                             });
+                         });
+                     } else {
+                         keysToClear.forEach(key => localStorage.removeItem(key));
+                         console.log("LocalStorage cleared.");
+                     }
+
+                      // Re-initialize state
+                      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+                      state = initializeState(tgUser);
+                      state.challenges = initializeChallenges();
+                      // Ensure the current user is in the fresh default leaderboard
+                      if (!state.leaderboard.find(p => p.userId === state.userId)) {
+                          state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+                      }
+                      state.leaderboard.sort((a, b) => b.points - a.points);
+
+
+                     // Save minimal essential state back
+                     await Promise.all([
+                         saveStateVariable('challenges', state.challenges),
+                         saveStateVariable('leaderboard', state.leaderboard),
+                         saveStateVariable('points', state.points), // Save 0 points
+                         saveStateVariable('energyLevel', state.energyLevel), // Save 0 energy
+                         saveStateVariable('consecutiveDays', state.consecutiveDays), // Save 0 days
+                         // Clear specific flags
+                         saveStateVariable('dailyCheckInDone', false),
+                         saveStateVariable('lastCheckInTime', null),
+                         saveStateVariable('lastPlayedDate', null),
+                         saveStateVariable('workshopAccess', false),
+                         saveStateVariable('birthdate', null),
+                         saveStateVariable('completedTasks', []),
+                         saveStateVariable('challengeHistory', [])
+                     ]);
+
+                     // No need for updateUI here, handleAsyncAction does it
+                     showNotification("Progress has been reset.", "success");
+                     // Re-run initialization logic to ensure UI reflects cleared state
+                     initializeApp(); // Re-init to go to correct starting screen
+                 }, "Resetting progress...");
+             } else {
+                 showNotification("Reset cancelled.");
+             }
+         }
+
+
+        // --- Tasks & Referrals ---
+
+        function updateTaskButtons() {
+            if (!domElements.socialMediaTasks) return;
+             const taskButtons = domElements.socialMediaTasks.querySelectorAll('button[data-task]');
+             taskButtons.forEach(button => {
+                 const taskKey = button.getAttribute('data-task');
+                 if (state.completedTasks.includes(taskKey)) {
+                     button.disabled = true;
+                     button.innerHTML = '<i class="fas fa-check me-1"></i> Claimed';
+                     button.classList.remove('btn-custom');
+                     button.classList.add('btn-success', 'btn-sm'); // Use success style
+                 } else {
+                     button.disabled = false;
+                     button.innerHTML = `Claim (+${POINTS.SOCIAL_TASK})`;
+                     button.classList.add('btn-custom', 'btn-sm');
+                     button.classList.remove('btn-success', 'btn-secondary');
+                 }
+             });
+        }
+
+        async function completeTask(taskKey) {
+             if (isLoading || state.completedTasks.includes(taskKey)) return;
+
+             await handleAsyncAction(async () => {
+                 state.completedTasks.push(taskKey);
+                 await awardPoints(POINTS.SOCIAL_TASK, `Task: ${taskKey.charAt(0).toUpperCase() + taskKey.slice(1)}`);
+                 await saveStateVariable('completedTasks', state.completedTasks);
+                 // UI update handled by handleAsyncAction
+                 showNotification('Task claimed!', "success");
+             }, "Claiming task...");
+        }
+
+
+        function copyReferralLink() {
+            const referralLinkInput = domElements.referralLink;
+            if (!referralLinkInput || !referralLinkInput.value) return;
+
+            navigator.clipboard.writeText(referralLinkInput.value).then(() => {
+                showNotification('Referral link copied!', "success");
+            }).catch(err => {
+                console.error('Failed to copy referral link: ', err);
+                 try {
+                    referralLinkInput.select(); document.execCommand('copy');
+                    showNotification('Referral link copied (fallback)!', "success");
+                 } catch (e) { showNotification('Could not copy link.', 'error'); }
+            });
+        }
+
+        // --- Event Listeners Setup ---
+        function setupEventListeners() {
+            // One-time setup
+            domElements.navHome.addEventListener('click', (e) => { e.preventDefault(); showSection('wellnessManager'); });
+            domElements.navTasks.addEventListener('click', (e) => { e.preventDefault(); showSection('tasksSection'); });
+            domElements.navGame.addEventListener('click', (e) => { e.preventDefault(); showSection('gamePage'); });
+            domElements.navProfile.addEventListener('click', (e) => { e.preventDefault(); showSection('playerProfile'); });
+            domElements.profileLink.addEventListener('click', () => showSection('playerProfile'));
+            domElements.saveHoroscopeBtn.addEventListener('click', saveHoroscope);
+            domElements.energySlider.addEventListener('input', () => { domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`; });
+            domElements.submitEnergyLog.addEventListener('click', submitEnergyLog);
+            domElements.submitEnrollment.addEventListener('click', enroll);
+            domElements.submitCode.addEventListener('click', submitWorkshopCode);
+            domElements.dailyCheckInBtn.addEventListener('click', dailyCheckIn);
+            domElements.playHoroscopeWheel.addEventListener('click', () => showSection('horoscopeWheelPage'));
+            domElements.playNumerologyPath.addEventListener('click', () => showSection('numerologyPathPage'));
+            domElements.spinWheel.addEventListener('click', spinWheel);
+            domElements.deleteProgressBtn.addEventListener('click', deleteProgress);
+            domElements.connectWalletBtn.addEventListener('click', () => showNotification('Wallet connection coming soon!', 'info'));
+            domElements.airdropWithdrawBtn.addEventListener('click', () => showNotification('Airdrop withdraw coming soon!', 'info'));
+
+             // Event delegation for dynamic elements (tasks)
+             if (domElements.socialMediaTasks) {
+                 domElements.socialMediaTasks.addEventListener('click', (e) => {
+                     if (e.target.matches('button[data-task]')) {
+                         completeTask(e.target.getAttribute('data-task'));
+                     }
+                 });
+             }
+
+            // Telegram Back Button
+            if (window.Telegram?.WebApp) { Telegram.WebApp.BackButton.onClick(goBack); }
+
+            // Referral Handling (Example)
+            if (window.Telegram?.WebApp?.initData) {
+                const startParam = new URLSearchParams(window.Telegram.WebApp.initData).get('start');
+                if (startParam) { console.log("Started with referral code:", startParam); /* Add referral logic here */ }
+            }
+        }
+
+         // --- Utility Functions ---
+         function isColorDark(hexColor) {
+             if (!hexColor) return true;
+             try {
+                 let color = hexColor.substring(1);
+                 if (color.length === 3) color = color.split('').map(c => c + c).join(''); // Expand shorthand hex
+                 const r = parseInt(color.substring(0, 2), 16);
+                 const g = parseInt(color.substring(2, 4), 16);
+                 const b = parseInt(color.substring(4, 6), 16);
+                 const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+                 return luminance < 0.55; // Adjusted threshold slightly
+             } catch (e) { console.error("Error checking color darkness:", e); return true; }
+         }
+
+    </script>
+</body>
+</html>
