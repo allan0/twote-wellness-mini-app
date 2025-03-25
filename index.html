@@ -10,9 +10,9 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #4E342E; /* Brown */
-            --text-color: #3E2723; /* Dark Brown */
-            --button-color: #FFD700; /* Gold */
+            --bg-color: #4E342E;
+            --text-color: #3E2723;
+            --button-color: #FFD700;
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -222,31 +222,15 @@
             <div id="socialMediaTasks">
                 <h3>Social Media Tasks</h3>
                 <ul>
-                    <li>
-                        <i class="fab fa-twitter task-icon" title="Twitter"></i>
-                        Follow us on Twitter: <a href="https://twitter.com/ThirdEyeApp" target="_blank">Twitter</a>
-                        <button class="btn btn-custom" id="twitterTaskBtn" onclick="completeTask('twitter')">Complete</button>
-                    </li>
-                    <li>
-                        <i class="fab fa-telegram-plane task-icon" title="Telegram"></i>
-                        Join our Telegram group: <a href="https://t.me/ThirdEyeCommunity" target="_blank">Telegram</a>
-                        <button class="btn btn-custom" id="telegramTaskBtn" onclick="completeTask('telegram')">Complete</button>
-                    </li>
-                    <li>
-                        <i class="fab fa-instagram task-icon" title="Instagram"></i>
-                        Follow us on Instagram: <a href="https://instagram.com/ThirdEyeApp" target="_blank">Instagram</a>
-                        <button class="btn btn-custom" id="instagramTaskBtn" onclick="completeTask('instagram')">Complete</button>
-                    </li>
-                    <li>
-                        <i class="fab fa-youtube task-icon" title="YouTube"></i>
-                        Subscribe to our YouTube: <a href="https://youtube.com/@ThirdEyeChannel" target="_blank">YouTube</a>
-                        <button class="btn btn-custom" id="youtubeTaskBtn" onclick="completeTask('youtube')">Complete</button>
-                    </li>
+                    <li><i class="fab fa-twitter task-icon"></i>Follow us on Twitter: <a href="https://twitter.com/ThirdEyeApp" target="_blank">Twitter</a><button class="btn btn-custom" id="twitterTaskBtn" onclick="completeTask('twitter')">Complete</button></li>
+                    <li><i class="fab fa-telegram-plane task-icon"></i>Join our Telegram group: <a href="https://t.me/ThirdEyeCommunity" target="_blank">Telegram</a><button class="btn btn-custom" id="telegramTaskBtn" onclick="completeTask('telegram')">Complete</button></li>
+                    <li><i class="fab fa-instagram task-icon"></i>Follow us on Instagram: <a href="https://instagram.com/ThirdEyeApp" target="_blank">Instagram</a><button class="btn btn-custom" id="instagramTaskBtn" onclick="completeTask('instagram')">Complete</button></li>
+                    <li><i class="fab fa-youtube task-icon"></i>Subscribe to our YouTube: <a href="https://youtube.com/@ThirdEyeChannel" target="_blank">YouTube</a><button class="btn btn-custom" id="youtubeTaskBtn" onclick="completeTask('youtube')">Complete</button></li>
                 </ul>
             </div>
             <div id="referralTask">
                 <h3>Referral Task</h3>
-                <p>Share your referral link to earn points when someone joins!</p>
+                <p>Share your referral link to earn points!</p>
                 <input type="text" id="referralLink" readonly>
                 <button class="btn btn-custom" onclick="copyReferralLink()">Copy Link</button>
             </div>
@@ -286,6 +270,11 @@
                 <thead><tr><th>Day</th><th>Goal</th><th>Energy Before</th><th>Energy After</th><th>Task 1 Proof</th><th>Task 2 Proof</th></tr></thead>
                 <tbody id="profileHistory"></tbody>
             </table>
+            <h3 class="mt-3">Leaderboard - Top 100</h3>
+            <table class="table">
+                <thead><tr><th>Rank</th><th>Name</th><th>Points ($twote)</th></tr></thead>
+                <tbody id="leaderboard"></tbody>
+            </table>
         </div>
     </div>
 
@@ -321,16 +310,48 @@
         </div>
     </div>
 
+    <div class="modal fade" id="enrollModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enroll in Workshop</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Name:</strong> <span id="enrollName"></span></p>
+                    <p><strong>Horoscope:</strong> <span id="enrollHoroscope"></span></p>
+                    <p><strong>Energy Level:</strong> <span id="enrollEnergy"></span>%</p>
+                    <button class="btn btn-custom" id="submitEnrollment" disabled>Submit Enrollment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="codeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enter Workshop Code</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="workshopCode" class="form-control" placeholder="Enter code">
+                    <button class="btn btn-custom mt-2" id="submitCode">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
     <script>
         const dailyGoals = [
-            { goal: "Wealth", meditation: "Visualize wealth.", task1: "Write 3 financial goals.", task2: "Plan a budget." },
-            { goal: "Peace", meditation: "Reflect on peace.", task1: "5-min gratitude.", task2: "5-min breathing." },
-            { goal: "Focus", meditation: "Focus your mind.", task1: "List 3 priorities.", task2: "Organize workspace." },
-            { goal: "Creativity", meditation: "Boost creativity.", task1: "Brainstorm 5 ideas.", task2: "Draw something." },
-            { goal: "Confidence", meditation: "Build confidence.", task1: "Write 3 positives.", task2: "Power pose 2 min." },
-            { goal: "Energy", meditation: "Energize yourself.", task1: "Visualize energy.", task2: "5-min stretch." },
-            { goal: "Gratitude", meditation: "Cultivate gratitude.", task1: "Write 3 thanks.", task2: "Send a thank-you." }
+            { goal: "Wealth", meditation: "Visualize wealth.", task1: "Write 3 financial goals.", task2: "Plan a budget.", points: 5 },
+            { goal: "Peace", meditation: "Reflect on peace.", task1: "5-min gratitude.", task2: "5-min breathing.", points: 5 },
+            { goal: "Focus", meditation: "Focus your mind.", task1: "List 3 priorities.", task2: "Organize workspace.", points: 5 },
+            { goal: "Creativity", meditation: "Boost creativity.", task1: "Brainstorm 5 ideas.", task2: "Draw something.", points: 5 },
+            { goal: "Confidence", meditation: "Build confidence.", task1: "Write 3 positives.", task2: "Power pose 2 min.", points: 5 },
+            { goal: "Energy", meditation: "Energize yourself.", task1: "Visualize energy.", task2: "5-min stretch.", points: 5 },
+            { goal: "Gratitude", meditation: "Cultivate gratitude.", task1: "Write 3 thanks.", task2: "Send a thank-you.", points: 5 }
         ];
 
         const zodiacOrder = [
@@ -367,7 +388,9 @@
             consecutiveDays: 0,
             lastPlayedDate: null,
             dailyCheckInDone: false,
-            completedTasks: []
+            completedTasks: [],
+            workshopAccess: false,
+            leaderboard: []
         };
 
         let sectionStack = [];
@@ -399,7 +422,14 @@
                 numerologyMessage: document.getElementById('numerologyMessage'),
                 numberGrid: document.getElementById('numberGrid'),
                 referralLink: document.getElementById('referralLink'),
-                dailyCheckInBtn: document.getElementById('dailyCheckInBtn')
+                dailyCheckInBtn: document.getElementById('dailyCheckInBtn'),
+                leaderboard: document.getElementById('leaderboard'),
+                enrollName: document.getElementById('enrollName'),
+                enrollHoroscope: document.getElementById('enrollHoroscope'),
+                enrollEnergy: document.getElementById('enrollEnergy'),
+                submitEnrollment: document.getElementById('submitEnrollment'),
+                workshopCode: document.getElementById('workshopCode'),
+                submitCode: document.getElementById('submitCode')
             };
         }
 
@@ -436,7 +466,7 @@
             async function init() {
                 document.getElementById('loading').style.display = 'flex';
                 try {
-                    const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks'];
+                    const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
                     const values = await Promise.all(keys.map(key => 
                         Telegram.WebApp.CloudStorage.getItem(key).catch(() => null)
                     ));
@@ -453,16 +483,16 @@
                     state.lastPlayedDate = values[9] || null;
                     state.dailyCheckInDone = values[10] === 'true';
                     state.completedTasks = JSON.parse(values[11] || '[]');
+                    state.workshopAccess = values[12] === 'true';
+                    state.leaderboard = JSON.parse(values[13] || '[]');
 
                     if (!state.challenges.length) {
                         state.challenges = initializeChallenges();
                         await Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges));
                     }
 
-                    const startParam = Telegram.WebApp.initDataUnsafe.start_param;
-                    if (!state.birthdate && startParam) {
-                        state.referrer = startParam;
-                        await Telegram.WebApp.CloudStorage.setItem('referrer', startParam);
+                    if (!state.leaderboard.find(p => p.userId === state.userId)) {
+                        state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
                     }
 
                     checkDailyStreak();
@@ -489,10 +519,16 @@
                 state.lastPlayedDate = localStorage.getItem('lastPlayedDate') || null;
                 state.dailyCheckInDone = localStorage.getItem('dailyCheckInDone') === 'true';
                 state.completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+                state.workshopAccess = localStorage.getItem('workshopAccess') === 'true';
+                state.leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
 
                 if (!state.challenges.length) {
                     state.challenges = initializeChallenges();
                     localStorage.setItem('challenges', JSON.stringify(state.challenges));
+                }
+
+                if (!state.leaderboard.find(p => p.userId === state.userId)) {
+                    state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
                 }
 
                 checkDailyStreak();
@@ -514,6 +550,7 @@
                 }
                 domElements.dailyCheckInBtn.disabled = state.dailyCheckInDone;
                 domElements.dailyCheckInBtn.textContent = state.dailyCheckInDone ? "Checked In" : "Daily Check-In";
+                updateLeaderboard();
             }
 
             function showSection(sectionId) {
@@ -573,16 +610,22 @@
 
             async function awardPoints(amount) {
                 state.points += amount;
+                const player = state.leaderboard.find(p => p.userId === state.userId);
+                if (player) player.points = state.points;
                 if (window.Telegram?.WebApp) {
-                    await Telegram.WebApp.CloudStorage.setItem('points', state.points.toString());
+                    await Promise.all([
+                        Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
+                        Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
+                    ]);
                 } else {
                     localStorage.setItem('points', state.points);
+                    localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                 }
                 updateUI();
             }
 
             function checkDailyStreak() {
-                const today = new Date("2025-03-25"); // Fixed date as per your setup
+                const today = new Date("2025-03-25");
                 const lastPlayed = state.lastPlayedDate ? new Date(state.lastPlayedDate) : null;
                 if (!lastPlayed) return;
 
@@ -607,7 +650,7 @@
                 state.lastPlayedDate = today;
                 state.dailyCheckInDone = true;
                 state.consecutiveDays++;
-                awardPoints(5); // Bonus for checking in
+                await awardPoints(5);
 
                 if (window.Telegram?.WebApp) {
                     await Promise.all([
@@ -633,6 +676,7 @@
                         meditation: dailyGoals[goalIndex].meditation,
                         task1: dailyGoals[goalIndex].task1,
                         task2: dailyGoals[goalIndex].task2,
+                        points: dailyGoals[goalIndex].points,
                         completed: false
                     };
                 });
@@ -640,8 +684,9 @@
 
             function isChallengeUnlocked(days) {
                 if (days === 7) return true;
-                const requiredCompletedDays = days === 21 ? 7 : days === 41 ? 21 : days === 66 ? 41 : 66;
-                return state.challenges.slice(0, requiredCompletedDays).every(ch => ch.completed);
+                if (days === 21) return state.challenges.slice(0, 7).every(ch => ch.completed);
+                if (days === 41) return state.challenges.slice(0, 21).every(ch => ch.completed);
+                return state.workshopAccess && (days === 66 || days === 150);
             }
 
             function loadChallenges() {
@@ -654,15 +699,24 @@
                     div.innerHTML = `
                         <i class="fas fa-star challenge-icon"></i>
                         <h3>${days}-Day Challenge</h3>
-                        <button class="btn btn-custom" data-days="${days}" ${isUnlocked ? '' : 'disabled'}>Start Challenge</button>
+                        ${isUnlocked ? 
+                            `<button class="btn btn-custom" data-days="${days}">Start Challenge</button>` : 
+                            days > 41 ? 
+                            `<p>Requires workshop participation</p>
+                             <button class="btn btn-custom" data-days="${days}" onclick="showEnrollModal(${days})">Enroll</button>
+                             <button class="btn btn-custom mt-2" data-days="${days}" onclick="showCodeModal(${days})">Already Attended</button>` : 
+                            `<p>Complete ${days === 21 ? '7-Day' : '21-Day'} Challenge first</p>`}
                     `;
                     domElements.challengeOptions.appendChild(div);
                 });
 
-                document.querySelectorAll('#challengeOptions button').forEach(btn => {
+                document.querySelectorAll('#challengeOptions button[data-days]').forEach(btn => {
                     btn.addEventListener('click', () => {
-                        state.currentChallengeDuration = parseInt(btn.getAttribute('data-days'));
-                        showSection('dailyChallenges');
+                        const days = parseInt(btn.getAttribute('data-days'));
+                        if (isChallengeUnlocked(days)) {
+                            state.currentChallengeDuration = days;
+                            showSection('dailyChallenges');
+                        }
                     });
                 });
             }
@@ -675,9 +729,9 @@
                     card.className = 'challenge-div';
                     const prevDayCompleted = index === 0 || state.challenges[index - 1].completed;
                     if (challenge.completed) {
-                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Completed</p>`;
-                    } else if (!prevDayCompleted && state.consecutiveDays === 0) {
-                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete previous day or check in!</p>`;
+                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Completed (+${challenge.points} $twote)</p>`;
+                    } else if (!prevDayCompleted) {
+                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete previous day first!</p>`;
                     } else {
                         card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><button class="btn btn-custom" data-day="${challenge.day}">Start Day ${challenge.day}</button>`;
                     }
@@ -748,6 +802,7 @@
                         task2Image
                     });
                     await updateEnergyLevel(state.energyBefore, energyAfter);
+                    await awardPoints(challenge.points);
                     if (window.Telegram?.WebApp) {
                         await Promise.all([
                             Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges)),
@@ -770,13 +825,81 @@
                 });
             }
 
+            function getHoroscope(birthdate) {
+                if (!birthdate) return "Unknown";
+                const date = new Date(birthdate);
+                const month = date.getMonth() + 1;
+                const day = date.getDate();
+                if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "Aries";
+                if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "Taurus";
+                if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "Gemini";
+                if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "Cancer";
+                if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "Leo";
+                if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "Virgo";
+                if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "Libra";
+                if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "Scorpio";
+                if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "Sagittarius";
+                if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "Capricorn";
+                if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "Aquarius";
+                if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return "Pisces";
+                return "Unknown";
+            }
+
+            function showEnrollModal(days) {
+                domElements.enrollName.textContent = state.userName;
+                domElements.enrollHoroscope.textContent = getHoroscope(state.birthdate);
+                domElements.enrollEnergy.textContent = state.energyLevel;
+                domElements.submitEnrollment.disabled = state.energyLevel < 70;
+                domElements.submitEnrollment.onclick = () => enroll(days);
+                new bootstrap.Modal(document.getElementById('enrollModal')).show();
+            }
+
+            async function enroll(days) {
+                if (state.energyLevel < 70) {
+                    Telegram.WebApp?.showAlert('Energy level must be 70 or higher to enroll!') || alert('Energy level must be 70 or higher to enroll!');
+                    return;
+                }
+                state.workshopAccess = true;
+                if (window.Telegram?.WebApp) {
+                    await Telegram.WebApp.CloudStorage.setItem('workshopAccess', 'true');
+                } else {
+                    localStorage.setItem('workshopAccess', 'true');
+                }
+                bootstrap.Modal.getInstance(document.getElementById('enrollModal')).hide();
+                loadChallenges();
+                Telegram.WebApp?.showAlert(`Enrolled for ${days}-Day Challenge!`) || alert(`Enrolled for ${days}-Day Challenge!`);
+            }
+
+            function showCodeModal(days) {
+                domElements.workshopCode.value = '';
+                domElements.submitCode.onclick = () => submitCode(days);
+                new bootstrap.Modal(document.getElementById('codeModal')).show();
+            }
+
+            async function submitCode(days) {
+                const code = domElements.workshopCode.value.trim();
+                if (code === "Wellness") {
+                    state.workshopAccess = true;
+                    if (window.Telegram?.WebApp) {
+                        await Telegram.WebApp.CloudStorage.setItem('workshopAccess', 'true');
+                    } else {
+                        localStorage.setItem('workshopAccess', 'true');
+                    }
+                    bootstrap.Modal.getInstance(document.getElementById('codeModal')).hide();
+                    loadChallenges();
+                    Telegram.WebApp?.showAlert(`Access granted for ${days}-Day Challenge!`) || alert(`Access granted for ${days}-Day Challenge!`);
+                } else {
+                    Telegram.WebApp?.showAlert('Invalid code! Use "Wellness"') || alert('Invalid code! Use "Wellness"');
+                }
+            }
+
             function drawAstrologyWheel() {
                 const canvas = document.getElementById('astrologyWheelCanvas');
                 const ctx = canvas.getContext('2d');
                 const centerX = canvas.width / 2;
                 const centerY = canvas.height / 2;
                 const radius = canvas.width / 2 - 20;
-                const difficultyFactor = Math.min(state.consecutiveDays / 10, 0.5); // Shrink zones up to 50%
+                const difficultyFactor = Math.min(state.consecutiveDays / 10, 0.5);
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 zodiacOrder.forEach((zodiac, index) => {
@@ -806,7 +929,7 @@
                 const ctx = canvas.getContext('2d');
                 let angle = 0;
                 const baseSpinDuration = 3000;
-                const difficultySpeed = 0.1 + (state.consecutiveDays * 0.02); // Faster with days
+                const difficultySpeed = 0.1 + (state.consecutiveDays * 0.02);
                 const startTime = Date.now();
                 const randomStop = Math.floor(Math.random() * 12);
 
@@ -839,7 +962,7 @@
                     return;
                 }
                 domElements.numberGrid.innerHTML = '';
-                const maxNumbers = Math.max(9 - Math.floor(state.consecutiveDays / 2), 3); // Decrease numbers, min 3
+                const maxNumbers = Math.max(9 - Math.floor(state.consecutiveDays / 2), 3);
                 for (let i = 1; i <= maxNumbers; i++) {
                     const button = document.createElement('button');
                     button.className = 'btn btn-custom m-1';
@@ -847,7 +970,7 @@
                     button.addEventListener('click', () => {
                         domElements.numerologyMessage.textContent = `Number ${i}: ${numerologyInsights[i]} (+${i} $twote)`;
                         awardPoints(i);
-                        domElements.numberGrid.innerHTML = ''; // Disable further clicks
+                        domElements.numberGrid.innerHTML = '';
                     });
                     domElements.numberGrid.appendChild(button);
                 }
@@ -866,6 +989,17 @@
                 `).join('');
             }
 
+            function updateLeaderboard() {
+                state.leaderboard.sort((a, b) => b.points - a.points);
+                domElements.leaderboard.innerHTML = state.leaderboard.slice(0, 100).map((player, index) => `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${player.name}</td>
+                        <td>${player.points}</td>
+                    </tr>
+                `).join('');
+            }
+
             async function deleteProgress() {
                 if (confirm('Are you sure you want to delete your progress?')) {
                     state.challenges = initializeChallenges();
@@ -875,6 +1009,10 @@
                     state.consecutiveDays = 0;
                     state.lastPlayedDate = null;
                     state.dailyCheckInDone = false;
+                    state.workshopAccess = false;
+                    const player = state.leaderboard.find(p => p.userId === state.userId);
+                    if (player) player.points = 0;
+
                     if (window.Telegram?.WebApp) {
                         await Promise.all([
                             Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges)),
@@ -883,7 +1021,9 @@
                             Telegram.WebApp.CloudStorage.setItem('points', '0'),
                             Telegram.WebApp.CloudStorage.setItem('consecutiveDays', '0'),
                             Telegram.WebApp.CloudStorage.removeItem('lastPlayedDate'),
-                            Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'false')
+                            Telegram.WebApp.CloudStorage.setItem('dailyCheckInDone', 'false'),
+                            Telegram.WebApp.CloudStorage.setItem('workshopAccess', 'false'),
+                            Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
                         ]);
                     } else {
                         localStorage.setItem('challenges', JSON.stringify(state.challenges));
@@ -893,6 +1033,8 @@
                         localStorage.setItem('consecutiveDays', '0');
                         localStorage.removeItem('lastPlayedDate');
                         localStorage.setItem('dailyCheckInDone', 'false');
+                        localStorage.setItem('workshopAccess', 'false');
+                        localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                     }
                     updateUI();
                     loadProfileHistory();
@@ -928,14 +1070,19 @@
                 if (!state.completedTasks.includes(task)) {
                     state.completedTasks.push(task);
                     state.points += 10;
+                    const player = state.leaderboard.find(p => p.userId === state.userId);
+                    if (player) player.points = state.points;
+
                     if (window.Telegram?.WebApp) {
                         await Promise.all([
                             Telegram.WebApp.CloudStorage.setItem('completedTasks', JSON.stringify(state.completedTasks)),
-                            Telegram.WebApp.CloudStorage.setItem('points', state.points.toString())
+                            Telegram.WebApp.CloudStorage.setItem('points', state.points.toString()),
+                            Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard))
                         ]);
                     } else {
                         localStorage.setItem('completedTasks', JSON.stringify(state.completedTasks));
                         localStorage.setItem('points', state.points);
+                        localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                     }
                     updateUI();
                     updateTaskButtons();
