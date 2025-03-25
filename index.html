@@ -16,6 +16,7 @@
             --button-text-color: #3E2723;
             --wellness-manager-color: #3E2723; /* Dark brown */
             --warning-color: #8B0000; /* Deep red */
+            --challenge-description-color: #3E2723; /* Dark brown for challenge descriptions */
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -55,7 +56,7 @@
             margin-bottom: 15px;
             text-align: center;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            color: #333;
+            color: var(--challenge-description-color); /* Dark brown for challenge descriptions */
         }
         .challenge-icon {
             font-size: 2.5em;
@@ -63,7 +64,7 @@
             color: var(--text-color);
         }
         .challenge-div .challenge-icon {
-            color: #333;
+            color: var(--challenge-description-color); /* Dark brown for icons in challenge divs */
         }
         .modal-content {
             background: var(--bg-color);
@@ -87,7 +88,7 @@
             background-color: var(--button-color);
         }
         .btn-danger {
-            background-color: var(--warning-color); /* Changed to deep red */
+            background-color: var(--warning-color); /* Deep red for warnings */
             color: #fff;
             border: none;
             box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2), -2px -2px 4px rgba(255, 255, 255, 0.2);
@@ -124,6 +125,10 @@
         }
         #wellnessManager h2 {
             color: var(--wellness-manager-color); /* Dark brown for Wellness Manager */
+        }
+        .warning-text {
+            color: var(--warning-color); /* Deep red for warnings */
+            font-weight: bold;
         }
         .footer-nav {
             position: fixed;
@@ -174,12 +179,28 @@
         #socialMediaTasks a:hover {
             text-decoration: underline;
         }
+        /* Responsive Design */
         @media (max-width: 768px) {
             .container { padding: 0 10px; }
             .section { padding: 15px; }
             .challenge-div { padding: 10px; }
             .challenge-icon { font-size: 2em; }
-            .btn-custom { width: 100%; margin-bottom: 15px; }
+            .btn-custom { 
+                width: 100%; 
+                margin-bottom: 15px; 
+                padding: 12px; /* Larger tap area */
+            }
+            h1, h2, h3, h4 { font-size: 1.5rem; }
+            p { font-size: 1rem; }
+            .challenge-div h3 { font-size: 1.25rem; }
+            .warning-text { font-size: 0.9rem; }
+        }
+        @media (max-width: 576px) {
+            .footer-nav a { font-size: 14px; }
+            .footer-nav a i { font-size: 20px; }
+            h1, h2, h3, h4 { font-size: 1.25rem; }
+            p { font-size: 0.875rem; }
+            .challenge-icon { font-size: 1.75em; }
         }
     </style>
 </head>
@@ -825,10 +846,10 @@
                         ${isUnlocked ? 
                             `<button class="btn btn-custom start-challenge-btn" data-days="${days}">Start Challenge</button>` : 
                             days > 41 ? 
-                            `<p>Requires workshop participation</p>
+                            `<p class="warning-text">Requires workshop participation</p>
                              <button class="btn btn-custom enroll-btn" data-days="${days}">Enroll</button>
                              <button class="btn btn-custom mt-2 attended-btn" data-days="${days}">Already Attended</button>` : 
-                            `<p>Complete ${days === 21 ? '7-Day' : '21-Day'} Challenge first</p>`}
+                            `<p class="warning-text">Complete ${days === 21 ? '7-Day' : '21-Day'} Challenge first</p>`}
                     `;
                     domElements.challengeOptions.appendChild(div);
                 });
@@ -868,7 +889,7 @@
                     if (challenge.completed) {
                         card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Completed (+${challenge.points} $twote)</p>`;
                     } else if (!prevDayCompleted) {
-                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p>Complete previous day first!</p>`;
+                        card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><p class="warning-text">Complete previous day first!</p>`;
                     } else {
                         card.innerHTML = `<h4>Day ${challenge.day}: ${challenge.goal}</h4><button class="btn btn-custom" data-day="${challenge.day}">Start Day ${challenge.day}</button>`;
                     }
