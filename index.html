@@ -10,10 +10,10 @@
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --bg-color: #4E342E; /* Brown */
-            --text-color: #FFF8E1; /* Soft cream for better contrast */
-            --button-color: #FFD700; /* Gold */
-            --button-text-color: #3E2723; /* Dark brown for button text */
+            --bg-color: #4E342E;
+            --text-color: #FFF8E1;
+            --button-color: #FFD700;
+            --button-text-color: #3E2723;
         }
         body {
             font-family: 'Nunito', sans-serif;
@@ -77,7 +77,7 @@
         .btn-custom:hover, .btn-custom:active, .btn-custom:focus {
             transform: scale(1.05);
             box-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3), -4px -4px 8px rgba(255, 255, 255, 0.3);
-            color: var(--button-text-color); /* Ensure text stays visible */
+            color: var(--button-text-color);
             background-color: var(--button-color);
         }
         .btn-danger {
@@ -372,22 +372,7 @@
 
         const sections = ['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage', 'horoscopeWheelPage', 'numerologyPathPage', 'playerProfile'];
 
-        let state = {
-            userId: null,
-            userName: "Guest",
-            userPhoto: "https://via.placeholder.com/40",
-            energyLevel: 0,
-            points: 0,
-            challenges: [],
-            challengeHistory: [],
-            birthdate: null,
-            consecutiveDays: 0,
-            lastPlayedDate: null,
-            dailyCheckInDone: false,
-            completedTasks: [],
-            workshopAccess: false,
-            leaderboard: []
-        };
+        let state = {};
 
         let sectionStack = [];
 
@@ -432,6 +417,25 @@
         document.addEventListener('DOMContentLoaded', () => {
             const domElements = getDomElements();
 
+            function initializeState() {
+                return {
+                    userId: null,
+                    userName: "Guest",
+                    userPhoto: "https://via.placeholder.com/40",
+                    energyLevel: 0,
+                    points: 0,
+                    challenges: [],
+                    challengeHistory: [],
+                    birthdate: null,
+                    consecutiveDays: 0,
+                    lastPlayedDate: null,
+                    dailyCheckInDone: false,
+                    completedTasks: [],
+                    workshopAccess: false,
+                    leaderboard: []
+                };
+            }
+
             function initializeApp() {
                 if (window.Telegram?.WebApp) {
                     Telegram.WebApp.ready();
@@ -462,26 +466,28 @@
 
             async function init() {
                 document.getElementById('loading').style.display = 'flex';
+                state = initializeState(); // Initialize with defaults
                 try {
                     const keys = ['userId', 'userName', 'userPhoto', 'energyLevel', 'points', 'challenges', 'challengeHistory', 'birthdate', 'consecutiveDays', 'lastPlayedDate', 'dailyCheckInDone', 'completedTasks', 'workshopAccess', 'leaderboard'];
                     const values = await Promise.all(keys.map(key => 
-                        Telegram.WebApp.CloudStorage.getItem(key).catch(() => null)
+                        Telegram.WebApp.CloudStorage.getItem(key).then(val => val || null).catch(() => null)
                     ));
-                    
+
+                    // Load state from storage, only overriding defaults if values exist
                     state.userId = values[0] || state.userId;
                     state.userName = values[1] || state.userName;
                     state.userPhoto = values[2] || state.userPhoto;
-                    state.energyLevel = parseInt(values[3]) || 0;
-                    state.points = parseInt(values[4]) || 0; // Persist points from storage
-                    state.challenges = JSON.parse(values[5] || '[]');
-                    state.challengeHistory = JSON.parse(values[6] || '[]');
-                    state.birthdate = values[7] || null;
-                    state.consecutiveDays = parseInt(values[8]) || 0;
-                    state.lastPlayedDate = values[9] || null;
+                    state.energyLevel = values[3] !== null ? parseInt(values[3]) : state.energyLevel;
+                    state.points = values[4] !== null ? parseInt(values[4]) : state.points; // Persist points
+                    state.challenges = values[5] ? JSON.parse(values[5]) : state.challenges;
+                    state.challengeHistory = values[6] ? JSON.parse(values[6]) : state.challengeHistory;
+                    state.birthdate = values[7] || state.birthdate;
+                    state.consecutiveDays = values[8] !== null ? parseInt(values[8]) : state.consecutiveDays;
+                    state.lastPlayedDate = values[9] || state.lastPlayedDate;
                     state.dailyCheckInDone = values[10] === 'true';
-                    state.completedTasks = JSON.parse(values[11] || '[]');
+                    state.completedTasks = values[11] ? JSON.parse(values[11]) : state.completedTasks;
                     state.workshopAccess = values[12] === 'true';
-                    state.leaderboard = JSON.parse(values[13] || '[]');
+                    state.leaderboard = values[13] ? JSON.parse(values[13]) : state.leaderboard;
 
                     if (!state.challenges.length) {
                         state.challenges = initializeChallenges();
@@ -490,6 +496,7 @@
 
                     if (!state.leaderboard.find(p => p.userId === state.userId)) {
                         state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+                        await Telegram.WebApp.CloudStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                     }
 
                     checkDailyStreak();
@@ -504,20 +511,21 @@
             }
 
             function initLocal() {
-                state.userId = localStorage.getItem('userId') || null;
+                state = initializeState(); // Initialize with defaults
+                state.userId = localStorage.getItem('userId') || state.userId;
                 state.userName = localStorage.getItem('userName') || state.userName;
                 state.userPhoto = localStorage.getItem('userPhoto') || state.userPhoto;
-                state.energyLevel = parseInt(localStorage.getItem('energyLevel') || '0');
-                state.points = parseInt(localStorage.getItem('points') || '0'); // Persist points from storage
-                state.challenges = JSON.parse(localStorage.getItem('challenges') || '[]');
-                state.challengeHistory = JSON.parse(localStorage.getItem('challengeHistory') || '[]');
-                state.birthdate = localStorage.getItem('birthdate') || null;
-                state.consecutiveDays = parseInt(localStorage.getItem('consecutiveDays') || '0');
-                state.lastPlayedDate = localStorage.getItem('lastPlayedDate') || null;
+                state.energyLevel = localStorage.getItem('energyLevel') !== null ? parseInt(localStorage.getItem('energyLevel')) : state.energyLevel;
+                state.points = localStorage.getItem('points') !== null ? parseInt(localStorage.getItem('points')) : state.points; // Persist points
+                state.challenges = localStorage.getItem('challenges') ? JSON.parse(localStorage.getItem('challenges')) : state.challenges;
+                state.challengeHistory = localStorage.getItem('challengeHistory') ? JSON.parse(localStorage.getItem('challengeHistory')) : state.challengeHistory;
+                state.birthdate = localStorage.getItem('birthdate') || state.birthdate;
+                state.consecutiveDays = localStorage.getItem('consecutiveDays') !== null ? parseInt(localStorage.getItem('consecutiveDays')) : state.consecutiveDays;
+                state.lastPlayedDate = localStorage.getItem('lastPlayedDate') || state.lastPlayedDate;
                 state.dailyCheckInDone = localStorage.getItem('dailyCheckInDone') === 'true';
-                state.completedTasks = JSON.parse(localStorage.getItem('completedTasks') || '[]');
+                state.completedTasks = localStorage.getItem('completedTasks') ? JSON.parse(localStorage.getItem('completedTasks')) : state.completedTasks;
                 state.workshopAccess = localStorage.getItem('workshopAccess') === 'true';
-                state.leaderboard = JSON.parse(localStorage.getItem('leaderboard') || '[]');
+                state.leaderboard = localStorage.getItem('leaderboard') ? JSON.parse(localStorage.getItem('leaderboard')) : state.leaderboard;
 
                 if (!state.challenges.length) {
                     state.challenges = initializeChallenges();
@@ -526,6 +534,7 @@
 
                 if (!state.leaderboard.find(p => p.userId === state.userId)) {
                     state.leaderboard.push({ userId: state.userId, name: state.userName, points: state.points });
+                    localStorage.setItem('leaderboard', JSON.stringify(state.leaderboard));
                 }
 
                 checkDailyStreak();
@@ -1013,17 +1022,7 @@
 
             async function deleteProgress() {
                 if (confirm('Are you sure you want to delete your progress?')) {
-                    state.challenges = initializeChallenges();
-                    state.energyLevel = 0;
-                    state.points = 0; // Reset points only here
-                    state.challengeHistory = [];
-                    state.consecutiveDays = 0;
-                    state.lastPlayedDate = null;
-                    state.dailyCheckInDone = false;
-                    state.workshopAccess = false;
-                    const player = state.leaderboard.find(p => p.userId === state.userId);
-                    if (player) player.points = 0;
-
+                    state = initializeState(); // Reset everything, including points
                     if (window.Telegram?.WebApp) {
                         await Promise.all([
                             Telegram.WebApp.CloudStorage.setItem('challenges', JSON.stringify(state.challenges)),
