@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Third Eye - Game</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon"> <!-- Placeholder for favicon -->
+    <!-- Add a real favicon.ico file to your project root -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
@@ -175,19 +176,26 @@
             display: inline-block; /* Keep H1 on same line */
             vertical-align: middle;
         }
-        #profileLink { cursor: pointer; }
+        #profileLink { cursor: pointer; text-align: right; } /* Ensure text aligns right */
         #profilePhoto {
             width: 40px;
             height: 40px;
             object-fit: cover;
             border-radius: 50%;
             border: 2px solid var(--button-color); /* Highlight profile pic */
+            vertical-align: middle; /* Align nicely if text wraps */
+            margin-left: 5px; /* Space between text and photo */
+        }
+        #profileInfoContainer { /* New container for better layout */
+             display: inline-block;
+             vertical-align: middle;
         }
         #profileNameDisplay, #profileLevelDisplay, #pointsDisplay, #energyHeaderDisplay { /* Added energyHeaderDisplay */
+            display: block; /* Make each span its own line */
             font-size: 0.8rem; /* Smaller text */
             line-height: 1.2;
             text-align: right;
-            margin-top: 2px;
+            /* removed margin-top: 2px; */
             color: var(--text-color); /* Default color */
         }
         #profileNameDisplay { font-weight: bold; }
@@ -365,9 +373,14 @@
             .challenge-div h3, .challenge-div h4 { font-size: 1rem; }
             p { font-size: 0.85rem; }
             .footer-nav a { font-size: 11px; } .footer-nav a i { font-size: 16px; }
-            header { flex-direction: column; text-align: center; }
-            header > div:last-child { margin-top: 8px; text-align: center;} /* Center profile info */
-            #profileNameDisplay, #profileLevelDisplay, #pointsDisplay, #energyHeaderDisplay { text-align: center; width: 100%;}
+            header { flex-direction: row; /* Keep row on small screens */ align-items: center; }
+            header > div:first-child { flex-grow: 1; } /* Allow title to take space */
+            header > div#profileLink { margin-top: 0; text-align: right; flex-shrink: 0; /* Prevent shrinking */}
+            #profileInfoContainer { margin-right: 5px;}
+            #profilePhoto { margin-left: 0;}
+            /* Stack profile info vertically on very small screens if needed */
+            /* @media (max-width: 360px) { ... } */
+
             #socialMediaTasks li { flex-direction: column; align-items: flex-start;}
             #socialMediaTasks li > div { margin-bottom: 8px; }
             #socialMediaTasks button { width: 100%; margin-top: 5px; font-size: 0.8em;}
@@ -502,16 +515,18 @@
     <div class="container">
         <header>
             <div class="d-flex align-items-center">
-                 <!-- Replaced icon with image -->
                  <img src="logo.webp" alt="Third Eye Logo">
                  <h1>Third Eye</h1>
             </div>
-            <div id="profileLink">
+            <!-- Updated Profile Area -->
+            <div id="profileLink" class="d-flex align-items-center">
+                <div id="profileInfoContainer">
+                    <span id="profileNameDisplay">Guest</span>
+                    <span id="profileLevelDisplay">Level: Novice</span>
+                    <span id="pointsDisplay">0 $twote</span>
+                    <span id="energyHeaderDisplay">NRG: 0%</span>
+                </div>
                 <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
-                <span id="profileNameDisplay">Guest</span>
-                 <span id="profileLevelDisplay">Level: Novice</span>
-                <span id="pointsDisplay">0 $twote</span>
-                 <span id="energyHeaderDisplay">NRG: 0%</span>
             </div>
         </header>
 
@@ -562,7 +577,7 @@
                  <p>Share your link! Both you and your friend earn $twote. You also get bonus spins!</p>
                  <div class="d-flex mb-2">
                      <input type="text" id="referralLink" class="form-control form-control-sm" readonly style="flex-grow: 1; margin-right: 10px;">
-                     <button class="btn btn-custom" id="copyReferralBtn">Copy</button> <!-- Added ID -->
+                     <button class="btn btn-custom" id="copyReferralBtn">Copy</button>
                  </div>
                  <button class="btn btn-secondary btn-sm mt-2 w-100" id="claimReferralRewardBtn">Simulate Friend Joined (Dev)</button>
              </div>
@@ -674,6 +689,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
+                    <!-- Ensure this ID matches getDomElements -->
                     <h5 class="modal-title" id="energyLogModalTitle">Energy Log</h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -810,6 +826,7 @@
         };
         const DUBAI_TIMEZONE_OFFSET_MS = 4 * 60 * 60 * 1000; // UTC+4
         const WHEEL_SEGMENTS = 8; // Number of segments defined in the CSS conic-gradient
+        const YOUR_BOT_USERNAME = "YOUR_BOT_USERNAME"; // !! IMPORTANT: Replace with your ACTUAL bot username
 
         // --- Global State & Variables ---
         let state = {};
@@ -819,6 +836,7 @@
         let activeWheelType = null; // Track which wheel is spinning
         let isSpinning = false; // Prevent multiple spins
         let spinTimeoutId = null; // To manage the failsafe timeout
+        let telegram = null; // Hold the Telegram WebApp object
 
 
         // --- Helper Functions ---
@@ -843,18 +861,24 @@
                 // Footer Nav
                  'navHome', 'navTasks', 'navGame', 'navProfile',
                  // Profile Buttons
-                 'deleteProgressBtn', 'connectWalletBtn', 'airdropWithdrawBtn'
+                 'deleteProgressBtn', 'connectWalletBtn', 'airdropWithdrawBtn',
+                 // Added missing from log/usage:
+                 'energyLogModalTitle', 'profileInfoContainer' // Add profileInfoContainer if used
             ];
              // Add wheel buttons
              wheelTypes.forEach(type => {
                  const btnId = type === 'referral' ? 'useReferralSpinBtn' : `spin${capitalizeFirstLetter(type)}WheelBtn`;
-                 ids.push(btnId);
+                 if (!ids.includes(btnId)) { // Avoid duplicates if manually added above
+                    ids.push(btnId);
+                 }
              });
 
             const elements = {};
-            ids.forEach(id => {
+            const uniqueIds = [...new Set(ids)]; // Ensure no duplicate IDs
+            uniqueIds.forEach(id => {
                 const el = document.getElementById(id);
-                if (!el) console.warn(`DOM Element not found: #${id}`); // Optional warning
+                // More specific warning if a crucial element is missing
+                if (!el) console.warn(`[getDomElements] Element not found: #${id}`);
                 elements[id] = el;
             });
             return elements;
@@ -876,15 +900,19 @@
             const toastContainer = document.querySelector('.toast-container');
             if (!toastContainer) {
                 console.error("Toast container not found!");
+                // Fallback to alert if toast container is missing
+                alert(`${type.toUpperCase()}: ${message}`);
                 return;
             }
 
+            const toastId = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`; // Unique ID
             const toast = document.createElement('div');
             let bgClass = 'bg-primary'; // Default to info
             if (type === 'success') bgClass = 'bg-success';
             else if (type === 'warning') bgClass = 'bg-warning text-dark'; // Dark text for yellow bg
             else if (type === 'error') bgClass = 'bg-danger';
 
+            toast.id = toastId;
             toast.className = `toast align-items-center text-white ${bgClass} border-0`;
             toast.setAttribute('role', 'alert');
             toast.setAttribute('aria-live', 'assertive');
@@ -902,68 +930,154 @@
                 const bsToast = new bootstrap.Toast(toast, { delay: 3500 });
                 bsToast.show();
                  toast.addEventListener('hidden.bs.toast', () => {
-                    toast.remove();
+                    toast.remove(); // Remove element from DOM after hiding
                 });
             } catch (e) {
                 console.error("Error showing bootstrap toast:", e);
-                toast.remove(); // Clean up if it failed
+                toast.remove(); // Clean up if Bootstrap fails
+                alert(`${type.toUpperCase()}: ${message}`); // Fallback
             }
         }
 
         // --- Initialization ---
         document.addEventListener('DOMContentLoaded', () => {
             console.log("DOM Loaded. Initializing App...");
-            domElements = getDomElements();
-            if (!domElements.navHome) {
-                console.error("Failed to get crucial DOM elements (e.g., navHome). Aborting initialization.");
-                alert("Error: Could not initialize the application UI.");
+            telegram = window.Telegram?.WebApp; // Store reference
+            domElements = getDomElements(); // Get elements AFTER DOM is ready
+
+            if (!domElements.navHome || !domElements.energyLogModalTitle) { // Check a few crucial elements
+                console.error("Failed to get crucial DOM elements. Aborting initialization.");
+                // Maybe show a user-facing error message here
+                document.body.innerHTML = '<div style="color: white; padding: 20px; text-align: center;">Error: Could not load essential app components. Please try again later.</div>';
                 return;
             }
 
             // Initialize Modals safely
             try {
-                modalInstances.energyLog = domElements.energyLogModal ? new bootstrap.Modal(domElements.energyLogModal) : null;
-                modalInstances.enroll = domElements.enrollModal ? new bootstrap.Modal(domElements.enrollModal) : null;
-                modalInstances.code = domElements.codeModal ? new bootstrap.Modal(domElements.codeModal) : null;
-                modalInstances.wheel = domElements.wheelModal ? new bootstrap.Modal(domElements.wheelModal) : null;
-                if (!modalInstances.wheel) console.error("Wheel modal failed to initialize!");
-                if (!modalInstances.energyLog) console.error("EnergyLog modal failed to initialize!");
+                // Ensure the element exists before creating the modal instance
+                if (domElements.energyLogModal) modalInstances.energyLog = new bootstrap.Modal(domElements.energyLogModal); else console.error("Energy Log Modal DOM element missing!");
+                if (domElements.enrollModal) modalInstances.enroll = new bootstrap.Modal(domElements.enrollModal); else console.warn("Enroll Modal DOM element missing!"); // Less critical?
+                if (domElements.codeModal) modalInstances.code = new bootstrap.Modal(domElements.codeModal); else console.warn("Code Modal DOM element missing!"); // Less critical?
+                if (domElements.wheelModal) modalInstances.wheel = new bootstrap.Modal(domElements.wheelModal); else console.error("Wheel Modal DOM element missing!");
+
+                // Verify instances were created
+                if (!modalInstances.energyLog) throw new Error("EnergyLog modal instance failed to create.");
+                if (!modalInstances.wheel) throw new Error("Wheel modal instance failed to create.");
+
             } catch(e) {
                 console.error("Error initializing Bootstrap Modals:", e);
+                showNotification("Error initializing interface components.", "error");
+                // Consider halting initialization if core modals fail
+                return;
             }
 
-            initializeApp(); // Load state and check Telegram
-            setupEventListeners(); // Setup interactions
+            initializeApp(); // Load state and check Telegram AFTER DOM and modals are ready
+        });
 
-            // Setup Telegram BackButton (with safety checks)
-            try {
-                if (window.Telegram?.WebApp) {
-                     if (!Telegram.WebApp.isVersionAtLeast('6.1')) {
-                        console.warn("[Telegram.WebApp] BackButton might have limited support below 6.1. Current:", Telegram.WebApp.version);
+        function initializeApp() {
+             console.log("Initializing App State...");
+             state = initializeState();
+             let telegramUser = null;
+
+             try {
+                 if (telegram) {
+                     telegram.ready(); // Inform TG client the app is ready
+                     telegram.expand(); // Expand the Mini App view
+
+                     // Setup theme handling AFTER ready()
+                     telegram.onEvent('themeChanged', applyTheme);
+                     // Request initial theme params
+                     telegram.postEvent("web_app_request_theme");
+                     // Set header color immediately if possible (might be overridden by theme)
+                     if (telegram.setHeaderColor) {
+                         telegram.setHeaderColor('secondary_bg_color');
+                     } else {
+                         console.warn("telegram.setHeaderColor not available in this version.");
                      }
-                     if (Telegram.WebApp.BackButton) {
-                        Telegram.WebApp.BackButton.onClick(() => {
+
+                     telegramUser = telegram.initDataUnsafe?.user;
+                     console.log("[initializeApp] Raw Telegram initDataUnsafe:", telegram.initDataUnsafe); // DEBUG TG DATA
+
+                     if (telegramUser && telegramUser.id) { // Check for ID specifically
+                         console.log("[initializeApp] Telegram User Data Found:", telegramUser);
+                         state.userId = telegramUser.id.toString(); // Ensure string ID
+                         // Prefer first_name, fallback to username, fallback to "User" + ID
+                         state.userName = telegramUser.first_name || telegramUser.username || `User ${telegramUser.id.toString().slice(-4)}`;
+                         state.userPhoto = telegramUser.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(state.userName)}&background=random&color=fff&size=40`;
+                         console.log(`[initializeApp] Set state from TG: ID=${state.userId}, Name=${state.userName}, Photo=${state.userPhoto}`); // DEBUG TG DATA
+                     } else {
+                         console.warn("[initializeApp] Telegram user data not found or incomplete in initDataUnsafe.");
+                         // Keep default "Guest" state if no TG user
+                     }
+
+                     // --- Setup BackButton ---
+                     if (telegram.BackButton) {
+                         if (!telegram.isVersionAtLeast('6.1')) {
+                             console.warn("[Telegram.WebApp] BackButton might have limited support below 6.1. Current:", telegram.version);
+                         }
+                         telegram.BackButton.onClick(() => {
                             console.log("Back button clicked. Stack:", [...sectionStack]);
                             if (sectionStack.length > 1) {
                                 sectionStack.pop();
                                 const previousSection = sectionStack[sectionStack.length - 1];
                                 console.log("Navigating back to:", previousSection);
-                                showSection(previousSection, true); // Navigate back
+                                showSection(previousSection, true); // Navigate back without pushing to stack
                             } else {
-                                console.log("Back button clicked on root section.");
-                                // Optionally close: Telegram.WebApp.close();
+                                console.log("Back button clicked on root section. Hiding button.");
+                                telegram.BackButton.hide();
+                                // Optionally close the app: telegram.close();
                             }
-                        });
+                         });
+                         // Initially hide back button, showSection will manage it
+                         telegram.BackButton.hide();
                      } else {
-                         console.warn("Telegram.WebApp.BackButton object not available.");
+                         console.warn("[Telegram.WebApp] BackButton object not available in this version.");
                      }
-                } else {
-                    console.warn("Telegram WebApp environment not detected. Back button disabled.");
-                }
-            } catch (e) {
-                console.error("Error setting up Telegram BackButton:", e);
-            }
-        });
+
+                 } else {
+                     console.warn("[initializeApp] Telegram WebApp environment not detected.");
+                     // Handle running outside Telegram - use local user ID
+                 }
+             } catch (e) { console.error("[initializeApp] Error during Telegram setup:", e); }
+
+             // --- User ID and Storage Logic ---
+             const storageUserId = localStorage.getItem('userId'); // Get ID saved previously in browser storage
+
+             if (state.userId && (!storageUserId || storageUserId !== state.userId)) {
+                 // We got a valid TG User ID, and it's different from browser storage (or storage is empty)
+                 console.log(`[initializeApp] Using Telegram User ID: ${state.userId}. Clearing old data if storage ID (${storageUserId}) differs.`);
+                 if (storageUserId) {
+                    clearLocalStorageForUser(storageUserId); // Clear data associated with the OLD ID
+                 }
+                 localStorage.setItem('userId', state.userId); // Save the correct TG User ID
+             } else if (!state.userId && storageUserId) {
+                 // No TG User ID, but found one in storage - use the stored one
+                 state.userId = storageUserId;
+                 console.log(`[initializeApp] Using stored User ID: ${state.userId}. (No Telegram user detected)`);
+                 // Keep the default "Guest" name/photo unless loaded from storage later
+             } else if (!state.userId && !storageUserId) {
+                 // No TG User ID and nothing in storage - generate a new local ID
+                 state.userId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+                 console.log(`[initializeApp] Generating new local User ID: ${state.userId}`);
+                 localStorage.setItem('userId', state.userId); // Save the new local ID
+             }
+             // Ensure current userId is stored if it came from Telegram initially and wasn't in storage
+             if (state.userId && state.userId !== storageUserId) {
+                 localStorage.setItem('userId', state.userId);
+             }
+             // If state.userId is STILL null here, something is wrong.
+             if (!state.userId) {
+                 console.error("[initializeApp] CRITICAL: Failed to determine User ID!");
+                 // Handle this critical failure - maybe show an error and stop.
+                 document.body.innerHTML = '<div style="color: white; padding: 20px; text-align: center;">Error: Could not identify user. Please try again later.</div>';
+                 return;
+             }
+
+             console.log(`[initializeApp] Proceeding with User ID: ${state.userId}`);
+             loadStateFromLocal(); // Load data for the determined user ID
+             applyTheme(); // Apply theme after potentially loading stored theme data
+             setupEventListeners(); // Setup interactions AFTER state is loaded
+         }
 
         function initializeState() {
              const defaultLeaderboard = [
@@ -972,10 +1086,11 @@
                  { userId: 'bot5', name: 'Starlight', points: 80 },
              ];
              const initialSpins = {};
+             // Initialize all wheel types, including referral
              wheelTypes.forEach(type => initialSpins[type] = (type === 'referral' ? 0 : 1));
 
             return {
-                userId: null, userName: "Guest", userPhoto: "https://via.placeholder.com/40",
+                userId: null, userName: "Guest", userPhoto: "https://via.placeholder.com/40", // Defaults
                 energyLevel: 50, points: 0, level: "Novice",
                 challenges: initializeChallenges(), challengeHistory: [], birthdate: null,
                 consecutiveDays: 0, weeklyStreak: 0, lastPlayedDate: null, lastCheckInTime: null,
@@ -985,75 +1100,41 @@
             };
         }
 
-        function initializeApp() {
-             console.log("Initializing App State...");
-             state = initializeState();
-             let telegramUser = null;
-
-             try {
-                 if (window.Telegram?.WebApp) {
-                     Telegram.WebApp.ready();
-                     Telegram.WebApp.expand();
-                     Telegram.WebApp.setHeaderColor('secondary_bg_color'); // Use theme color
-                     Telegram.WebApp.onEvent('themeChanged', applyTheme); // Listen for theme changes
-
-                     // Request theme AFTER ready()
-                     Telegram.WebApp.postEvent("web_app_request_theme");
-
-                     telegramUser = Telegram.WebApp.initDataUnsafe?.user;
-                     console.log("Raw Telegram initDataUnsafe:", Telegram.WebApp.initDataUnsafe); // DEBUG TG DATA
-                     if (telegramUser) {
-                         console.log("Telegram User Data Found:", telegramUser);
-                         state.userId = telegramUser.id.toString();
-                         state.userName = telegramUser.first_name || telegramUser.username || "User";
-                         state.userPhoto = telegramUser.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(state.userName)}&background=random&color=fff&size=40`;
-                         console.log(`Set state from TG: Name=${state.userName}, Photo=${state.userPhoto}`); // DEBUG TG DATA
-                     } else { console.warn("Telegram user data not found in initDataUnsafe."); }
-                 } else { console.warn("Telegram WebApp object not available."); }
-             } catch (e) { console.error("Error during Telegram setup:", e); }
-
-             // --- User ID and Storage ---
-             const storageUserId = localStorage.getItem('userId');
-             if (telegramUser && (!storageUserId || storageUserId !== state.userId)) {
-                 console.log(`Using Telegram User ID: ${state.userId}. Clearing old data if storage ID (${storageUserId}) differs.`);
-                 if (storageUserId) clearLocalStorageForUser(storageUserId);
-                 localStorage.setItem('userId', state.userId);
-             } else if (!state.userId && storageUserId) {
-                 state.userId = storageUserId;
-                 console.log(`Using stored User ID: ${state.userId}`);
-             } else if (!state.userId && !storageUserId) {
-                 state.userId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-                 console.log(`Generating new local User ID: ${state.userId}`);
-                 localStorage.setItem('userId', state.userId);
-             }
-             // Ensure current userId is stored if it came from Telegram initially
-             if (state.userId && state.userId !== storageUserId) {
-                 localStorage.setItem('userId', state.userId);
-             }
-
-             console.log(`Initializing Data for User ID: ${state.userId}`);
-             loadStateFromLocal(); // Load data for the determined user ID
-             applyTheme(); // Apply theme after loading potentially stored theme data
-        }
 
         function applyTheme() {
             try {
-                if (window.Telegram?.WebApp?.themeParams && Object.keys(Telegram.WebApp.themeParams).length > 0) {
-                    console.log("Applying Telegram theme:", Telegram.WebApp.themeParams);
-                    document.documentElement.style.setProperty('--bg-color', Telegram.WebApp.themeParams.secondary_bg_color || '#4E342E');
-                    document.documentElement.style.setProperty('--text-color', Telegram.WebApp.themeParams.text_color || '#FFF8E1');
-                    document.documentElement.style.setProperty('--button-color', Telegram.WebApp.themeParams.button_color || '#FFD700');
-                    document.documentElement.style.setProperty('--button-text-color', Telegram.WebApp.themeParams.button_text_color || '#3E2723');
-                    // Adjust other colors based on theme if needed (e.g., make warnings more visible on dark themes)
-                    if(Telegram.WebApp.colorScheme === 'dark') {
+                if (telegram?.themeParams && Object.keys(telegram.themeParams).length > 0) {
+                    console.log("Applying Telegram theme:", telegram.themeParams);
+                    const theme = telegram.themeParams;
+                    document.documentElement.style.setProperty('--bg-color', theme.secondary_bg_color || '#4E342E');
+                    document.documentElement.style.setProperty('--text-color', theme.text_color || '#FFF8E1');
+                    document.documentElement.style.setProperty('--button-color', theme.button_color || '#FFD700');
+                    document.documentElement.style.setProperty('--button-text-color', theme.button_text_color || '#3E2723');
+                    // Adjust other colors based on theme if needed
+                     const colorScheme = telegram.colorScheme || 'light'; // Default to light if undefined
+                    if(colorScheme === 'dark') {
                          document.documentElement.style.setProperty('--challenge-description-color', '#E0E0E0'); // Lighter text on dark
                          document.documentElement.style.setProperty('--warning-color', '#FF6B6B'); // Brighter red for dark mode
                     } else {
                         document.documentElement.style.setProperty('--challenge-description-color', '#3E2723');
                         document.documentElement.style.setProperty('--warning-color', '#d9534f');
                     }
+                    // Update header color if supported
+                     if (telegram.setHeaderColor) {
+                        try {
+                            telegram.setHeaderColor(theme.secondary_bg_color || '#4E342E');
+                        } catch (e) { console.warn("Error setting header color:", e); }
+                     }
+
                 } else {
                     console.log("No Telegram theme data found or themeParams empty, using default CSS variables.");
+                    // Ensure defaults are explicitly set if no theme applied (redundant if CSS defaults are same)
+                    document.documentElement.style.setProperty('--bg-color', '#4E342E');
+                    document.documentElement.style.setProperty('--text-color', '#FFF8E1');
+                    document.documentElement.style.setProperty('--button-color', '#FFD700');
+                    document.documentElement.style.setProperty('--button-text-color', '#3E2723');
+                    document.documentElement.style.setProperty('--challenge-description-color', '#3E2723');
+                    document.documentElement.style.setProperty('--warning-color', '#d9534f');
                 }
             } catch (e) {
                 console.error("Error applying theme:", e);
@@ -1073,15 +1154,19 @@
             if (!userIdToClear) return;
             console.warn(`Clearing local storage keys for previous user ID: ${userIdToClear}`);
             try {
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith(`${userIdToClear}_`)) {
+                // Iterate through all keys in localStorage
+                for (let i = localStorage.length - 1; i >= 0; i--) {
+                    const key = localStorage.key(i);
+                    // Check if the key starts with the user ID prefix
+                    if (key && key.startsWith(`${userIdToClear}_`)) {
                         localStorage.removeItem(key);
                         console.log(`Removed: ${key}`);
                     }
-                });
+                }
                 // Also remove the base userId key if it matches the old one
                 if (localStorage.getItem('userId') === userIdToClear) {
                     localStorage.removeItem('userId');
+                    console.log(`Removed: userId key`);
                 }
             } catch (error) {
                 console.error(`Error clearing local storage for user ${userIdToClear}:`, error);
@@ -1096,65 +1181,90 @@
                  return;
              }
              try {
-                 state.energyLevel = parseInt(localStorage.getItem(getStorageKey('energyLevel')) || '50');
-                 state.points = parseInt(localStorage.getItem(getStorageKey('points')) || '0');
-                 state.level = localStorage.getItem(getStorageKey('level')) || "Novice";
+                 // Load basic values with defaults
+                 state.energyLevel = parseInt(localStorage.getItem(getStorageKey('energyLevel')) || state.energyLevel);
+                 state.points = parseInt(localStorage.getItem(getStorageKey('points')) || state.points);
+                 state.level = localStorage.getItem(getStorageKey('level')) || state.level;
+
+                 // Load potentially sensitive/identifying info only if NOT using default guest account
+                 // (This part is tricky, maybe just load name/photo if they exist)
+                 const storedName = localStorage.getItem(getStorageKey('userName'));
+                 const storedPhoto = localStorage.getItem(getStorageKey('userPhoto'));
+                 // Only override TG name/photo if stored ones exist AND current state is still "Guest"
+                 // This prevents overwriting valid TG data with potentially stale local data
+                 if (state.userName === "Guest" && storedName) state.userName = storedName;
+                 if (state.userPhoto.includes("via.placeholder.com") && storedPhoto) state.userPhoto = storedPhoto; // Only override placeholder
+
 
                  // --- Birthdate Loading ---
                  const loadedBirthdate = localStorage.getItem(getStorageKey('birthdate'));
-                 state.birthdate = (loadedBirthdate && loadedBirthdate !== 'null' && loadedBirthdate.length > 5) ? loadedBirthdate : null;
-                 console.log(`Loaded birthdate from storage: '${state.birthdate}' (type: ${typeof state.birthdate})`); // DEBUG
-
-                 state.consecutiveDays = parseInt(localStorage.getItem(getStorageKey('consecutiveDays')) || '0');
-                 state.weeklyStreak = parseInt(localStorage.getItem(getStorageKey('weeklyStreak')) || '0');
-                 state.lastPlayedDate = localStorage.getItem(getStorageKey('lastPlayedDate')) || null;
-                 state.lastCheckInTime = localStorage.getItem(getStorageKey('lastCheckInTime')) ? parseInt(localStorage.getItem(getStorageKey('lastCheckInTime'))) : null;
-                 state.workshopAccess = localStorage.getItem(getStorageKey('workshopAccess')) === 'true';
-                 state.mysteryBoxes = parseInt(localStorage.getItem(getStorageKey('mysteryBoxes')) || '0');
-                 state.lastDailySpinReset = localStorage.getItem(getStorageKey('lastDailySpinReset')) || null;
-                 state.completedTasks = JSON.parse(localStorage.getItem(getStorageKey('completedTasks')) || '[]');
-                 state.achievements = JSON.parse(localStorage.getItem(getStorageKey('achievements')) || '[]');
-                 state.currentChallengeDuration = localStorage.getItem(getStorageKey('currentChallengeDuration')) ? parseInt(localStorage.getItem(getStorageKey('currentChallengeDuration'))) : null;
-
-                 const savedChallenges = JSON.parse(localStorage.getItem(getStorageKey('challenges')) || 'null');
-                 if (savedChallenges && Array.isArray(savedChallenges)) {
-                    state.challenges.forEach((challenge, index) => {
-                        const saved = savedChallenges.find(sc => sc.day === challenge.day);
-                        if (saved) {
-                            challenge.completed = saved.completed || false;
-                            challenge.completionDate = saved.completionDate || null;
-                        }
-                    });
+                 // Check if loadedBirthdate is a valid date string format
+                 if (loadedBirthdate && /^\d{4}-\d{2}-\d{2}$/.test(loadedBirthdate)) {
+                     state.birthdate = loadedBirthdate;
+                 } else {
+                     state.birthdate = null; // Ensure it's null if invalid/missing
                  }
+                 console.log(`Loaded birthdate from storage: '${state.birthdate}'`);
 
-                 state.challengeHistory = JSON.parse(localStorage.getItem(getStorageKey('challengeHistory')) || '[]');
-                 const savedLeaderboard = JSON.parse(localStorage.getItem(getStorageKey('leaderboard')) || 'null') || [];
+                 state.consecutiveDays = parseInt(localStorage.getItem(getStorageKey('consecutiveDays')) || state.consecutiveDays);
+                 state.weeklyStreak = parseInt(localStorage.getItem(getStorageKey('weeklyStreak')) || state.weeklyStreak);
+                 state.lastPlayedDate = localStorage.getItem(getStorageKey('lastPlayedDate')) || state.lastPlayedDate;
+                 state.lastCheckInTime = localStorage.getItem(getStorageKey('lastCheckInTime')) ? parseInt(localStorage.getItem(getStorageKey('lastCheckInTime'))) : state.lastCheckInTime;
+                 state.workshopAccess = localStorage.getItem(getStorageKey('workshopAccess')) === 'true' || state.workshopAccess;
+                 state.mysteryBoxes = parseInt(localStorage.getItem(getStorageKey('mysteryBoxes')) || state.mysteryBoxes);
+                 state.lastDailySpinReset = localStorage.getItem(getStorageKey('lastDailySpinReset')) || state.lastDailySpinReset;
+                 state.currentChallengeDuration = localStorage.getItem(getStorageKey('currentChallengeDuration')) ? parseInt(localStorage.getItem(getStorageKey('currentChallengeDuration'))) : state.currentChallengeDuration;
+
+                 // Load JSON arrays/objects safely
+                 state.completedTasks = JSON.parse(localStorage.getItem(getStorageKey('completedTasks')) || '[]') || [];
+                 state.achievements = JSON.parse(localStorage.getItem(getStorageKey('achievements')) || '[]') || [];
+                 state.challengeHistory = JSON.parse(localStorage.getItem(getStorageKey('challengeHistory')) || '[]') || [];
+
+                 // Merge leaderboard: load saved, merge with defaults, ensure user exists
+                 const savedLeaderboard = JSON.parse(localStorage.getItem(getStorageKey('leaderboard')) || '[]') || [];
                  state.leaderboard = mergeLeaderboards(initializeState().leaderboard, savedLeaderboard);
-                 ensureUserInLeaderboard();
+                 ensureUserInLeaderboard(); // Ensure current user is in the loaded/merged list
 
-                 const savedSpins = JSON.parse(localStorage.getItem(getStorageKey('wheelSpins')) || '{}');
+                 // Load wheel spins, ensuring all types exist
+                 const savedSpins = JSON.parse(localStorage.getItem(getStorageKey('wheelSpins')) || '{}') || {};
                  wheelTypes.forEach(type => {
-                     state.wheelSpins[type] = savedSpins[type] ?? (type === 'referral' ? 0 : 1); // Use nullish coalescing
+                     // Use saved value if present, otherwise use the initial default (0 for referral, 1 for others)
+                     state.wheelSpins[type] = savedSpins[type] ?? state.wheelSpins[type];
+                 });
+
+                 // Load challenges completion status
+                 const savedChallengesStatus = JSON.parse(localStorage.getItem(getStorageKey('challengesStatus')) || '{}') || {};
+                 state.challenges.forEach(challenge => {
+                     const status = savedChallengesStatus[challenge.day];
+                     if (status) {
+                         challenge.completed = status.completed || false;
+                         challenge.completionDate = status.completionDate || null;
+                     } else {
+                         challenge.completed = false; // Reset if not in saved status
+                         challenge.completionDate = null;
+                     }
                  });
 
                  console.log("State loaded successfully.");
 
-                 checkDailyReset();
+                 checkDailyReset(); // Check for daily resets AFTER loading state
                  updateUserLevel(); // Update level based on loaded points
                  updateUI(); // Update UI with loaded data FIRST
-                 startCountdown();
-                 showInitialSection(); // THEN Show section AFTER state is loaded and UI is initially updated
+                 startCountdown(); // Update countdown based on loaded check-in time
+                 showInitialSection(); // THEN Show appropriate section AFTER state is loaded/UI updated
 
              } catch (error) {
                  console.error('Error loading state from LocalStorage:', error);
                  showNotification('Failed to load saved data. Resetting to defaults.', 'error');
+                 // Preserve user ID/name/photo if possible, reset everything else
                  const userId = state.userId, userName = state.userName, userPhoto = state.userPhoto;
                  state = initializeState();
                  state.userId = userId; state.userName = userName; state.userPhoto = userPhoto;
                  ensureUserInLeaderboard();
                  updateUI();
                  showInitialSection(); // Show default section after error
-                 saveData(Object.keys(state).filter(k => k !== 'userId' && k !== 'userName' && k !== 'userPhoto')); // Save default state
+                 // Save the reset default state (important!)
+                 saveData(Object.keys(state).filter(k => !['userId'].includes(k)));
              }
          }
 
@@ -1163,33 +1273,59 @@
                 console.error("Cannot save state: userId is not set!");
                 return;
             }
-            console.log(`Saving keys: ${keysToSave.join(', ')}`); // DEBUG Save
-            keysToSave.forEach(key => {
-                 if (key === 'userId' || key === 'userName' || key === 'userPhoto') return;
-                 try {
-                    let valueToSave; const stateValue = state[key];
-                    if (typeof stateValue === 'object' && stateValue !== null) { valueToSave = JSON.stringify(stateValue); }
-                    else if (typeof stateValue === 'boolean') { valueToSave = stateValue ? 'true' : 'false'; }
-                    else if (stateValue !== null && stateValue !== undefined) { valueToSave = String(stateValue); }
-                    else { valueToSave = null; } // Represent null/undefined as removed item
+            // Filter out identity keys that shouldn't be saved this way
+            const validKeysToSave = keysToSave.filter(k => !['userId'].includes(k));
+            if (validKeysToSave.length === 0) return;
 
-                    const storageKey = getStorageKey(key);
+            console.log(`Saving keys: ${validKeysToSave.join(', ')}`); // DEBUG Save
+
+            validKeysToSave.forEach(key => {
+                 try {
+                    let valueToSave;
+                    const stateValue = state[key];
+
+                    // Special handling for challenges: only save completion status
+                    if (key === 'challenges') {
+                        const challengesStatus = {};
+                        state.challenges.forEach(ch => {
+                             if(ch.completed || ch.completionDate) { // Only save if completed or has a date
+                                challengesStatus[ch.day] = {
+                                    completed: ch.completed,
+                                    completionDate: ch.completionDate
+                                };
+                             }
+                        });
+                        valueToSave = JSON.stringify(challengesStatus);
+                        key = 'challengesStatus'; // Save under a different key name
+                        console.log(`Saving challenge statuses under key 'challengesStatus'`);
+                    }
+                    // Standard saving for other types
+                    else if (typeof stateValue === 'object' && stateValue !== null) {
+                         valueToSave = JSON.stringify(stateValue);
+                    } else if (typeof stateValue === 'boolean') {
+                         valueToSave = stateValue ? 'true' : 'false';
+                    } else if (stateValue !== null && stateValue !== undefined) {
+                         valueToSave = String(stateValue);
+                    } else {
+                         valueToSave = null; // Represent null/undefined as removed item
+                    }
+
+                    const storageKey = getStorageKey(key); // Use original key OR 'challengesStatus'
                     if (valueToSave !== null) {
-                        // console.log(`Saving ${storageKey}: ${valueToSave.substring(0,100)}...`); // DEBUG Save Value
                         localStorage.setItem(storageKey, valueToSave);
                     } else {
-                        // console.log(`Removing ${storageKey}`); // DEBUG Remove Value
-                        localStorage.removeItem(storageKey);
+                        localStorage.removeItem(storageKey); // Remove if value is null/undefined
                     }
                  } catch (error) {
                      console.error(`Error saving '${key}' to LocalStorage:`, error);
-                      // Avoid notification spam if storage is full
-                      if (error.name === 'QuotaExceededError') {
-                          console.error("LocalStorage quota exceeded!");
-                          // Maybe show notification only once
-                      } else {
-                         showNotification(`Error saving game data (${key}). Progress might be lost!`, 'error');
-                      }
+                     // Avoid notification spam if storage is full
+                     if (error.name === 'QuotaExceededError') {
+                         console.error("LocalStorage quota exceeded! Cannot save progress.");
+                         // Show a persistent error message to the user?
+                         showNotification('Storage full! Cannot save progress.', 'error');
+                     } else {
+                        showNotification(`Error saving game data (${key}).`, 'error');
+                     }
                  }
              });
         }
@@ -1201,64 +1337,92 @@
             // Add dependencies implicitly
             if (uniqueKeys.includes('points') && !uniqueKeys.includes('level')) uniqueKeys.push('level');
             if (uniqueKeys.includes('points') && !uniqueKeys.includes('leaderboard')) uniqueKeys.push('leaderboard');
+             // 'challenges' key will be handled inside saveStateToLocal to save as 'challengesStatus'
             if (uniqueKeys.includes('challenges') && !uniqueKeys.includes('challengeHistory')) uniqueKeys.push('challengeHistory');
-            saveStateToLocal(uniqueKeys.filter(k => k !== 'userId' && k !== 'userName' && k !== 'userPhoto')); // Filter identity keys
+
+            // Save user name/photo separately if they changed (e.g., user updates profile later - not implemented yet)
+            // if (uniqueKeys.includes('userName')) saveStateToLocal(['userName']);
+            // if (uniqueKeys.includes('userPhoto')) saveStateToLocal(['userPhoto']);
+
+            // Save the rest of the data
+            saveStateToLocal(uniqueKeys);
         }
 
 
         function mergeLeaderboards(defaultBoard, savedBoard) {
             const mergedMap = new Map();
-            defaultBoard.forEach(p => mergedMap.set(p.userId, { ...p }));
+            // Add defaults first
+            defaultBoard.forEach(p => {
+                 if (p && p.userId) { // Ensure valid entry
+                    mergedMap.set(p.userId, { ...p, points: p.points || 0, name: p.name || 'Bot' });
+                 }
+            });
+            // Overwrite/add saved players
             savedBoard.forEach(p => {
                  if (!p || !p.userId) return; // Skip invalid entries
                  const existing = mergedMap.get(p.userId);
-                 if (existing) {
-                     existing.points = Math.max(existing.points, p.points || 0);
-                     existing.name = p.name || existing.name; // Prefer saved name if available
-                 } else {
-                     mergedMap.set(p.userId, { ...p, points: p.points || 0, name: p.name || 'Anonymous' });
-                 }
+                 // Use saved points if higher or if player wasn't a default bot
+                 const pointsToUse = Math.max(existing ? existing.points : 0, p.points || 0);
+                 // Prefer saved name if available and not empty
+                 const nameToUse = (p.name || existing?.name || 'Anonymous').trim();
+
+                 mergedMap.set(p.userId, { userId: p.userId, name: nameToUse || 'Anonymous', points: pointsToUse });
             });
             return Array.from(mergedMap.values());
         }
 
         function ensureUserInLeaderboard() {
-             if (!state.userId) return;
+             if (!state.userId) return; // Cannot add if no user ID
              let userEntry = state.leaderboard.find(p => p.userId === state.userId);
              if (!userEntry) {
                  console.log(`Adding user ${state.userId} (${state.userName}) to leaderboard.`);
                  userEntry = { userId: state.userId, name: state.userName, points: state.points };
                  state.leaderboard.push(userEntry);
+             } else {
+                // Always update points and name in case they changed since last load/save
+                userEntry.points = state.points;
+                 // Only update name if it's different and not empty/null
+                if (state.userName && userEntry.name !== state.userName) {
+                    userEntry.name = state.userName;
+                }
              }
-             // Always update points and name in case they changed
-             userEntry.points = state.points;
-             userEntry.name = state.userName;
          }
 
         // --- UI Update Functions ---
          function updateUI() {
-             // Header
-             if (domElements.profilePhoto) domElements.profilePhoto.src = state.userPhoto;
-             if (domElements.profileNameDisplay) domElements.profileNameDisplay.textContent = state.userName;
-             if (domElements.pointsDisplay) domElements.pointsDisplay.textContent = `${state.points} $twote`;
-             if (domElements.profileLevelDisplay) domElements.profileLevelDisplay.textContent = `Level: ${state.level}`;
-             if (domElements.energyHeaderDisplay) domElements.energyHeaderDisplay.textContent = `NRG: ${state.energyLevel}%`;
+             if (!domElements) {
+                 console.error("updateUI called before domElements are ready.");
+                 return;
+             }
+             // Header - Use safe navigation ?. and nullish coalescing ??
+             domElements.profilePhoto?.setAttribute('src', state.userPhoto ?? 'https://via.placeholder.com/40');
+             if(domElements.profileNameDisplay) domElements.profileNameDisplay.textContent = state.userName ?? 'Guest';
+             if(domElements.pointsDisplay) domElements.pointsDisplay.textContent = `${state.points ?? 0} $twote`;
+             if(domElements.profileLevelDisplay) domElements.profileLevelDisplay.textContent = `Level: ${state.level ?? 'Novice'}`;
+             if(domElements.energyHeaderDisplay) domElements.energyHeaderDisplay.textContent = `NRG: ${state.energyLevel ?? 0}%`;
 
              // Profile Page
-             if (domElements.profileNameDisplayInner) domElements.profileNameDisplayInner.textContent = state.userName;
-             if (domElements.pointsValue) domElements.pointsValue.textContent = state.points;
-             if (domElements.energyValue) domElements.energyValue.textContent = state.energyLevel;
-             if (domElements.levelName) domElements.levelName.textContent = state.level;
-             if (domElements.consecutiveDaysValue) domElements.consecutiveDaysValue.textContent = state.consecutiveDays;
-             if (domElements.weeklyStreakValue) domElements.weeklyStreakValue.textContent = state.weeklyStreak;
+             if(domElements.profileNameDisplayInner) domElements.profileNameDisplayInner.textContent = state.userName ?? 'Guest';
+             if(domElements.pointsValue) domElements.pointsValue.textContent = state.points ?? 0;
+             if(domElements.energyValue) domElements.energyValue.textContent = state.energyLevel ?? 0;
+             if(domElements.levelName) domElements.levelName.textContent = state.level ?? 'Novice';
+             if(domElements.consecutiveDaysValue) domElements.consecutiveDaysValue.textContent = state.consecutiveDays ?? 0;
+             if(domElements.weeklyStreakValue) domElements.weeklyStreakValue.textContent = state.weeklyStreak ?? 0;
 
-             // Referral
+             // Referral Link
              if (domElements.referralLink) {
-                 if (state.userId) {
-                     const botUsername = "YOUR_BOT_USERNAME"; // !! IMPORTANT: Replace with your ACTUAL bot username
-                     domElements.referralLink.value = `https://t.me/${botUsername}?start=${state.userId}`;
-                 } else { domElements.referralLink.value = "Link unavailable"; }
+                 if (state.userId && YOUR_BOT_USERNAME !== "YOUR_BOT_USERNAME") { // Only show if bot username is set
+                     domElements.referralLink.value = `https://t.me/${YOUR_BOT_USERNAME}?start=${state.userId}`;
+                 } else {
+                    domElements.referralLink.value = "Link unavailable";
+                    // Optionally disable copy button if link unavailable
+                    if (domElements.copyReferralBtn) domElements.copyReferralBtn.disabled = true;
+                 }
+             } else if (domElements.copyReferralBtn) {
+                 // Disable copy button if link input doesn't exist
+                 domElements.copyReferralBtn.disabled = true;
              }
+
 
              // Dynamic Components
              updateDailyCheckInButtonState();
@@ -1267,26 +1431,32 @@
              updateWheelButtons();
              updateAchievementsUI();
              updateMysteryBoxUI();
-             // updateReferralSpinsUI(); // Now handled within updateWheelButtons
              updateActiveNav();
          }
 
          function updateActiveNav() {
-            const currentSection = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : 'wellnessManager'; // Default if stack empty
+            const currentSection = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : null;
             const navMap = {
-                'wellnessManager': domElements.navHome, 'dailyChallenges': domElements.navHome,
-                'tasksSection': domElements.navTasks, 'gamePage': domElements.navGame,
-                'playerProfile': domElements.navProfile, 'horoscopeForm': null // No nav item for horoscope form
+                'wellnessManager': domElements.navHome,
+                'dailyChallenges': domElements.navHome, // Keep Home active for challenges too
+                'tasksSection': domElements.navTasks,
+                'gamePage': domElements.navGame,
+                'playerProfile': domElements.navProfile,
+                'horoscopeForm': null // No nav item for horoscope form
             };
-             [domElements.navHome, domElements.navTasks, domElements.navGame, domElements.navProfile].forEach(nav => nav?.classList.remove('active'));
-             const activeNav = navMap[currentSection];
-             if (activeNav) { activeNav.classList.add('active'); }
+             const allNavItems = [domElements.navHome, domElements.navTasks, domElements.navGame, domElements.navProfile];
+             allNavItems.forEach(nav => nav?.classList.remove('active')); // Use optional chaining
+
+             if (currentSection && navMap[currentSection]) {
+                navMap[currentSection].classList.add('active');
+             }
          }
 
          function updateDailyCheckInButtonState() {
             if (!domElements.dailyCheckInBtn) return;
             const now = Date.now();
             const twentyFourHours = 24 * 60 * 60 * 1000;
+            // Can check in if last check-in time is null OR more than 24 hours ago
             const canCheckIn = !state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours);
 
              domElements.dailyCheckInBtn.disabled = !canCheckIn;
@@ -1297,16 +1467,17 @@
              } else {
                  domElements.dailyCheckInBtn.textContent = "Checked In Today";
                  if(domElements.spinInfo) domElements.spinInfo.textContent = 'Spins enabled for today!';
-                 startCountdown(); // Ensure countdown runs if checked in
+                 startCountdown(); // Ensure countdown runs if already checked in
              }
-             updateWheelButtons(); // Wheel availability depends on check-in
+             // Wheel availability depends on check-in, update them too
+             updateWheelButtons();
          }
 
         function startCountdown() {
              if (window.checkinCountdownInterval) clearInterval(window.checkinCountdownInterval);
              if (!state.lastCheckInTime || !domElements.countdownDisplay) {
                  if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = 'Check-in available!';
-                 updateDailyCheckInButtonState(); // Ensure button state correct
+                 updateDailyCheckInButtonState(); // Ensure button state correct if no timer needed
                  return;
              }
 
@@ -1314,24 +1485,36 @@
              const endTime = state.lastCheckInTime + twentyFourHours;
 
              function updateCountdownDisplay() {
-                 const now = Date.now(); const timeLeft = endTime - now;
+                 const now = Date.now();
+                 const timeLeft = endTime - now;
+
                  if (timeLeft <= 0) {
                      if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = 'Check-in available!';
                      updateDailyCheckInButtonState(); // Enable button
                      clearInterval(window.checkinCountdownInterval);
+                     window.checkinCountdownInterval = null; // Clear interval ID
                      return;
                  }
+
                  const hours = Math.floor(timeLeft / (1000 * 60 * 60));
                  const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                  const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
-                 if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = `Next check-in: ${hours}h ${minutes}m ${seconds}s`;
-                 if (domElements.dailyCheckInBtn && !domElements.dailyCheckInBtn.disabled) { // Only update if not already disabled by logic
-                    domElements.dailyCheckInBtn.disabled = true;
-                    domElements.dailyCheckInBtn.textContent = "Checked In Today";
+
+                 // Ensure leading zeros for minutes and seconds
+                 const displayMinutes = String(minutes).padStart(2, '0');
+                 const displaySeconds = String(seconds).padStart(2, '0');
+
+                 if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = `Next check-in: ${hours}h ${displayMinutes}m ${displaySeconds}s`;
+
+                 // Ensure button is disabled while countdown is active
+                 if (domElements.dailyCheckInBtn && !domElements.dailyCheckInBtn.disabled) {
+                     domElements.dailyCheckInBtn.disabled = true;
+                     domElements.dailyCheckInBtn.textContent = "Checked In Today";
                  }
              }
-             updateCountdownDisplay();
-             window.checkinCountdownInterval = setInterval(updateCountdownDisplay, 1000);
+
+             updateCountdownDisplay(); // Initial call
+             window.checkinCountdownInterval = setInterval(updateCountdownDisplay, 1000); // Store interval ID
          }
 
 
@@ -1344,18 +1527,21 @@
                 const isReferral = type === 'referral';
                 const btnId = isReferral ? 'useReferralSpinBtn' : `spin${capitalizeFirstLetter(type)}WheelBtn`;
                 const button = domElements[btnId];
-                 if (!button) { /*console.warn(`Wheel button not found: ${btnId}`);*/ return; } // Skip if button doesn't exist
+                 if (!button) { /* console.warn(`Wheel button not found: ${btnId}`); */ return; }
 
                  const spinsLeft = state.wheelSpins[type] || 0;
-                 // Referral spins can be used anytime if available, others need check-in AND spins>0
+                 // Referral spins can be used anytime if available > 0
+                 // Others need check-in AND spins > 0
                  const canSpin = isReferral ? (spinsLeft > 0) : (checkedInToday && spinsLeft > 0);
-                 button.disabled = !canSpin || isSpinning; // Also disable if another spin is active
+
+                 // Disable button if cannot spin OR if another spin is currently active
+                 button.disabled = !canSpin || isSpinning;
 
                  // Update text content for the spins count span
                  const spinsLeftSpan = button.querySelector('.spins-left');
                  if (spinsLeftSpan) {
                      spinsLeftSpan.textContent = `(${spinsLeft})`;
-                     // Specific ID for referral count if needed, otherwise handled by general class
+                     // Ensure referral count ID is also updated if it exists separately
                      if (isReferral && domElements.referralSpinsCount && spinsLeftSpan !== domElements.referralSpinsCount) {
                         domElements.referralSpinsCount.textContent = `(${spinsLeft})`;
                      }
@@ -1363,11 +1549,20 @@
                     console.warn(`Spins left span not found for button ${btnId}`);
                  }
 
-
-                 button.title = !checkedInToday && !isReferral ? "Complete daily check-in first"
-                              : spinsLeft <= 0 ? (isReferral ? "No referral spins left" : "No spins left for today")
-                              : isSpinning ? "Spin in progress..."
-                              : `Click to spin (${spinsLeft} left)`;
+                 // Add helpful title attribute for disabled states
+                 if (!canSpin && !isSpinning) { // Don't override 'Spinning...' title
+                    if (isReferral) {
+                        button.title = spinsLeft <= 0 ? "No referral spins left" : ""; // Should be enabled if spins > 0
+                    } else {
+                        button.title = !checkedInToday ? "Complete daily check-in first"
+                                      : spinsLeft <= 0 ? "No spins left for today"
+                                      : ""; // Should be enabled if checked in and spins > 0
+                    }
+                 } else if (isSpinning) {
+                    button.title = "Spin in progress...";
+                 } else { // Can spin
+                    button.title = `Click to spin (${spinsLeft} left)`;
+                 }
              });
         }
 
@@ -1375,46 +1570,75 @@
         function updateTaskButtons() {
             ['telegram', 'twitter', 'instagram', 'youtube'].forEach(taskKey => {
                  const button = domElements[`${taskKey}TaskBtn`];
-                 if (!button) return;
-                 const isCompleted = state.completedTasks.includes(taskKey);
+                 if (!button) return; // Skip if button doesn't exist
+                 const isCompleted = state.completedTasks?.includes(taskKey); // Safe check
                  button.disabled = isCompleted;
                  button.textContent = isCompleted ? 'Done' : 'Verify';
-                 button.classList.toggle('btn-success', isCompleted);
-                 button.classList.toggle('btn-custom', !isCompleted);
+                 button.classList.toggle('btn-success', isCompleted); // Add success class if completed
+                 button.classList.toggle('btn-custom', !isCompleted); // Ensure custom class if not completed
              });
         }
 
         function updateAchievementsUI() {
             if (!domElements.achievementsList) return;
-             if (!state.achievements || state.achievements.length === 0) {
-                 domElements.achievementsList.innerHTML = '<li><i class="fas fa-hourglass-start"></i> No achievements yet</li>'; return;
+             const achievements = state.achievements || []; // Ensure it's an array
+             if (achievements.length === 0) {
+                 domElements.achievementsList.innerHTML = '<li><i class="fas fa-hourglass-start"></i> No achievements yet</li>';
+                 return;
              }
-             domElements.achievementsList.innerHTML = state.achievements.map(key => {
-                 const ach = achievementsConfig[key]; if (!ach) return '';
+             domElements.achievementsList.innerHTML = achievements.map(key => {
+                 const ach = achievementsConfig[key];
+                 if (!ach) {
+                     console.warn(`Achievement config missing for key: ${key}`);
+                     return ''; // Skip invalid keys
+                 }
                  return `<li title="${escapeHtml(ach.description || '')}"><i class="fas ${ach.icon || 'fa-question-circle'}"></i> ${escapeHtml(ach.name || 'Unknown')}</li>`;
              }).join('');
          }
 
         function updateMysteryBoxUI() {
-            if (domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes;
-            if (domElements.openMysteryBoxBtn) domElements.openMysteryBoxBtn.disabled = state.mysteryBoxes <= 0 || isSpinning; // Disable if spinning or no boxes
+            if (domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes ?? 0;
+            if (domElements.openMysteryBoxBtn) {
+                // Disable if no boxes OR if a wheel spin is in progress
+                domElements.openMysteryBoxBtn.disabled = (state.mysteryBoxes ?? 0) <= 0 || isSpinning;
+            }
          }
 
         function updateLeaderboardUI() {
             if (!domElements.leaderboard) return;
-             ensureUserInLeaderboard(); // Make sure current user is reflected
+             ensureUserInLeaderboard(); // Make sure current user is reflected with latest points/name
              // Sort leaderboard by points descending
-             state.leaderboard.sort((a, b) => b.points - a.points);
-             domElements.leaderboard.innerHTML = state.leaderboard.slice(0, 100).map((p, i) => `
-                 <tr class="${p.userId === state.userId ? 'table-primary' : ''}">
-                     <td class="rank-col">${i + 1}</td>
-                     <td>${escapeHtml(p.name)}</td>
-                     <td class="points-col">${p.points}</td>
-                 </tr>`).join('') || '<tr><td colspan="3" class="text-center text-muted">Leaderboard is empty.</td></tr>';
+             const sortedLeaderboard = [...(state.leaderboard || [])].sort((a, b) => (b.points || 0) - (a.points || 0));
+
+             // Limit to top 100
+             const top100 = sortedLeaderboard.slice(0, 100);
+
+             domElements.leaderboard.innerHTML = top100.map((p, i) => {
+                // Ensure values are valid before rendering
+                const rank = i + 1;
+                const name = escapeHtml(p.name || 'Anonymous');
+                const points = p.points || 0;
+                const isCurrentUser = p.userId === state.userId;
+
+                return `
+                 <tr class="${isCurrentUser ? 'table-primary' : ''}">
+                     <td class="rank-col">${rank}</td>
+                     <td>${name}</td>
+                     <td class="points-col">${points}</td>
+                 </tr>`;
+                }).join('') || '<tr><td colspan="3" class="text-center text-muted">Leaderboard is empty.</td></tr>';
          }
 
         function escapeHtml(unsafe) {
-            if (typeof unsafe !== 'string') return unsafe; // Return non-strings as is
+            if (typeof unsafe !== 'string') {
+                // If it's not a string, try to convert it safely or return a placeholder
+                if (unsafe === null || unsafe === undefined) return '';
+                try {
+                    return String(unsafe);
+                } catch (e) {
+                    return ''; // Return empty string if conversion fails
+                }
+            }
             return unsafe
                  .replace(/&/g, "&amp;")
                  .replace(/</g, "&lt;")
@@ -1425,105 +1649,137 @@
 
         // --- Navigation ---
          function showInitialSection() {
-             console.log(`showInitialSection called. Current birthdate state: '${state.birthdate}'`); // DEBUG
+             console.log(`showInitialSection called. Current birthdate state: '${state.birthdate}'`);
              // Robust check for birthdate (must be a non-empty string representing a date)
-             const hasBirthdate = state.birthdate && typeof state.birthdate === 'string' && state.birthdate.length > 5;
+             const hasBirthdate = state.birthdate && typeof state.birthdate === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(state.birthdate);
              const firstSection = hasBirthdate ? 'wellnessManager' : 'horoscopeForm';
-             console.log(`Determined initial section: ${firstSection} (hasBirthdate: ${hasBirthdate})`); // DEBUG
-             sectionStack = [firstSection]; // Reset stack to only the first section
-             showSection(firstSection, true); // Use true to prevent adding to stack again
+             console.log(`Determined initial section: ${firstSection} (hasBirthdate: ${hasBirthdate})`);
+             sectionStack = [firstSection]; // Reset stack to only the determined first section
+             showSection(firstSection, true); // Use true to prevent adding to stack again and manage BackButton correctly
          }
 
 
          function showSection(sectionId, isNavigatingBackOrInitial = false) {
-             if (!sections.includes(sectionId)) { console.error(`Invalid sectionId: ${sectionId}`); return; }
+             if (!sections.includes(sectionId)) {
+                 console.error(`Invalid sectionId requested: ${sectionId}`);
+                 return;
+             }
 
              const currentTopSection = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : null;
 
-             // Prevent pushing duplicates or navigating to the same section
+             // Prevent pushing duplicates or navigating to the same section unless forced (e.g., initial)
              if (!isNavigatingBackOrInitial && sectionId === currentTopSection) {
-                console.log(`Already on section: ${sectionId}`);
+                console.log(`Already on section: ${sectionId}, navigation ignored.`);
                 return;
              }
 
-             // Update stack only if it's a forward navigation
+             // --- Stack Management ---
              if (!isNavigatingBackOrInitial) {
-                sectionStack.push(sectionId);
-             } else if (sectionStack[sectionStack.length - 1] !== sectionId && sectionStack.length === 0) {
-                 // Handle case where stack is empty but we are showing initial section
+                 // Forward navigation: Push the new section onto the stack
                  sectionStack.push(sectionId);
+             } else if (isNavigatingBackOrInitial && sectionStack[sectionStack.length - 1] !== sectionId) {
+                 // This handles the very first call to showInitialSection where the stack might be empty
+                 // or if navigating back programmatically to a section not currently at the top.
+                 // We reset the stack to just this section in initial cases.
+                 if (sectionStack.length === 0 || sectionId === sectionStack[0]) {
+                     sectionStack = [sectionId]; // Reset stack if it's the initial load
+                 }
+                 // If navigating back, the stack is handled by the BackButton logic BEFORE calling showSection
+             }
+             console.log("Showing section:", sectionId, "Stack:", [...sectionStack]);
+
+
+             // Hide all sections, then show the target one
+             sections.forEach(id => {
+                 const el = document.getElementById(id);
+                 if (el) el.style.display = 'none'; // Hide all first
+             });
+             const targetElement = document.getElementById(sectionId);
+             if (targetElement) {
+                 targetElement.style.display = 'block'; // Show target
+             } else {
+                 console.error(`Target section element #${sectionId} not found in DOM!`);
+                 // Optionally show an error or navigate to a default safe section
+                 if (sectionId !== 'wellnessManager') { // Avoid infinite loop
+                    showSection('wellnessManager');
+                 }
+                 return; // Stop processing if section element missing
              }
 
 
-             console.log("Showing section:", sectionId, "Stack:", [...sectionStack]);
-
-             sections.forEach(id => { const el = document.getElementById(id); if (el) el.style.display = id === sectionId ? 'block' : 'none'; });
-
              // Update TG BackButton visibility based on stack depth
              try {
-                 if (window.Telegram?.WebApp?.BackButton) {
-                     if (sectionStack.length > 1) Telegram.WebApp.BackButton.show();
-                     else Telegram.WebApp.BackButton.hide();
+                 if (telegram?.BackButton) {
+                     if (sectionStack.length > 1) {
+                        telegram.BackButton.show();
+                     } else {
+                        telegram.BackButton.hide();
+                     }
                  }
              } catch (e) { console.error("Error updating BackButton visibility:", e); }
 
-             // Section-specific logic/updates
+             // Section-specific logic/updates when shown
              switch (sectionId) {
                  case 'wellnessManager': loadChallenges(); break;
                  case 'dailyChallenges': displayDailyChallenges(state.currentChallengeDuration); break;
                  case 'playerProfile': loadProfileHistory(); updateLeaderboardUI(); updateAchievementsUI(); break;
-                 case 'gamePage': updateWheelButtons(); updateMysteryBoxUI(); break; // Update game elements
+                 case 'gamePage': updateWheelButtons(); updateMysteryBoxUI(); break;
                  case 'tasksSection': updateTaskButtons(); break;
-                 // No specific action needed for horoscopeForm on show
+                 case 'horoscopeForm':
+                    // Reset birthdate input if needed?
+                    // if(domElements.birthdate) domElements.birthdate.value = '';
+                    break;
              }
              updateActiveNav(); // Highlight correct footer nav item
-             window.scrollTo(0, 0); // Scroll to top
+             window.scrollTo(0, 0); // Scroll to top for new section view
          }
 
 
         // --- Core Logic Functions ---
         function saveHoroscope() {
-             console.log("saveHoroscope triggered"); // DEBUG
              const birthdateInput = domElements.birthdate;
-             if (!birthdateInput) { console.error("Birthdate input not found"); return; }
-
+             if (!birthdateInput) {
+                 console.error("Birthdate input element not found");
+                 showNotification("Error saving birthdate.", "error");
+                 return;
+             }
              const birthdate = birthdateInput.value; // Format YYYY-MM-DD
-             console.log(`Got birthdate value: ${birthdate}`); // DEBUG
 
-             if (birthdate) {
-                 try {
-                    // Basic validation: Check if it's a plausible date string
-                    if (!/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) {
-                        throw new Error("Invalid date format. Use YYYY-MM-DD.");
-                    }
+             if (!birthdate) {
+                 showNotification('Please enter your birthdate.', 'warning');
+                 birthdateInput.focus();
+                 return;
+             }
 
-                    const d = new Date(birthdate);
-                    // Check if the date object is valid (accounts for invalid dates like 2023-02-30)
-                    if (isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== birthdate) {
-                        throw new Error("Invalid date value (e.g., day/month out of range).");
-                    }
-
-                    const year = d.getFullYear();
-                    const currentYear = new Date().getFullYear();
-                    if (year < 1900 || year > currentYear) { // Check year range
-                        throw new Error(`Year ${year} is out of range (1900-${currentYear}).`);
-                    }
-
-                    // If validation passes
-                    console.log("Birthdate validated:", birthdate); // DEBUG
-                    state.birthdate = birthdate;
-                    saveData(['birthdate']); // Save the validated date
-                    showNotification('Birthdate saved!', 'success');
-                    showSection('wellnessManager'); // Navigate to next section
-
-                 } catch (e) {
-                    console.error("Birthdate validation error:", e.message); // DEBUG
-                    showNotification(`Invalid birthdate: ${e.message}. Please try again.`, 'warning');
-                    birthdateInput.focus();
+             try {
+                 // Validate format YYYY-MM-DD
+                 if (!/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) {
+                     throw new Error("Invalid date format. Use YYYY-MM-DD.");
                  }
-             } else {
-                showNotification('Please enter your birthdate.', 'warning');
-                birthdateInput.focus();
+
+                 // Validate date parts make sense (e.g., not 2023-02-30)
+                 const d = new Date(birthdate + 'T00:00:00'); // Add time to avoid timezone issues with just date
+                 // Check if the constructed date matches the input string AND is a valid date number
+                 if (isNaN(d.getTime()) || d.toISOString().slice(0, 10) !== birthdate) {
+                     throw new Error("Invalid date value (e.g., day/month out of range).");
+                 }
+
+                 const year = d.getFullYear();
+                 const currentYear = new Date().getFullYear();
+                 if (year < 1900 || year > currentYear) { // Plausible year range check
+                     throw new Error(`Year ${year} is out of the accepted range (1900-${currentYear}).`);
+                 }
+
+                 // If all validations pass
+                 state.birthdate = birthdate;
+                 saveData(['birthdate']); // Save only the birthdate
+                 showNotification('Birthdate saved!', 'success');
+                 showSection('wellnessManager'); // Navigate to the main app section
+
+             } catch (e) {
+                 console.error("Birthdate validation error:", e.message);
+                 showNotification(`Invalid birthdate: ${e.message}. Please try again.`, 'warning');
+                 birthdateInput.focus();
              }
          }
 
@@ -1536,8 +1792,8 @@
                 state.consecutiveDays = 0;
                 state.weeklyStreak = 0;
                 console.log("First play or data reset, streaks set to 0.");
-                // No need to save here, will be saved on check-in
-                updateDailyCheckInButtonState(); // Ensure button is enabled
+                // No need to save here, will be saved on check-in or other actions
+                updateDailyCheckInButtonState(); // Ensure button is enabled for first check-in
                 return;
             }
 
@@ -1549,35 +1805,35 @@
 
              // Played previously, but not today
              try {
-                const todayDate = new Date(today);
-                const lastPlayedDateObj = new Date(state.lastPlayedDate);
+                const todayDate = new Date(today + 'T00:00:00'); // Use consistent time for comparison
+                const lastPlayedDateObj = new Date(state.lastPlayedDate + 'T00:00:00');
 
-                // Calculate difference in days (robustly handling timezone/DST changes near midnight)
+                // Calculate difference in days robustly
                 const diffTime = todayDate.getTime() - lastPlayedDateObj.getTime();
-                const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                // Use Math.floor after division to get full days difference
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
                 if (diffDays > 1) {
-                    // Missed one or more days
+                    // Missed one or more full days
+                    console.log(`Streak broken. Missed ${diffDays - 1} day(s). Last played: ${state.lastPlayedDate}, Today: ${today}`);
                     state.consecutiveDays = 0;
                     state.weeklyStreak = 0;
-                    console.log(`Missed ${diffDays - 1} day(s), streaks reset.`);
                     saveData(['consecutiveDays', 'weeklyStreak']); // Save the reset streaks
                 } else if (diffDays === 1) {
-                    // Played yesterday, streak continues (handled during check-in)
-                    console.log("Consecutive day possible.");
+                    // Played exactly yesterday, streak continues (will be incremented on check-in)
+                    console.log("Played yesterday. Streak can continue.");
                 } else if (diffDays <= 0) {
                     // Should not happen if lastPlayedDate is correctly set, but handle defensively
-                    console.warn(`Unexpected day difference: ${diffDays}. Resetting streaks just in case.`);
+                    console.warn(`Unexpected day difference: ${diffDays} (Last: ${state.lastPlayedDate}, Today: ${today}). Resetting streaks.`);
                     state.consecutiveDays = 0;
                     state.weeklyStreak = 0;
                     saveData(['consecutiveDays', 'weeklyStreak']);
                 }
              } catch(e) {
-                // Error parsing dates? Reset streaks defensively.
                 console.error("Error in checkDailyReset date diff calculation:", e);
                 state.consecutiveDays = 0;
                 state.weeklyStreak = 0;
-                saveData(['consecutiveDays', 'weeklyStreak']);
+                saveData(['consecutiveDays', 'weeklyStreak']); // Reset defensively on error
              }
 
             // Regardless of streak reset, the check-in button should be available if not played today
@@ -1586,30 +1842,33 @@
 
 
         function resetDailySpinsIfNeeded(today) {
+             // Check if the last reset date is not today
             if (state.lastDailySpinReset !== today) {
                 console.log(`Resetting daily spins for ${today}. Previous reset: ${state.lastDailySpinReset}`);
-                let changed = false;
+                let spinsChanged = false;
                 wheelTypes.forEach(type => {
-                    // Reset non-referral spins to 1
+                    // Reset non-referral spins back to 1
                     if (type !== 'referral') {
-                        if (state.wheelSpins[type] !== 1) {
+                        if (state.wheelSpins[type] !== 1) { // Only reset if not already 1
                             state.wheelSpins[type] = 1;
-                            changed = true;
+                            spinsChanged = true;
                         }
                     }
+                    // Referral spins are NOT reset daily, they accumulate
                 });
-                state.lastDailySpinReset = today;
+                state.lastDailySpinReset = today; // Update the reset date
 
-                if (changed) {
-                    console.log("Daily spins were reset.");
+                // Save only if spins actually changed or if the date needed updating
+                if (spinsChanged) {
+                    console.log("Daily wheel spins were reset.");
                     saveData(['wheelSpins', 'lastDailySpinReset']);
                 } else {
-                    console.log("Daily spins already seem correct, only updating reset date.");
+                    console.log("Daily spins seem correct, only updating reset date.");
                     saveData(['lastDailySpinReset']); // Still save the reset date
                 }
-                updateWheelButtons(); // Update UI after reset
+                updateWheelButtons(); // Update UI after potential reset
             } else {
-                // console.log("Daily spins already reset today."); // Less verbose
+                 // console.log("Daily spins already reset today."); // Less verbose log
             }
         }
 
@@ -1618,10 +1877,21 @@
             const now = Date.now();
             const twentyFourHours = 24 * 60 * 60 * 1000;
 
+            // Prevent check-in if cooldown active
             if (state.lastCheckInTime && (now - state.lastCheckInTime < twentyFourHours)) {
                 showNotification('Cooldown active. Next check-in available later.', 'warning');
+                startCountdown(); // Ensure countdown is showing correct time
                 return;
             }
+
+            // Prevent check-in if already marked as played today (using date)
+            const today = getCurrentDubaiDate();
+            if (state.lastPlayedDate === today && state.lastCheckInTime) { // Check both just in case
+                 showNotification("Already checked in today.", "info");
+                 updateDailyCheckInButtonState(); // Ensure button/countdown are correct
+                 return;
+            }
+
 
             // Disable button immediately
             if (domElements.dailyCheckInBtn) {
@@ -1629,75 +1899,73 @@
                 domElements.dailyCheckInBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking In...';
             }
 
-            const today = getCurrentDubaiDate();
             let pointsAwarded = 5; // Base points
             let streakBonusPoints = 0;
             let newWeeklyStreak = false;
             let streakContinued = false;
 
-            resetDailySpinsIfNeeded(today); // Ensure spins are definitely reset for today
-
-            // Check streak continuity
+            // --- Streak Logic ---
+            // Check if last play was exactly yesterday
             if (state.lastPlayedDate) {
                 try {
-                    const lastPlayedDateObj = new Date(state.lastPlayedDate);
-                    const todayDate = new Date(today);
+                    const lastPlayedDateObj = new Date(state.lastPlayedDate + 'T00:00:00');
+                    const todayDate = new Date(today + 'T00:00:00');
                     const diffTime = todayDate.getTime() - lastPlayedDateObj.getTime();
-                    const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-                    if (diffDays === 1) { // Played yesterday
+                    if (diffDays === 1) { // Played exactly yesterday
                         state.consecutiveDays++;
-                        streakBonusPoints = Math.min(state.consecutiveDays, 7); // Cap bonus at 7
+                        streakBonusPoints = Math.min(state.consecutiveDays, 7); // Bonus capped at 7 points for day 7+
                         streakContinued = true;
-                        console.log(`Streak continued: Day ${state.consecutiveDays}, Bonus +${streakBonusPoints}`);
+                        console.log(`Streak continued: Day ${state.consecutiveDays}, Base +${pointsAwarded}, Bonus +${streakBonusPoints}`);
 
+                        // Check for weekly streak completion
                         if (state.consecutiveDays > 0 && state.consecutiveDays % 7 === 0) {
                             state.weeklyStreak++;
                             newWeeklyStreak = true;
                             awardMysteryBox(1, "Weekly Streak"); // Award box on completing a week
                             console.log(`Weekly streak advanced to ${state.weeklyStreak}`);
                         }
-
-                        // Grant achievement for 7-day streak
+                        // Grant achievement for 7-day streak (can be granted multiple times if logic allows, but checkAndGrant handles duplicates)
                         if (state.consecutiveDays >= 7) {
                             checkAndGrantAchievement('7_DAY_STREAK');
                         }
-                    } else if (diffDays > 1) { // Missed days
-                        console.log("Streak broken, starting new streak.");
-                        state.consecutiveDays = 1; // Start new streak
-                        state.weeklyStreak = 0;
-                    } else if (diffDays === 0) {
-                        // Should be caught by cooldown check, but handle defensively
-                        console.warn("Duplicate check-in attempt on same day detected here.");
-                        pointsAwarded = 0; // No points if already checked in
-                        streakBonusPoints = 0;
-                    } else { // Unexpected diff (e.g., negative) - reset
-                        console.warn(`Unexpected day difference ${diffDays}. Resetting streak.`);
-                        state.consecutiveDays = 1;
-                        state.weeklyStreak = 0;
+
+                    } else if (diffDays > 1) { // Missed days, reset streak
+                        console.log("Streak broken, starting new streak from Day 1.");
+                        state.consecutiveDays = 1; // Start new streak at 1
+                        state.weeklyStreak = 0; // Reset weekly streak too
+                    } else if (diffDays <= 0) {
+                         // Played today already (should have been caught earlier, but reset defensively)
+                         console.warn("Duplicate check-in detected during streak logic. Resetting streak.");
+                         state.consecutiveDays = 1;
+                         state.weeklyStreak = 0;
+                         pointsAwarded = 0; // No points for duplicate
+                         streakBonusPoints = 0;
                     }
                 } catch (e) {
                     console.error("Error calculating check-in date difference:", e);
-                    state.consecutiveDays = 1; // Reset defensively
+                    state.consecutiveDays = 1; // Reset defensively on error
                     state.weeklyStreak = 0;
                 }
             } else {
                 // First ever check-in
-                console.log("First check-in.");
+                console.log("First check-in. Starting Day 1 streak.");
                 state.consecutiveDays = 1;
                 state.weeklyStreak = 0;
             }
 
-            // Grant first check-in achievement if applicable
-             if (pointsAwarded > 0) {
+            // Grant first check-in achievement if it's the first time
+            // Check if the achievement is already present before granting
+             if (pointsAwarded > 0 && !state.achievements?.includes('FIRST_CHECKIN')) {
                 checkAndGrantAchievement('FIRST_CHECKIN');
              }
 
-            // Update state and award points if any were earned
-            if (pointsAwarded > 0 || streakBonusPoints > 0) {
-                state.lastPlayedDate = today;
-                state.lastCheckInTime = now;
-                const totalPoints = pointsAwarded + streakBonusPoints;
+            // --- Update State & Award Points ---
+            const totalPoints = pointsAwarded + streakBonusPoints;
+            if (totalPoints > 0) {
+                state.lastPlayedDate = today; // Mark today as played
+                state.lastCheckInTime = now; // Record the timestamp of this check-in
                 awardPoints(totalPoints, "Daily Check-in"); // Award combined points
 
                 // Construct feedback message
@@ -1705,32 +1973,36 @@
                 if (newWeeklyStreak) {
                     msg += ` Weekly Streak: ${state.weeklyStreak}! +1 Box!`;
                 } else if (streakContinued) {
-                    // msg += ` Streak bonus: +${streakBonusPoints}!`; // Already included in total points message
+                    // Message already includes total points, maybe add a small icon?
+                    // msg += ` 🔥`;
                 }
                 showNotification(msg, 'success');
 
                 // Save all relevant state changes
-                saveData(['lastPlayedDate', 'lastCheckInTime', 'consecutiveDays', 'weeklyStreak', 'points', 'level', 'leaderboard', 'achievements', 'mysteryBoxes']); // Added mysteryBoxes
+                saveData(['lastPlayedDate', 'lastCheckInTime', 'consecutiveDays', 'weeklyStreak', 'points', 'level', 'leaderboard', 'achievements', 'mysteryBoxes']);
             } else {
-                console.log("No points awarded for this check-in (likely duplicate or error).");
-                // Still update lastCheckInTime to prevent immediate re-checkin if error occurred
-                state.lastCheckInTime = now;
-                saveData(['lastCheckInTime']);
-                showNotification("Already checked in today.", "info");
+                 // Handle cases where no points were awarded (e.g., duplicate check-in detected late)
+                 console.log("No points awarded for this check-in (likely duplicate or error).");
+                 // Still update lastCheckInTime to prevent immediate re-checkin loops if error occurred
+                 state.lastCheckInTime = now;
+                 saveData(['lastCheckInTime']); // Save only the timestamp update
+                 showNotification("Already checked in today.", "info");
             }
 
-            // Update UI elements like button state and streaks display
-            updateUI();
-            startCountdown(); // Start or update the countdown timer
+            // Update UI elements like button state, countdown, and streaks display
+            updateUI(); // This will call updateDailyCheckInButtonState which calls startCountdown
         }
 
 
         function awardPoints(amount, reason = "") {
-             if (!Number.isInteger(amount) || amount <= 0) return;
-             state.points += amount;
+             if (!Number.isInteger(amount) || amount <= 0) {
+                 // console.log(`Attempted to award invalid points: ${amount}`);
+                 return;
+             }
+             state.points = (state.points || 0) + amount; // Ensure state.points is treated as number
              console.log(`+${amount} points (${reason}). New total: ${state.points}`);
 
-             ensureUserInLeaderboard(); // Update user's points in the leaderboard state
+             ensureUserInLeaderboard(); // Update user's points in the leaderboard state before level check
              const previousLevel = state.level;
              updateUserLevel(); // Check if level changed
 
@@ -1738,6 +2010,7 @@
              const keysToSave = ['points', 'leaderboard'];
              if (state.level !== previousLevel) {
                  keysToSave.push('level'); // Save level only if it changed
+                 keysToSave.push('achievements'); // Save achievements if level might grant one
              }
 
              saveData(keysToSave);
@@ -1747,8 +2020,9 @@
 
         function awardEnergy(amount, reason = "") {
             if (!Number.isInteger(amount) || amount === 0) return;
-            const oldEnergy = state.energyLevel;
+            const oldEnergy = state.energyLevel || 0; // Default to 0 if undefined
             state.energyLevel = Math.min(100, Math.max(0, oldEnergy + amount)); // Clamp between 0 and 100
+
             if (state.energyLevel !== oldEnergy) {
                 console.log(`${amount > 0 ? '+' : ''}${amount}% energy (${reason}). New: ${state.energyLevel}%`);
                 saveData(['energyLevel']);
@@ -1760,51 +2034,60 @@
         }
 
         function updateUserLevel() {
-            let currentLevel = state.level;
+            let currentLevelName = state.level || levels[0].name;
             let newLevelData = levels[0]; // Default to first level
 
-            // Find the highest level the user qualifies for
+            // Find the highest level the user qualifies for based on points
             for (let i = levels.length - 1; i >= 0; i--) {
                 if (state.points >= levels[i].points) {
                     newLevelData = levels[i];
-                    break;
+                    break; // Found the highest applicable level
                 }
             }
 
-            if (newLevelData.name !== currentLevel) {
+            // Check if the level name has changed
+            if (newLevelData.name !== currentLevelName) {
+                const oldLevelName = currentLevelName;
                 state.level = newLevelData.name;
-                console.log(`Level up! New level: ${state.level}`);
+                console.log(`Level up! ${oldLevelName} -> ${state.level}`);
                 showNotification(`Level Up: ${state.level}! 🎉`, 'success');
 
-                // Grant achievements based on level
+                // Grant achievements based on reaching specific levels
+                // Ensure checkAndGrantAchievement handles saving 'achievements'
                 if (state.level === "Adept") checkAndGrantAchievement('LEVEL_ADEPT');
-                // Add more level achievements here...
+                // Add more level checks here:
+                // if (state.level === "Guardian") checkAndGrantAchievement('LEVEL_GUARDIAN'); // Example
 
-                // Note: saveData is typically handled by awardPoints which calls this.
-                // If called elsewhere, ensure 'level' is saved.
+                // Note: saveData for 'level' and 'achievements' is typically handled by the function
+                // that awarded the points (e.g., awardPoints). If called independently, ensure saving.
                 updateUI(); // Update displayed level name
             }
          }
 
         function checkAndGrantAchievement(key) {
               if (!achievementsConfig[key]) {
-                  console.warn(`Invalid achievement key: ${key}`);
-                  return false; // Indicate failure
+                  console.warn(`Invalid achievement key provided: ${key}`);
+                  return false; // Indicate failure: invalid key
               }
+              // Ensure achievements array exists
+              state.achievements = state.achievements || [];
+
               if (!state.achievements.includes(key)) {
                   state.achievements.push(key);
                   const ach = achievementsConfig[key];
                   console.log(`Achievement Unlocked: ${ach.name}`);
                   showNotification(`Achievement: ${ach.name}! 🏅`, 'success');
-                  saveData(['achievements']); // Save the updated achievements list
+                  // Save the updated achievements list immediately
+                  saveData(['achievements']);
                   updateAchievementsUI(); // Update the UI display
-                  return true; // Indicate success
+                  return true; // Indicate success: achievement granted
               }
-              return false; // Indicate already had achievement
+              return false; // Indicate failure: already had achievement
           }
 
         // --- Challenge Logic ---
         function initializeChallenges() {
+             // Create the full structure but completion status will be loaded/saved separately
              return Array.from({ length: 150 }, (_, i) => {
                  const goalIndex = i % dailyGoals.length; // Cycle through goals
                  const goalData = dailyGoals[goalIndex];
@@ -1815,14 +2098,15 @@
                     task1: goalData.task1,
                     task2: goalData.task2,
                     points: goalData.points,
-                    completed: false,
-                    completionDate: null // Store YYYY-MM-DD date when completed
+                    completed: false, // Default status
+                    completionDate: null // Default status
                  };
              });
          }
 
         function getCompletedDaysCount(maxDay) {
              if (!state.challenges || maxDay <= 0) return 0;
+             // Count based on the current state loaded from challengesStatus
              return state.challenges.slice(0, maxDay).filter(ch => ch.completed).length;
          }
 
@@ -1833,7 +2117,9 @@
                  case 41: return getCompletedDaysCount(21) === 21; // Requires 21-day completed
                  case 66: return state.workshopAccess && getCompletedDaysCount(41) === 41; // Requires workshop + 41-day
                  case 150: return state.workshopAccess && getCompletedDaysCount(66) === 66; // Requires workshop + 66-day
-                 default: return false; // Unknown duration
+                 default:
+                    console.warn(`isChallengeUnlocked called with unknown duration: ${days}`);
+                    return false; // Unknown duration
              }
          }
 
@@ -1842,16 +2128,20 @@
             const icons = { 7: 'fa-sun', 21: 'fa-seedling', 41: 'fa-star', 66: 'fa-moon', 150: 'fa-crown' };
             const titles = { 7: 'Foundation', 21: 'Habit Building', 41: 'Deepening', 66: 'Integration', 150: 'Mastery' };
 
-            if (!domElements.challengeOptions) return;
+            if (!domElements.challengeOptions) {
+                console.error("Cannot load challenges: challengeOptions element missing.");
+                return;
+            }
             domElements.challengeOptions.innerHTML = ''; // Clear previous options
 
             durations.forEach(days => {
                 const unlocked = isChallengeUnlocked(days);
                 const icon = icons[days] || 'fa-question-circle';
                 const title = titles[days] || `${days}-Day`;
-                const reqWorkshop = days > 41; // Workshop required for 66 and 150
+                const reqWorkshop = days >= 66; // Workshop required for 66 and 150
                 const prevDays = days === 21 ? 7 : (days === 41 ? 21 : (days === 66 ? 41 : (days === 150 ? 66 : 0)));
                 const prevTitle = titles[prevDays] || `${prevDays}-Day`;
+                // Check completion of the *required* previous challenge
                 const prevComplete = prevDays === 0 || getCompletedDaysCount(prevDays) === prevDays;
 
                 const div = document.createElement('div');
@@ -1859,22 +2149,29 @@
                 let content = `<i class="fas ${icon} challenge-icon"></i><h3>${days}-Day: ${title}</h3>`;
 
                 if (unlocked) {
-                    // Check if this challenge is the currently active one
+                    // Check if this challenge is the currently active one being viewed
                     if (state.currentChallengeDuration === days) {
                         content += `<button class="btn btn-info view-challenge-btn mt-2 btn-sm" data-days="${days}">View Progress</button>`;
                     } else {
+                        // Check if any challenge is active, if so, maybe disable starting others? (Optional)
+                        // const isActiveChallenge = state.currentChallengeDuration !== null;
                         content += `<button class="btn btn-custom start-challenge-btn mt-2 btn-sm" data-days="${days}">Begin ${title}</button>`;
                     }
                 } else {
                     // Explain why it's locked
-                    if (!prevComplete) {
+                    if (!prevComplete && prevDays > 0) {
+                        // Need to complete previous challenge
                         content += `<p class="warning-text">Complete the ${prevTitle} challenge first.</p>`;
                     } else if (reqWorkshop && !state.workshopAccess) {
-                        // If previous is complete but workshop is needed and not accessed
-                        content += `<p class="warning-text">Requires Workshop Access</p><div class="d-flex justify-content-center gap-2 mt-2"><button class="btn btn-info enroll-btn btn-sm" data-days="${days}">Enroll Info</button><button class="btn btn-secondary attended-btn btn-sm" data-days="${days}">Enter Code</button></div>`;
+                        // Previous complete, but workshop needed and not accessed
+                        content += `<p class="warning-text">Requires Workshop Access</p>
+                                    <div class="d-flex justify-content-center gap-2 mt-2">
+                                        <button class="btn btn-info enroll-btn btn-sm" data-days="${days}">Enroll Info</button>
+                                        <button class="btn btn-secondary attended-btn btn-sm" data-days="${days}">Enter Code</button>
+                                    </div>`;
                     } else {
-                         // Should not happen if logic is correct, but provide a fallback message
-                        content += `<p class="warning-text">Locked (Requirement not met)</p>`;
+                         // Generic locked message if other conditions met but still locked (shouldn't normally happen)
+                        content += `<p class="warning-text">Locked</p><p class="fs-sm">(Requirement not met)</p>`;
                     }
                 }
                 div.innerHTML = content;
@@ -1884,9 +2181,11 @@
 
 
          function displayDailyChallenges(days) {
-             if (!days || !domElements.dailyChallengeList) {
-                 console.warn("Cannot display daily challenges: No duration set or list element missing.");
-                 showSection('wellnessManager'); // Go back if state is invalid
+             if (!days || !domElements.dailyChallengeList || !domElements.challengeTitle) {
+                 console.warn("Cannot display daily challenges: No duration set or DOM elements missing.");
+                 // Optionally navigate back if state is clearly invalid
+                 // showSection('wellnessManager');
+                 if(domElements.dailyChallengeList) domElements.dailyChallengeList.innerHTML = '<p class="text-warning text-center">Could not load challenge details.</p>';
                  return;
              }
 
@@ -1896,64 +2195,89 @@
              const dubaiDate = getCurrentDubaiDate();
              let firstUncompletedIdx = -1;
 
-             // Find the index of the first challenge that can be started today
+             // Find the index of the first challenge within this duration that is NOT completed
              for(let i = 0; i < days; i++) {
-                 const ch = state.challenges[i];
-                 if (ch.completed) continue; // Skip completed challenges
-
-                 // If it's the very first challenge (day 1) and not completed, it's startable
-                 if (i === 0) {
-                     firstUncompletedIdx = 0;
-                     break;
-                 }
-
-                 // For subsequent challenges, check if the *previous* one was completed *yesterday* or earlier
-                 const prevCh = state.challenges[i-1];
-                 if (prevCh.completed && prevCh.completionDate && dubaiDate > prevCh.completionDate) {
-                     firstUncompletedIdx = i; // This challenge unlocks today
-                     break;
-                 } else {
-                     // If previous not completed, or completed today, cannot start this one yet
-                     break; // Stop searching, no more challenges can be started
+                 if (!state.challenges[i]?.completed) {
+                     firstUncompletedIdx = i;
+                     break; // Found the first uncompleted one
                  }
              }
 
-             // If all challenges up to 'days' are completed
-             if (firstUncompletedIdx === -1 && getCompletedDaysCount(days) === days) {
-                 firstUncompletedIdx = days; // Indicates all done, no button needed
+              // If all challenges up to 'days' are completed
+             const allDurationCompleted = (firstUncompletedIdx === -1 && getCompletedDaysCount(days) === days);
+             if (allDurationCompleted) {
+                 firstUncompletedIdx = days; // Use index 'days' to signify all done
                  console.log(`${days}-Day Challenge Completed!`);
-                 // Optionally add a completion message here
+                 // Add a completion message to the UI
+                 const completionMsg = document.createElement('div');
+                 completionMsg.className = 'alert alert-success text-center';
+                 completionMsg.innerHTML = `🎉 Congratulations! You completed the ${days}-Day ${titles[days] || ''} Challenge! 🎉`;
+                 domElements.dailyChallengeList.appendChild(completionMsg);
+                 // Grant achievement for completing THIS specific duration (only if not already granted)
+                 if (days === 7) checkAndGrantAchievement('CHALLENGE_7_COMPLETE');
+                 // Add more for 21, 41 etc. if defined in achievementsConfig
              }
 
-             console.log(`Displaying challenges for ${days} days. First startable index: ${firstUncompletedIdx}`); // DEBUG
+             console.log(`Displaying challenges for ${days} days. First uncompleted index: ${firstUncompletedIdx}`); // DEBUG
+
+             // --- Determine which day is actually STARTABLE today ---
+             let startableDayIndex = -1;
+             if (firstUncompletedIdx !== -1 && firstUncompletedIdx < days) { // If there *is* an uncompleted challenge
+                 if (firstUncompletedIdx === 0) {
+                     // Day 1 is always startable if not completed
+                     startableDayIndex = 0;
+                 } else {
+                     // For subsequent days, check if the PREVIOUS day was completed, and NOT completed today
+                     const prevCh = state.challenges[firstUncompletedIdx - 1];
+                     if (prevCh?.completed && prevCh.completionDate && prevCh.completionDate < dubaiDate) {
+                         // Previous day completed before today, so current uncompleted day is startable
+                         startableDayIndex = firstUncompletedIdx;
+                     }
+                 }
+             }
+             console.log(`Actual startable day index today: ${startableDayIndex}`);
 
              // Render challenge cards up to the duration 'days'
              state.challenges.slice(0, days).forEach((ch, idx) => {
+                 if (!ch) return; // Skip if challenge data is missing
+
                  const card = document.createElement('div');
                  card.className = 'challenge-div mb-2';
-                 const isStartable = idx === firstUncompletedIdx;
+                 const isStartable = idx === startableDayIndex;
 
                  let content = `<h4>Day ${ch.day}: ${escapeHtml(ch.goal)}</h4>`;
 
                  if (ch.completed) {
                      content += `<p style="color: green; font-weight: bold;"><i class="fas fa-check-circle"></i> Completed (+${ch.points} $twote)</p>`;
+                     if(ch.completionDate) content += `<p class="text-muted fs-sm">(${ch.completionDate})</p>`;
                      card.classList.add('completed');
                  } else if (isStartable) {
+                     // This is the first uncompleted day AND previous was done before today
                      content += `<button class="btn btn-custom btn-sm mt-1 start-day-btn" data-day="${ch.day}">Start Day ${ch.day}</button>`;
                      card.classList.add('startable');
                  } else {
-                     // Explain why it's locked
-                     const prevCh = idx > 0 ? state.challenges[idx - 1] : null;
-                     if (prevCh && !prevCh.completed) {
-                         content += `<p class="warning-text fs-sm"><i class="fas fa-lock"></i> Complete Day ${ch.day - 1}</p>`;
-                     } else if (prevCh && prevCh.completionDate && dubaiDate <= prevCh.completionDate) {
-                         // Previous completed today, unlocks tomorrow
-                         content += `<p class="text-muted fs-sm"><i class="fas fa-clock"></i> Unlocks after midnight (Dubai)</p>`;
-                     } else {
-                         // Generic locked state (e.g., index > firstUncompletedIdx)
-                         content += `<p class="text-muted fs-sm"><i class="fas fa-lock"></i> Locked</p>`;
-                     }
+                     // It's locked for today
                      card.classList.add('locked');
+                     // Explain why it's locked
+                     if (idx < firstUncompletedIdx) {
+                         // This case shouldn't happen if firstUncompletedIdx is correct, but indicates an error
+                         content += `<p class="warning-text fs-sm"><i class="fas fa-exclamation-triangle"></i> Error: Should be completed?</p>`;
+                     } else if (idx === firstUncompletedIdx) {
+                         // It's the first uncompleted, but previous day was completed *today*
+                          const prevCh = idx > 0 ? state.challenges[idx - 1] : null;
+                         if (prevCh?.completed && prevCh.completionDate === dubaiDate) {
+                             content += `<p class="text-muted fs-sm"><i class="fas fa-clock"></i> Unlocks tomorrow (Dubai Time)</p>`;
+                         } else if (idx > 0 && !prevCh?.completed) {
+                              // This means firstUncompletedIdx logic might be slightly off, or data inconsistent
+                              content += `<p class="warning-text fs-sm"><i class="fas fa-lock"></i> Complete Day ${ch.day - 1}</p>`;
+                         } else {
+                             // Generic case if day 1 is locked (shouldn't happen) or other edge cases
+                             content += `<p class="text-muted fs-sm"><i class="fas fa-lock"></i> Locked</p>`;
+                         }
+                     } else {
+                          // This day is > firstUncompletedIdx, so definitely locked
+                          content += `<p class="text-muted fs-sm"><i class="fas fa-lock"></i> Complete Day ${firstUncompletedIdx + 1}</p>`;
+                     }
                  }
                  card.innerHTML = content;
                  domElements.dailyChallengeList.appendChild(card);
@@ -1961,10 +2285,11 @@
          }
 
         function startChallenge(day) {
-            console.log(`Attempting to start challenge for day ${day}`); // DEBUG
+            console.log(`Attempting to start challenge for day ${day}`);
             const challenge = state.challenges.find(c => c.day === day);
             if (!challenge) {
                 console.error(`Challenge data not found for day ${day}`);
+                showNotification("Error: Challenge details missing.", "error");
                 return;
             }
             if (challenge.completed) {
@@ -1972,45 +2297,62 @@
                 return;
             }
 
-            state.currentChallengeDay = day;
-            state.energyBefore = null; // Reset energyBefore
+            // --- FIX: Check crucial modal elements before proceeding ---
+             if (!modalInstances.energyLog || !domElements.energyLogModalTitle || !domElements.energyLogPrompt || !domElements.energySlider || !domElements.energySliderValue || !domElements.challengeTasks || !domElements.submitEnergyLog) {
+                 console.error("Energy log modal elements not initialized correctly!");
+                 showNotification("Error: Cannot display challenge interface.", "error");
+                 return;
+             }
 
-            if (!modalInstances.energyLog) {
-                console.error("Energy log modal not initialized!");
-                showNotification("Error: Cannot open energy log.", "error");
-                return;
-            }
+            state.currentChallengeDay = day;
+            state.energyBefore = null; // Reset energyBefore for the new attempt
 
             try {
                 // Configure the modal for the 'before' stage
                 domElements.energyLogModalTitle.textContent = `Day ${day}: ${escapeHtml(challenge.goal)} - Before`;
                 domElements.energyLogPrompt.textContent = "Log your current energy level (0-100%).";
-                domElements.energySlider.value = state.energyLevel; // Pre-fill with current energy
-                if(domElements.energySliderValue) domElements.energySliderValue.textContent = `${state.energyLevel}%`;
+                domElements.energySlider.value = state.energyLevel ?? 50; // Pre-fill with current energy, default 50
+                domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
                 domElements.challengeTasks.style.display = 'none'; // Hide task section initially
-                domElements.proofWarning.style.display = 'none'; // Hide proof warning
-                if(domElements.task1Proof) domElements.task1Proof.value = ''; // Clear file inputs
+                if(domElements.proofWarning) domElements.proofWarning.style.display = 'none'; // Hide proof warning
+
+                // Clear previous file inputs if they exist
+                if(domElements.task1Proof) domElements.task1Proof.value = '';
                 if(domElements.task2Proof) domElements.task2Proof.value = '';
 
+                // Configure submit button for 'before' stage
                 domElements.submitEnergyLog.textContent = 'Confirm Energy & View Tasks';
                 domElements.submitEnergyLog.setAttribute('data-stage', 'before');
-                domElements.submitEnergyLog.disabled = false; // Enable submission
+                domElements.submitEnergyLog.disabled = false; // Enable submission for 'before' stage
 
-                console.log("Showing energy log modal for 'before' stage."); // DEBUG
+                console.log("Showing energy log modal for 'before' stage.");
                 modalInstances.energyLog.show();
+
             } catch (e) {
+                // Catch errors during modal configuration (e.g., if elements were missing despite checks)
                 console.error("Error configuring or showing energy log modal:", e);
                 showNotification("Error displaying challenge details.", "error");
+                // Reset state if modal fails to show
+                state.currentChallengeDay = null;
             }
          }
 
         async function submitEnergyLog() {
+             // Double-check elements needed for submission
+             if (!domElements.energySlider || !domElements.submitEnergyLog || !modalInstances.energyLog) {
+                 console.error("Cannot submit energy log: Missing crucial DOM elements or modal instance.");
+                 showNotification("Error submitting log. Please close and retry.", "error");
+                 return;
+             }
+
              const sliderValue = parseInt(domElements.energySlider.value);
              const stage = domElements.submitEnergyLog.getAttribute('data-stage');
              const challenge = state.challenges.find(c => c.day === state.currentChallengeDay);
 
-             if (!challenge || !modalInstances.energyLog) {
-                 console.error("Cannot submit energy log: Missing challenge data or modal instance.");
+             if (!challenge) {
+                 console.error("Cannot submit energy log: Missing challenge data for day", state.currentChallengeDay);
+                 if(modalInstances.energyLog) modalInstances.energyLog.hide(); // Hide broken modal
+                 showNotification("Error: Challenge data lost. Please restart.", "error");
                  return;
              }
 
@@ -2022,25 +2364,40 @@
                  state.energyBefore = sliderValue; // Record energy before starting tasks
                  console.log(`Energy Before (Day ${state.currentChallengeDay}): ${state.energyBefore}%`);
 
-                 // Configure modal for 'after' stage
+                 // --- Configure modal for 'after' stage ---
+                 // Check elements needed for 'after' stage
+                 if (!domElements.energyLogModalTitle || !domElements.energyLogPrompt || !domElements.challengeTasks || !domElements.meditationTask || !domElements.task1Text || !domElements.task2Text || !domElements.task1Proof || !domElements.task2Proof || !domElements.proofWarning) {
+                     console.error("Cannot proceed to 'after' stage: Modal elements missing.");
+                     showNotification("Error loading task details.", "error");
+                     domElements.submitEnergyLog.textContent = 'Confirm Energy & View Tasks'; // Reset button text
+                     domElements.submitEnergyLog.disabled = false; // Re-enable
+                     state.energyBefore = null; // Reset energyBefore
+                     return;
+                 }
+
                  domElements.energyLogModalTitle.textContent = `Day ${state.currentChallengeDay}: ${escapeHtml(challenge.goal)} - After`;
                  domElements.energyLogPrompt.textContent = "Complete tasks & log energy post-challenge.";
-                 domElements.challengeTasks.style.display = 'block'; // Show tasks
+                 domElements.challengeTasks.style.display = 'block'; // Show tasks section
                  domElements.meditationTask.textContent = escapeHtml(challenge.meditation);
                  domElements.task1Text.textContent = escapeHtml(challenge.task1);
                  domElements.task2Text.textContent = escapeHtml(challenge.task2);
 
-                 // Keep slider at the 'before' value for reference, or reset? Let's keep it.
-                 // domElements.energySlider.value = sliderValue;
-                 // domElements.energySliderValue.textContent = `${sliderValue}%`;
+                 // Keep slider at the 'before' value or reset? Let's reset to current actual energy for 'after' log.
+                 domElements.energySlider.value = state.energyLevel ?? 50;
+                 if(domElements.energySliderValue) domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
 
-                 // Reset file inputs and enable 'after' submission (conditionally based on files)
-                 if(domElements.task1Proof) domElements.task1Proof.value = '';
-                 if(domElements.task2Proof) domElements.task2Proof.value = '';
+
+                 // Reset file inputs and proof warning
+                 domElements.task1Proof.value = '';
+                 domElements.task2Proof.value = '';
+                 domElements.proofWarning.style.display = 'block'; // Show warning initially for 'after' stage
+
+                 // Update submit button for 'after' stage
                  domElements.submitEnergyLog.textContent = 'Submit Completion';
                  domElements.submitEnergyLog.setAttribute('data-stage', 'after');
-                 domElements.submitEnergyLog.disabled = true; // Disable until files are added
-                 domElements.proofWarning.style.display = 'block'; // Show warning initially
+                 // Keep button disabled initially for 'after' stage until files are added
+                 domElements.submitEnergyLog.disabled = true;
+
 
              } else if (stage === 'after') {
                  const energyAfter = sliderValue;
@@ -2052,45 +2409,55 @@
                      showNotification('Please upload proof for both tasks.', 'warning');
                      domElements.submitEnergyLog.textContent = 'Submit Completion';
                      domElements.submitEnergyLog.disabled = false; // Re-enable button
-                     domElements.proofWarning.style.display = 'block'; // Ensure warning is visible
+                     if(domElements.proofWarning) domElements.proofWarning.style.display = 'block'; // Ensure warning is visible
                      return; // Stop submission
                  }
                  console.log(`Energy After (Day ${state.currentChallengeDay}): ${energyAfter}%`);
 
-                 // Simulate upload/processing delay
+                 // Simulate upload/processing delay (replace with actual upload if needed)
                  await new Promise(resolve => setTimeout(resolve, 1000));
 
                  try {
-                     // Mark challenge as completed
+                     // --- Process Completion ---
+                     // Mark challenge as completed in the state
                      challenge.completed = true;
                      challenge.completionDate = getCurrentDubaiDate(); // Record completion date
 
                      // Add to history (limit size)
+                     state.challengeHistory = state.challengeHistory || []; // Ensure array exists
                      state.challengeHistory.push({
                          day: state.currentChallengeDay,
                          goal: challenge.goal,
                          energyBefore: state.energyBefore,
                          energyAfter,
+                         // Store filenames or just boolean flags? Boolean for now.
                          task1ProofProvided: !!task1File,
                          task2ProofProvided: !!task2File,
                          completionTimestamp: Date.now()
                      });
+                     // Limit history size to prevent excessive storage use
                      if (state.challengeHistory.length > 50) {
-                         state.challengeHistory.shift(); // Keep history size manageable
+                         state.challengeHistory = state.challengeHistory.slice(-50); // Keep last 50
                      }
 
                      // Update overall energy level based on 'after' value
                      updateEnergyLevel(state.energyBefore, energyAfter); // Pass before/after for potential logic
                      awardPoints(challenge.points, `Challenge Day ${state.currentChallengeDay}`);
 
-                     // Check for challenge completion achievements
-                     if (state.currentChallengeDuration === 7 && getCompletedDaysCount(7) === 7) {
-                         checkAndGrantAchievement('CHALLENGE_7_COMPLETE');
+                     // Check for challenge duration completion achievements
+                     // Check *after* points are awarded and state saved
+                     if (state.currentChallengeDuration) {
+                         const completedCount = getCompletedDaysCount(state.currentChallengeDuration);
+                         if (completedCount === 7 && state.currentChallengeDuration === 7) {
+                             checkAndGrantAchievement('CHALLENGE_7_COMPLETE');
+                         }
+                         // Add more checks for 21, 41, etc. if defined
+                         // if (completedCount === 21 && state.currentChallengeDuration === 21) { checkAndGrantAchievement('CHALLENGE_21_COMPLETE'); }
                      }
-                     // Add more achievement checks for 21, 41, etc. days if needed
 
-                     // Save all relevant changes
-                     saveData(['challenges', 'challengeHistory', 'energyLevel', 'points', 'level', 'leaderboard', 'achievements']);
+                     // Save all relevant changes (points/level/achievements saved by their functions)
+                     // Need to save challenges (status), history, energyLevel
+                     saveData(['challenges', 'challengeHistory', 'energyLevel']);
 
                      modalInstances.energyLog.hide();
                      showNotification(`Day ${state.currentChallengeDay} completed! 🎉`, 'success');
@@ -2103,7 +2470,7 @@
                      domElements.submitEnergyLog.textContent = 'Submit Completion';
                      domElements.submitEnergyLog.disabled = false;
                  } finally {
-                     // Clean up state regardless of success/error
+                     // Clean up current challenge state regardless of success/error
                      state.currentChallengeDay = null;
                      state.energyBefore = null;
                  }
@@ -2111,65 +2478,84 @@
         }
 
         function updateEnergyLevel(before, after) {
-             // Current logic just sets energy to the 'after' value.
-             // Could add more complex logic here (e.g., average, bonus for increase).
-             if (after !== null && after !== undefined) {
-                 const oldEnergy = state.energyLevel;
-                 const newEnergy = Math.min(Math.max(after, 0), 100); // Use 'after' value, clamped
+             // Current simple logic: Set energy to the 'after' value reported by the user.
+             if (after !== null && after !== undefined && Number.isInteger(after)) {
+                 const oldEnergy = state.energyLevel ?? 0;
+                 const newEnergy = Math.min(100, Math.max(0, after)); // Clamp between 0 and 100
+
                  if (newEnergy !== oldEnergy) {
-                     state.energyLevel = newEnergy;
-                     console.log(`Energy updated from ${oldEnergy}% to ${state.energyLevel}% based on challenge log.`);
-                     saveData(['energyLevel']);
-                     updateUI(); // Reflect change in UI
+                     console.log(`Energy level updated from ${oldEnergy}% to ${newEnergy}% based on challenge log.`);
+                     // Use awardEnergy function for consistency in logging, saving, UI update
+                     awardEnergy(newEnergy - oldEnergy, `Challenge Day ${state.currentChallengeDay || ''} Log`);
+                     // Note: awardEnergy handles saving and UI update
+                 } else {
+                     console.log(`Reported energy (${newEnergy}%) matches current energy level. No change.`);
                  }
+             } else {
+                console.warn("Invalid 'after' energy value received:", after);
              }
          }
 
         function showEnrollModal(days) {
-             if (!modalInstances.enroll) return;
-             domElements.enrollName.textContent = state.userName;
-             domElements.enrollEnergy.textContent = state.energyLevel;
-             const canEnroll = state.energyLevel >= 70;
+             if (!modalInstances.enroll || !domElements.enrollName || !domElements.enrollEnergy || !domElements.submitEnrollment || !domElements.enrollRequirement) {
+                 console.error("Cannot show enroll modal: elements missing.");
+                 showNotification("Error displaying enrollment info.", "error");
+                 return;
+             };
+             domElements.enrollName.textContent = state.userName ?? 'User';
+             domElements.enrollEnergy.textContent = state.energyLevel ?? 0;
+             const canEnroll = (state.energyLevel ?? 0) >= 70;
              domElements.submitEnrollment.disabled = !canEnroll;
              domElements.enrollRequirement.style.display = canEnroll ? 'none' : 'block';
-             // Ensure the onclick handler is set correctly
-             domElements.submitEnrollment.onclick = () => enroll(days); // Pass days if needed for context
+             // Ensure the onclick handler is set correctly (using an anonymous function to pass context)
+             domElements.submitEnrollment.onclick = () => enroll(days);
              modalInstances.enroll.show();
          }
 
-         function enroll(daysContext) { // Added context parameter
-             if (state.energyLevel < 70) {
+         function enroll(daysContext) { // daysContext might be useful later
+             if ((state.energyLevel ?? 0) < 70) {
                  showNotification('Requires 70% Energy to enroll!', 'warning');
                  return;
              }
              if (state.workshopAccess) {
                  showNotification('You already have workshop access!', 'info');
-                 modalInstances.enroll.hide();
+                 if(modalInstances.enroll) modalInstances.enroll.hide();
                  return;
              }
 
              // Grant access
              state.workshopAccess = true;
-             saveData(['workshopAccess']);
-             modalInstances.enroll.hide();
+             saveData(['workshopAccess']); // Save the change
+             if(modalInstances.enroll) modalInstances.enroll.hide();
              showNotification(`Enrollment successful! Workshop access granted.`, 'success');
 
              // Refresh the challenge options to show newly unlocked challenges
-             loadChallenges();
+             // Need to ensure we are on the correct section or navigate there
+             if (sectionStack[sectionStack.length-1] === 'wellnessManager') {
+                 loadChallenges(); // Refresh if already on the manager page
+             } else {
+                 showSection('wellnessManager'); // Navigate to manager page to see updated list
+             }
          }
 
         function showCodeModal(days) {
-             if (!modalInstances.code) return;
-             domElements.workshopCode.value = '';
-             // Ensure the onclick handler is set correctly
-             domElements.submitCode.onclick = () => submitCode(days); // Pass days if needed
+             if (!modalInstances.code || !domElements.workshopCode || !domElements.submitCode) {
+                 console.error("Cannot show code modal: elements missing.");
+                 showNotification("Error displaying code entry.", "error");
+                 return;
+             }
+             domElements.workshopCode.value = ''; // Clear previous entry
+             // Set onclick handler correctly
+             domElements.submitCode.onclick = () => submitCode(days);
              modalInstances.code.show();
          }
 
-         function submitCode(daysContext) { // Added context parameter
+         function submitCode(daysContext) { // daysContext might be useful later
              const codeInput = domElements.workshopCode;
+             if (!codeInput) return; // Should be checked by showCodeModal, but double-check
+
              const code = codeInput.value.trim();
-             const correctCode = "WELLNESS"; // Case-insensitive check below
+             const correctCode = "WELLNESS"; // The secret code (case-insensitive check below)
 
              if (!code) {
                  showNotification('Please enter the workshop code.', 'warning');
@@ -2180,31 +2566,36 @@
              if (code.toUpperCase() === correctCode) {
                  if (!state.workshopAccess) {
                      state.workshopAccess = true;
-                     saveData(['workshopAccess']);
+                     saveData(['workshopAccess']); // Save the change
                      showNotification(`Code accepted! Workshop access granted.`, 'success');
                      // Refresh challenges after gaining access
-                     loadChallenges();
+                     if (sectionStack[sectionStack.length-1] === 'wellnessManager') {
+                         loadChallenges(); // Refresh if already on the manager page
+                     } else {
+                         showSection('wellnessManager'); // Navigate to manager page
+                     }
                  } else {
                      showNotification('Workshop access already granted!', 'info');
                  }
-                 modalInstances.code.hide();
+                 if(modalInstances.code) modalInstances.code.hide();
              } else {
                  showNotification('Invalid workshop code.', 'error');
-                 codeInput.focus();
-                 codeInput.select();
+                 codeInput.focus(); // Keep focus on input
+                 codeInput.select(); // Select text for easy re-entry
              }
          }
 
         // --- Game Page Logic (Wheels, Boxes) ---
          function spinWheel(wheelType) {
-             console.log(`Spin request for: ${wheelType}`); // DEBUG
+             console.log(`Spin request for: ${wheelType}`);
              if (isSpinning) {
                  console.warn("Attempted to spin while already spinning.");
                  showNotification("Spin already in progress...", "warning");
                  return;
              }
              if (!wheelType || !wheelTypes.includes(wheelType)){
-                 console.error(`Invalid wheel type: ${wheelType}`);
+                 console.error(`Invalid wheel type requested: ${wheelType}`);
+                 showNotification("Invalid wheel selected.", "error");
                  return;
              }
 
@@ -2214,16 +2605,19 @@
                  return;
              }
 
-             const now = Date.now();
-             const twentyFourHours = 24 * 60 * 60 * 1000;
-             // Referral spins DON'T require daily check-in, others do
-             if (wheelType !== 'referral' && (!state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours))) {
-                 showNotification('Complete your Daily Check-In first to spin this wheel!', 'warning');
-                 return;
+             // Check daily check-in requirement (only for non-referral wheels)
+             if (wheelType !== 'referral') {
+                 const now = Date.now();
+                 const twentyFourHours = 24 * 60 * 60 * 1000;
+                 if (!state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours)) {
+                     showNotification('Complete your Daily Check-In first to spin this wheel!', 'warning');
+                     return;
+                 }
              }
 
-             if (!modalInstances.wheel || !domElements.modalWheel) {
-                 console.error("Wheel modal or wheel element not ready!");
+
+             if (!modalInstances.wheel || !domElements.modalWheel || !domElements.wheelModalTitle || !domElements.wheelResultDisplay) {
+                 console.error("Wheel modal elements not ready!");
                  showNotification("Wheel cannot be displayed currently.", "error");
                  return;
              }
@@ -2235,63 +2629,72 @@
 
              // Decrement spin count and save immediately
              state.wheelSpins[wheelType]--;
-             saveData(['wheelSpins']);
+             saveData(['wheelSpins']); // Save the reduced spin count
              updateWheelButtons(); // Update counts and disable buttons visually
+             updateMysteryBoxUI(); // Disable mystery box button while spinning
 
              // Prepare and show modal
              domElements.wheelModalTitle.textContent = `Spinning: ${capitalizeFirstLetter(wheelType)}!`;
              domElements.wheelResultDisplay.textContent = "Spinning...";
-             domElements.modalWheel.style.transition = 'none'; // Remove transition for reset
-             domElements.modalWheel.style.transform = 'rotate(0deg)'; // Reset position
+             domElements.modalWheel.style.transition = 'none'; // Remove transition for instantaneous reset
+             domElements.modalWheel.style.transform = 'rotate(0deg)'; // Reset visual position
 
-             // Show modal *before* starting animation
+             // --- Show modal BEFORE starting animation ---
              modalInstances.wheel.show();
 
-             // Force reflow/repaint to apply reset before animation starts
-             domElements.modalWheel.offsetHeight;
+             // Force browser reflow/repaint AFTER reset and BEFORE animation starts
+             // This ensures the visual reset is applied before the transition begins.
+             void domElements.modalWheel.offsetWidth; // Reading offsetWidth forces reflow
 
              // Calculate target rotation
-             const randomSpins = Math.floor(Math.random() * 5) + 5; // 5-9 full spins
-             const randomStopAngle = Math.random() * 360; // Random stopping point within a circle
+             const randomSpins = Math.floor(Math.random() * 5) + 5; // 5-9 full spins for visual effect
+             const randomStopAngle = Math.random() * 360; // Random stopping point within one rotation
              const targetRotation = (randomSpins * 360) + randomStopAngle;
 
-             // Set a failsafe timeout
+             // Set a failsafe timeout slightly longer than the animation
+             const animationDuration = 4000; // 4 seconds from CSS
+             const failsafeDelay = animationDuration + 1500; // 5.5 seconds total
              spinTimeoutId = setTimeout(() => {
                  console.warn("Spin failsafe timeout triggered! Transitionend likely didn't fire.");
                  if (isSpinning) { // Only reset if still marked as spinning
                      handleSpinEnd(null); // Call handler manually
                  }
-             }, 5500); // Slightly longer than animation (4s) + buffer
+             }, failsafeDelay);
 
-             // Apply animation properties
-             domElements.modalWheel.style.transition = 'transform 4s cubic-bezier(0.25, 0.1, 0.25, 1)';
+             // --- Add transition properties and start animation ---
+             domElements.modalWheel.style.transition = `transform ${animationDuration / 1000}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
              domElements.modalWheel.style.transform = `rotate(${targetRotation}deg)`;
 
              // Add event listener for when the transition finishes
+             // Use { once: true } to automatically remove listener after firing
              domElements.modalWheel.addEventListener('transitionend', handleSpinEnd, { once: true });
-             console.log(`Wheel animation started. Target rotation: ${targetRotation.toFixed(0)}deg`); // DEBUG
+             console.log(`Wheel animation started. Target rotation: ${targetRotation.toFixed(0)}deg`);
          }
 
          // --- handleSpinEnd ---
         function handleSpinEnd(event) {
-             // Check if called by event and if it's the transform property
-             if (event && event.propertyName !== 'transform') {
-                // console.log("Ignoring transitionend event for property:", event.propertyName); // DEBUG Other transitions
-                return;
+             // Check if called by event and if it's the transform property we animated
+             if (event instanceof TransitionEvent && event.propertyName !== 'transform') {
+                // console.log("Ignoring transitionend event for property:", event.propertyName);
+                return; // Ignore transitions on other properties if any
              }
              // Prevent double execution if failsafe and transitionend both fire close together
              if (!isSpinning) {
-                console.log("handleSpinEnd called but isSpinning is false, ignoring."); // DEBUG Double call
+                console.log("handleSpinEnd called but isSpinning is false, ignoring.");
                 return;
              }
 
              console.log("Spin animation ended or failsafe triggered. Processing result...");
-             if (spinTimeoutId) clearTimeout(spinTimeoutId); // Clear the failsafe timeout
+             if (spinTimeoutId) {
+                 clearTimeout(spinTimeoutId); // Clear the failsafe timeout
+                 spinTimeoutId = null;
+             }
+
 
              let finalAngle = 0;
              try {
                 const wheelElement = domElements.modalWheel;
-                if (!wheelElement) throw new Error("Wheel element not found in DOM");
+                if (!wheelElement) throw new Error("Wheel element not found in DOM for angle calculation");
 
                 // Get the computed final rotation angle
                 const currentTransform = window.getComputedStyle(wheelElement).transform;
@@ -2299,62 +2702,69 @@
                      // Extract angle from matrix(a, b, c, d, tx, ty) using atan2(b, a)
                      const matrixValues = currentTransform.match(/matrix.*\((.+)\)/);
                      if (matrixValues && matrixValues[1]) {
-                         const v = matrixValues[1].split(', ').map(parseFloat);
+                         const v = matrixValues[1].split(',').map(s => parseFloat(s.trim())); // Trim whitespace
                          // atan2 gives radians, convert to degrees
-                         finalAngle = Math.round(Math.atan2(v[1], v[0]) * (180 / Math.PI));
+                         finalAngle = Math.atan2(v[1], v[0]) * (180 / Math.PI);
                          // Normalize angle to be between 0 and 360
-                         if (finalAngle < 0) finalAngle += 360;
+                         finalAngle = (finalAngle % 360 + 360) % 360; // Ensure positive 0 <= angle < 360
                      } else {
-                        console.warn("Could not parse matrix from transform:", currentTransform);
+                        console.warn("Could not parse matrix from transform:", currentTransform, ". Using 0 angle.");
                      }
                  } else {
-                     console.warn("No transform found on wheel element after spin.");
+                     console.warn("No transform found on wheel element after spin. Using 0 angle.");
                  }
-                 console.log(`Final computed angle: ${finalAngle.toFixed(2)}deg`); // DEBUG Angle
+                 console.log(`Final computed angle: ${finalAngle.toFixed(2)}deg`);
 
                 // Determine winning segment based on angle
                 const segmentAngle = 360 / WHEEL_SEGMENTS;
-                // Adjust calculation slightly: segments are centered, pointer points to top (0/360 deg)
-                // We need to find which segment's *range* the 0 degree pointer falls into AFTER rotation.
-                // Example: 8 segments (45 deg each).
-                // 0-45 deg -> Segment 8 (index 7)
-                // 45-90 deg -> Segment 7 (index 6)
+                // Offset angle slightly to avoid landing exactly on borders if needed,
+                // but integer division should handle ranges correctly.
+                // Pointer is at the top (0 degrees). We calculate which segment range contains 0 degrees AFTER rotation.
+                // Example 8 segments (45 deg each):
+                // 0 <= finalAngle < 45   -> Segment 8 (index 7)
+                // 45 <= finalAngle < 90   -> Segment 7 (index 6)
                 // ...
-                // 315-360 deg -> Segment 1 (index 0)
-                // Offset angle slightly to avoid landing exactly on borders
-                const adjustedAngle = (finalAngle + segmentAngle / 2) % 360;
-                const winningSegmentIndexRaw = Math.floor(adjustedAngle / segmentAngle);
-                // The index needs to be mapped back to the visual order if needed, but for rewards, index is fine.
-                // Let's assume index 0 = first segment clockwise from top-right-ish based on conic gradient
-                const winningSegmentIndex = (WHEEL_SEGMENTS - winningSegmentIndexRaw) % WHEEL_SEGMENTS; // Adjust index based on visual/reward mapping
+                // 315 <= finalAngle < 360 -> Segment 1 (index 0)
+                // Formula: floor( (360 - finalAngle) / segmentAngle ) should give 0-7 index directly? Let's test.
+                // If final=10deg, (360-10)/45 = 350/45 = 7.7 -> floor is 7 (Segment 8) - Correct.
+                // If final=50deg, (360-50)/45 = 310/45 = 6.8 -> floor is 6 (Segment 7) - Correct.
+                // If final=350deg, (360-350)/45 = 10/45 = 0.2 -> floor is 0 (Segment 1) - Correct.
+                let winningSegmentIndex = Math.floor(((360 - finalAngle + (segmentAngle / 100)) % 360) / segmentAngle); // Add tiny offset before floor, modulo 360
 
 
-                console.log(`Winning segment index (calculated): ${winningSegmentIndex}`); // DEBUG Segment
+                console.log(`Winning segment index (calculated): ${winningSegmentIndex}`);
 
-                // --- Define Rewards ---
-                 // Ensure rewards array length matches WHEEL_SEGMENTS
+                // --- Define Rewards (Ensure length matches WHEEL_SEGMENTS) ---
                  const rewards = [ // Index 0 corresponds to segment 1 (e.g., #ffd700 0% 12.5%)
-                     { type: 'energy', value: 10, message: "+10% Energy!" },       // Segment 1
-                     { type: 'points', value: 5, message: "+5 $twote!" },         // Segment 2
-                     { type: 'energy', value: 15, message: "+15% Energy!" },       // Segment 3
-                     { type: 'mystery_box', value: 1, message: "+1 Mystery Box!" },// Segment 4
-                     { type: 'energy', value: 5, message: "+5% Energy!" },        // Segment 5
-                     { type: 'points', value: 10, message: "+10 $twote!" },        // Segment 6
-                     { type: 'referral_spin', value: 1, message: "+1 Referral Spin!" }, // Segment 7 (Example: Add ref spin)
-                     { type: 'points', value: 2, message: "+2 $twote!" },         // Segment 8
+                     { type: 'energy', value: 10, message: "+10% Energy!", icon: '⚡' },       // Seg 1
+                     { type: 'points', value: 5, message: "+5 $twote!", icon: '💰' },         // Seg 2
+                     { type: 'energy', value: 15, message: "+15% Energy!", icon: '⚡' },       // Seg 3
+                     { type: 'mystery_box', value: 1, message: "+1 Mystery Box!", icon: '🎁' },// Seg 4
+                     { type: 'energy', value: 5, message: "+5% Energy!", icon: '⚡' },        // Seg 5
+                     { type: 'points', value: 10, message: "+10 $twote!", icon: '💰' },        // Seg 6
+                     { type: 'referral_spin', value: 1, message: "+1 Referral Spin!", icon: '✨' }, // Seg 7
+                     { type: 'points', value: 2, message: "+2 $twote!", icon: '💰' },         // Seg 8
                  ];
                  if (rewards.length !== WHEEL_SEGMENTS) {
-                    console.error(`Mismatch: WHEEL_SEGMENTS (${WHEEL_SEGMENTS}) vs rewards array (${rewards.length})`);
-                    // Handle error, maybe award default
+                    console.error(`CRITICAL: WHEEL_SEGMENTS (${WHEEL_SEGMENTS}) does not match rewards array length (${rewards.length})`);
+                    // Handle error: Award default or show error message
+                    domElements.wheelResultDisplay.textContent = "Spin Error! Contact support.";
+                    throw new Error("Reward configuration error."); // Stop further processing
                  }
 
-                 const reward = rewards[winningSegmentIndex] || rewards[0]; // Fallback to first reward if index is somehow invalid
+                 // Get the reward based on the calculated index
+                 const reward = rewards[winningSegmentIndex];
+                 if (!reward) {
+                     console.error(`No reward found for winning index ${winningSegmentIndex}!`);
+                     throw new Error("Reward calculation error.");
+                 }
+
 
                 // --- Award Reward ---
                 const prefix = getWheelResultMessagePrefix(activeWheelType);
-                const fullMessage = `${prefix} ${reward.message}`;
+                const fullMessage = `${reward.icon} ${prefix} ${reward.message}`;
                 domElements.wheelResultDisplay.textContent = fullMessage;
-                console.log(`Awarding reward: ${reward.type}, value ${reward.value}`); // DEBUG Reward
+                console.log(`Awarding reward: type=${reward.type}, value=${reward.value}`);
 
                  if (reward.type === 'energy') {
                      awardEnergy(reward.value, `${capitalizeFirstLetter(activeWheelType)} Wheel`);
@@ -2364,10 +2774,10 @@
                      awardMysteryBox(reward.value, `${capitalizeFirstLetter(activeWheelType)} Wheel`);
                  } else if (reward.type === 'referral_spin') {
                      state.wheelSpins.referral = (state.wheelSpins.referral || 0) + reward.value;
-                     saveData(['wheelSpins']);
-                     updateWheelButtons(); // Update UI for referral spins
+                     saveData(['wheelSpins']); // Save the updated referral spin count
+                     updateWheelButtons(); // Update UI for referral spins immediately
                  }
-                 // Add more reward types here if needed
+                 // Add more reward types here if needed (e.g., 'item', 'badge')
 
                  // Schedule modal hide after showing result
                  setTimeout(() => {
@@ -2376,38 +2786,42 @@
 
             } catch (error) {
                 console.error("Error during handleSpinEnd reward processing:", error);
-                domElements.wheelResultDisplay.textContent = "Spin Error! Awarding default.";
+                if(domElements.wheelResultDisplay) domElements.wheelResultDisplay.textContent = "Spin Error! Awarding default.";
                 awardEnergy(5, "Spin Error Fallback"); // Award a default small reward
                 setTimeout(() => { if(modalInstances.wheel) modalInstances.wheel.hide(); }, 2500);
             } finally {
-                // IMPORTANT: Reset isSpinning flag slightly after modal hide starts
+                // IMPORTANT: Reset isSpinning flag slightly AFTER modal hide starts or error occurs
+                 // Use a separate timeout to ensure it runs after potential modal hide timeout
                  setTimeout(() => {
-                    console.log("Resetting isSpinning flag.");
-                    isSpinning = false;
-                    activeWheelType = null;
-                    updateWheelButtons(); // Re-enable buttons
-                    updateMysteryBoxUI(); // Re-enable mystery box button
-                 }, 2600); // Just after modal hide timeout
+                    if (isSpinning) { // Check again in case of rapid events
+                        console.log("Resetting isSpinning flag after spin completion/error.");
+                        isSpinning = false;
+                        activeWheelType = null;
+                        updateWheelButtons(); // Re-enable buttons based on new spin counts
+                        updateMysteryBoxUI(); // Re-enable mystery box button
+                    }
+                 }, 2600); // Should be slightly after the modal hide timeout
             }
         }
 
         function getWheelResultMessagePrefix(wheelType) {
-            switch (wheelType) {
-                case 'energy': return "Feel the power!";
-                case 'sigil': return "Symbols align!";
-                case 'happiness': return "Spread the joy!";
-                case 'wellness': return "Nurture your being!";
-                case 'prosperity': return "Attract abundance!";
-                case 'manifestation': return "Your wish is heard!";
-                case 'healing': return "Embrace restoration!";
-                case 'referral': return "A gift from a friend!";
-                default: return "The wheel turns!";
-            }
+            // Add more thematic prefixes
+            const prefixes = {
+                energy: "Feel the power!",
+                sigil: "Symbols align!",
+                happiness: "Spread the joy!",
+                wellness: "Nurture your being!",
+                prosperity: "Attract abundance!",
+                manifestation: "Your wish is heard!",
+                healing: "Embrace restoration!",
+                referral: "A special gift!",
+            };
+            return prefixes[wheelType] || "The wheel turns!";
         }
 
          function awardMysteryBox(count = 1, reason = "") {
             if (!Number.isInteger(count) || count <= 0) return;
-            state.mysteryBoxes += count;
+            state.mysteryBoxes = (state.mysteryBoxes || 0) + count; // Ensure it's treated as number
             console.log(`+${count} Mystery Box (${reason}). Total: ${state.mysteryBoxes}`);
             saveData(['mysteryBoxes']);
             showNotification(`Received ${count} Mystery Box! 🎁`, 'success');
@@ -2419,65 +2833,91 @@
                 showNotification("Wait for the wheel spin to finish.", "warning");
                 return;
             }
-            if (state.mysteryBoxes <= 0) {
+            if ((state.mysteryBoxes ?? 0) <= 0) {
                 showNotification("You don't have any mystery boxes!", 'warning');
                 return;
+            }
+            if (!domElements.openMysteryBoxBtn) {
+                 console.error("Open Mystery Box button not found.");
+                 return;
             }
 
             // Disable button and show loading state
             domElements.openMysteryBoxBtn.disabled = true;
             domElements.openMysteryBoxBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Opening...';
-            state.mysteryBoxes--; // Decrement count immediately
+            state.mysteryBoxes--; // Decrement count immediately (optimistic update)
+            // Temporarily update UI count before save
+            if(domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes;
+
 
             setTimeout(() => {
-                 // Weighted rewards pool
-                 const rewards = [
-                     { type: 'points', value: 15, weight: 4 },
-                     { type: 'points', value: 25, weight: 3 },
-                     { type: 'points', value: 50, weight: 1 },
-                     { type: 'spin', wheel: 'referral', value: 1, weight: 3 }, // Increased weight for spins
-                     { type: 'energy', value: 10, weight: 3 },
-                     { type: 'energy', value: 20, weight: 1 },
-                 ];
-                 const totalWeight = rewards.reduce((sum, reward) => sum + reward.weight, 0);
-                 let randomWeight = Math.random() * totalWeight;
-                 let chosenReward = rewards[rewards.length - 1]; // Default to last if calculation fails
+                 try {
+                    // Weighted rewards pool
+                    const rewards = [
+                        { type: 'points', value: 15, weight: 4 },
+                        { type: 'points', value: 25, weight: 3 },
+                        { type: 'points', value: 50, weight: 1 },
+                        { type: 'spin', wheel: 'referral', value: 1, weight: 3 }, // Referral spin
+                        { type: 'spin', wheel: 'energy', value: 1, weight: 1 }, // Extra energy spin
+                        { type: 'energy', value: 10, weight: 3 },
+                        { type: 'energy', value: 20, weight: 1 },
+                    ];
+                    const totalWeight = rewards.reduce((sum, reward) => sum + reward.weight, 0);
+                    let randomWeight = Math.random() * totalWeight;
+                    let chosenReward = rewards[rewards.length - 1]; // Default fallback
 
-                 for(const reward of rewards) {
-                     if (randomWeight < reward.weight) {
-                         chosenReward = reward;
-                         break;
+                    for(const reward of rewards) {
+                        if (randomWeight < reward.weight) {
+                            chosenReward = reward;
+                            break;
+                        }
+                        randomWeight -= reward.weight;
+                    }
+
+                    console.log("Mystery Box chosen reward:", chosenReward);
+
+                    // Apply the reward
+                    let message = "Opened Box: ";
+                    if (chosenReward.type === 'points') {
+                        message += `+${chosenReward.value} $twote!`;
+                        awardPoints(chosenReward.value, "Mystery Box");
+                    } else if (chosenReward.type === 'spin' && wheelTypes.includes(chosenReward.wheel)) {
+                        message += `+${chosenReward.value} ${capitalizeFirstLetter(chosenReward.wheel)} spin!`;
+                        state.wheelSpins[chosenReward.wheel] = (state.wheelSpins[chosenReward.wheel] || 0) + chosenReward.value;
+                        // Need to explicitly save wheelSpins here as awardPoints/Energy isn't called
+                        saveData(['wheelSpins']);
+                        updateWheelButtons(); // Update wheel buttons UI
+                    } else if (chosenReward.type === 'energy') {
+                        message += `+${chosenReward.value}% Energy boost!`;
+                        awardEnergy(chosenReward.value, "Mystery Box");
+                    } else {
+                        // Fallback for unknown reward type?
+                        message += `Something unexpected!`;
+                        console.warn("Unknown reward type from mystery box:", chosenReward.type);
+                    }
+
+                    checkAndGrantAchievement('OPEN_MYSTERY_BOX'); // Grant achievement for opening
+
+                    // Save mysteryBoxes count and achievements (points/energy/spins saved by their functions)
+                    saveData(['mysteryBoxes', 'achievements']);
+                    showNotification(message, 'success');
+
+                 } catch (error) {
+                     console.error("Error processing mystery box reward:", error);
+                     showNotification("Error opening box. Please try again.", "error");
+                     // Rollback optimistic decrement if error occurred?
+                     state.mysteryBoxes++; // Add the box back
+                     if(domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes;
+                     // saveData(['mysteryBoxes']); // Optionally save the rollback
+                 } finally {
+                     // Reset button state regardless of success/error
+                     if (domElements.openMysteryBoxBtn) {
+                         domElements.openMysteryBoxBtn.innerHTML = 'Open a Box';
+                         // Re-enable button based on potentially rolled back count
+                         domElements.openMysteryBoxBtn.disabled = (state.mysteryBoxes ?? 0) <= 0 || isSpinning;
                      }
-                     randomWeight -= reward.weight;
+                     updateUI(); // General UI update
                  }
-
-                 console.log("Mystery Box chosen reward:", chosenReward); // DEBUG
-
-                 // Apply the reward
-                 let message = "Opened Box: ";
-                 if (chosenReward.type === 'points') {
-                     message += `+${chosenReward.value} $twote!`;
-                     awardPoints(chosenReward.value, "Mystery Box");
-                 } else if (chosenReward.type === 'spin' && wheelTypes.includes(chosenReward.wheel)) {
-                     message += `+${chosenReward.value} ${capitalizeFirstLetter(chosenReward.wheel)} spin!`;
-                     state.wheelSpins[chosenReward.wheel] = (state.wheelSpins[chosenReward.wheel] || 0) + chosenReward.value;
-                     saveData(['wheelSpins']); // Save the updated spin count
-                     updateWheelButtons(); // Update wheel buttons UI
-                 } else if (chosenReward.type === 'energy') {
-                     message += `+${chosenReward.value}% Energy boost!`;
-                     awardEnergy(chosenReward.value, "Mystery Box");
-                 }
-
-                 checkAndGrantAchievement('OPEN_MYSTERY_BOX'); // Grant achievement for opening
-                 // Save changes (points/energy/spins are saved by their respective functions)
-                 // Need to save mysteryBoxes count and achievements here
-                 saveData(['mysteryBoxes', 'achievements']);
-                 showNotification(message, 'success');
-
-                 // Reset button state
-                 domElements.openMysteryBoxBtn.innerHTML = 'Open a Box';
-                 updateMysteryBoxUI(); // Update count and re-enable button if more boxes exist
-                 updateUI(); // General UI update just in case
 
              }, 1500); // Simulate opening time
          }
@@ -2487,42 +2927,111 @@
         function loadProfileHistory() {
              if (!domElements.profileHistory) return;
 
-             // Get the last 15 entries, newest first
-             const history = state.challengeHistory.slice(-15).reverse();
+             const history = [...(state.challengeHistory || [])].reverse().slice(0, 15); // Get last 15, newest first
 
              if (history.length === 0) {
                  domElements.profileHistory.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No challenge history yet.</td></tr>';
                  return;
              }
 
-             // Generate table rows
-             domElements.profileHistory.innerHTML = history.map(entry => `
+             domElements.profileHistory.innerHTML = history.map(entry => {
+                const energyBeforeText = (entry.energyBefore !== null && entry.energyBefore !== undefined) ? `${entry.energyBefore}%` : '-';
+                const energyAfterText = (entry.energyAfter !== null && entry.energyAfter !== undefined) ? `${entry.energyAfter}%` : '-';
+                const task1ProofIcon = entry.task1ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+                const task2ProofIcon = entry.task2ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+
+                 return `
                  <tr>
-                     <td class="text-center">${entry.day}</td>
-                     <td>${escapeHtml(entry.goal)}</td>
-                     <td class="text-center">${entry.energyBefore !== null && entry.energyBefore !== undefined ? entry.energyBefore + '%' : '-'}</td>
-                     <td class="text-center">${entry.energyAfter !== null && entry.energyAfter !== undefined ? entry.energyAfter + '%' : '-'}</td>
-                     <td class="text-center">${entry.task1ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
-                     <td class="text-center">${entry.task2ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>'}</td>
-                 </tr>`).join('');
+                     <td class="text-center">${entry.day ?? '-'}</td>
+                     <td>${escapeHtml(entry.goal ?? 'N/A')}</td>
+                     <td class="text-center">${energyBeforeText}</td>
+                     <td class="text-center">${energyAfterText}</td>
+                     <td class="text-center">${task1ProofIcon}</td>
+                     <td class="text-center">${task2ProofIcon}</td>
+                 </tr>`;
+                }).join('');
          }
 
         function deleteProgress() {
-             const confirmationMessage = 'ARE YOU SURE?\n\nThis action will delete ALL your game progress, including points, levels, streaks, completed challenges, tasks, achievements, spins, and mystery boxes.\n\nThis cannot be undone!';
+             const confirmationMessage = 'ARE YOU SURE?\n\nThis action will delete ALL your game progress for this user ID, including points, levels, streaks, challenge completions, tasks, achievements, spins, and mystery boxes.\n\nThis cannot be undone!';
 
-             const confirmCallback = (confirmed) => {
-                 if (confirmed) {
-                     performDeletion();
-                 } else {
-                     showNotification("Deletion cancelled.", "info");
+             const performDeletion = () => {
+                 console.warn("PERFORMING PROGRESS DELETION for user:", state.userId);
+
+                 // Optional: Show a simple overlay
+                 const overlay = document.createElement('div');
+                 overlay.id = 'temp-loading-delete';
+                 overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; color: white; font-size: 1.2em; text-align: center; padding: 20px;';
+                 overlay.innerHTML = 'Deleting Progress...<br>Please wait.';
+                 document.body.appendChild(overlay);
+
+                 // Store identity before clearing (if needed, though re-init should handle it)
+                 const userId = state.userId, userName = state.userName, userPhoto = state.userPhoto;
+
+                 try {
+                     // 1. Clear LocalStorage keys associated with this user
+                     clearLocalStorageForUser(userId);
+
+                     // 2. Reset the global state object to defaults
+                     state = initializeState();
+
+                     // 3. Restore user identity (if available, otherwise will be Guest/Local)
+                     state.userId = userId;
+                     state.userName = userName;
+                     state.userPhoto = userPhoto;
+
+                     // 4. Ensure the (now reset) user is in the default leaderboard
+                     state.leaderboard = initializeState().leaderboard; // Reset to default bots
+                     ensureUserInLeaderboard(); // Add the user back with 0 points
+
+                     // 5. IMPORTANT: Save the *fully reset* state back to LocalStorage
+                     // This prevents old data reappearing on next load if clearing failed partially.
+                     // Use saveStateToLocal directly to ensure ALL keys are reset/removed.
+                     // Get all keys from the *initial* state to ensure everything is covered.
+                     const allInitialKeys = Object.keys(initializeState());
+                     saveStateToLocal(allInitialKeys.filter(k => !['userId'].includes(k)));
+
+                     console.log("Progress deleted and state reset.");
+                     showNotification('All progress has been reset.', 'success');
+
+                     // Update UI and navigate to the initial state AFTER resetting
+                     updateUI(); // Reflect the reset state
+                     // loadProfileHistory(); // No need, history is empty now
+                     showInitialSection(); // Go back to horoscope or wellness manager
+
+                 } catch (error) {
+                     console.error("Error during deletion process:", error);
+                     showNotification('An error occurred while resetting progress. Some data might remain.', 'error');
+                 } finally {
+                     // Remove overlay after a short delay
+                     setTimeout(() => overlay.remove(), 1500);
                  }
              };
 
-             // Use Telegram's confirmation popup if available, otherwise use browser confirm
-             if (window.Telegram?.WebApp?.showConfirm) {
-                 Telegram.WebApp.showConfirm(confirmationMessage, confirmCallback);
-             } else {
-                 if (confirm(confirmationMessage)) {
+             // --- FIX: Use Fallback Confirmation ---
+             try {
+                 // Try using Telegram's confirmation popup if available AND supported
+                 if (telegram?.showConfirm && telegram.isVersionAtLeast('6.1')) { // Check version support
+                     telegram.showConfirm(confirmationMessage, (confirmed) => {
+                         if (confirmed) {
+                             performDeletion();
+                         } else {
+                             showNotification("Deletion cancelled.", "info");
+                         }
+                     });
+                 } else {
+                     // Fallback to browser confirm if TG method not available/supported
+                     console.warn("Using browser confirm() as fallback for delete confirmation.");
+                     if (window.confirm(confirmationMessage)) {
+                         performDeletion();
+                     } else {
+                         showNotification("Deletion cancelled.", "info");
+                     }
+                 }
+             } catch (e) {
+                 // Catch errors from calling Telegram methods (e.g., if WebApp object broken)
+                 console.error("Error calling Telegram confirmation, using browser confirm() fallback:", e);
+                 if (window.confirm(confirmationMessage)) {
                      performDeletion();
                  } else {
                      showNotification("Deletion cancelled.", "info");
@@ -2530,60 +3039,9 @@
              }
         }
 
-        function performDeletion() {
-             console.warn("PERFORMING PROGRESS DELETION...");
-
-             // Show a simple overlay (optional, can be improved)
-             const overlay = document.createElement('div');
-             overlay.id = 'temp-loading';
-             overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 9999; color: white; font-size: 1.2em;';
-             overlay.innerHTML = 'Deleting Progress... Please wait.';
-             document.body.appendChild(overlay);
-
-             // Store identity before clearing
-             const userId = state.userId, userName = state.userName, userPhoto = state.userPhoto;
-
-             try {
-                 // Clear LocalStorage keys associated with this user
-                 clearLocalStorageForUser(userId);
-
-                 // Reset the global state object to defaults
-                 state = initializeState();
-
-                 // Restore user identity
-                 state.userId = userId;
-                 state.userName = userName;
-                 state.userPhoto = userPhoto;
-
-                 // Reset leaderboard (may keep bots or clear completely)
-                 state.leaderboard = initializeState().leaderboard; // Reset to default bots
-                 ensureUserInLeaderboard(); // Add the user back with 0 points
-
-                 // IMPORTANT: Save the *fully reset* state back to LocalStorage
-                 // This prevents old data reappearing on next load if clearing failed partially
-                 const keysToSave = Object.keys(state).filter(k => k !== 'userId' && k !== 'userName' && k !== 'userPhoto');
-                 saveStateToLocal(keysToSave); // Use saveStateToLocal directly to ensure ALL keys are reset
-
-                 console.log("Progress deleted and state reset.");
-                 showNotification('All progress has been reset.', 'success');
-
-                 // Update UI and navigate to the initial state
-                 updateUI(); // Reflect the reset state
-                 loadProfileHistory(); // Clear history table
-                 showInitialSection(); // Go back to horoscope or wellness manager
-
-             } catch (error) {
-                 console.error("Error during deletion process:", error);
-                 showNotification('An error occurred while resetting progress. Some data might remain.', 'error');
-             } finally {
-                 // Remove overlay after a short delay to ensure message is seen
-                 setTimeout(() => overlay.remove(), 1500);
-             }
-         }
-
-
         // --- Task Management ---
         function completeTask(taskKey) {
+             state.completedTasks = state.completedTasks || []; // Ensure array exists
              if (state.completedTasks.includes(taskKey)) {
                  showNotification(`Task '${capitalizeFirstLetter(taskKey)}' already completed!`, 'info');
                  return;
@@ -2593,21 +3051,27 @@
              if (button) {
                  button.disabled = true; // Disable button immediately
                  button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+             } else {
+                 console.warn(`Button not found for task: ${taskKey}`);
+                 // Proceed without button feedback if necessary? Or return error?
              }
 
-             // Simulate verification delay
+             // Simulate verification delay (replace with actual verification if needed)
              setTimeout(() => {
-                 // Double-check in case of race conditions (unlikely here but good practice)
+                 // Double-check in state array before adding (prevents race condition if clicked fast)
                  if (!state.completedTasks.includes(taskKey)) {
                     state.completedTasks.push(taskKey);
                     awardPoints(10, `Task: ${capitalizeFirstLetter(taskKey)}`); // Award points
-                    saveData(['completedTasks', 'points', 'level', 'leaderboard']); // Save relevant state
+                    // awardPoints handles saving points/level/leaderboard
+                    // Need to explicitly save completedTasks
+                    saveData(['completedTasks']);
                     showNotification(`Task '${capitalizeFirstLetter(taskKey)}' verified! +10 $twote`, 'success');
                  } else {
                     // Already completed by another means before timeout finished
                     showNotification(`Task '${capitalizeFirstLetter(taskKey)}' already completed!`, 'info');
                  }
-                 updateTaskButtons(); // Update button state (will show 'Done')
+                 // Update button state after processing (will show 'Done')
+                 updateTaskButtons();
              }, 1500); // 1.5 second delay
         }
 
@@ -2622,7 +3086,9 @@
             state.wheelSpins.referral = (state.wheelSpins.referral || 0) + referralSpins;
             checkAndGrantAchievement('FIRST_REFERRAL'); // Grant achievement
 
-            saveData(['points', 'level', 'leaderboard', 'wheelSpins', 'achievements']); // Save all changes
+            // Save changes: points/level/leaderboard saved by awardPoints
+            // Need to save wheelSpins and achievements explicitly
+            saveData(['wheelSpins', 'achievements']);
 
             showNotification(`Referral simulated! +${referralPoints} $twote & +${referralSpins} Ref Spins!`, 'success');
             updateUI(); // Update displayed points, spins, achievements
@@ -2637,47 +3103,75 @@
 
              const textToCopy = input.value;
 
-             // Try using Telegram's clipboard first if available
-             if (window.Telegram?.WebApp?.clipboard?.writeText) {
-                 Telegram.WebApp.clipboard.writeText(textToCopy, (success) => {
-                     if (success) {
-                         showNotification('Referral link copied! (via TG)', 'success');
-                     } else {
-                         // Fallback if Telegram method fails (e.g., permissions)
-                         console.warn("Telegram clipboard write failed, falling back to navigator.");
-                         copyUsingNavigator(textToCopy);
-                     }
+             // Try using modern navigator.clipboard API first (more reliable, requires HTTPS)
+             if (navigator.clipboard && navigator.clipboard.writeText) {
+                 navigator.clipboard.writeText(textToCopy).then(() => {
+                     showNotification('Referral link copied!', 'success');
+                 }).catch(err => {
+                     console.error('Failed to copy using navigator.clipboard:', err);
+                     // Fallback to Telegram method if navigator fails
+                     copyUsingTelegramFallback(textToCopy);
                  });
              } else {
-                 // Fallback to standard browser clipboard API
-                 copyUsingNavigator(textToCopy);
+                 // Fallback to Telegram method if navigator.clipboard not supported
+                 copyUsingTelegramFallback(textToCopy);
              }
          }
 
-         function copyUsingNavigator(text) {
-             navigator.clipboard.writeText(text).then(() => {
-                 showNotification('Referral link copied!', 'success');
-             }).catch(err => {
-                 console.error('Failed to copy referral link using navigator.clipboard:', err);
-                 showNotification('Could not copy link. Please copy manually.', 'error');
-                 // Optionally select the text for easier manual copying
-                 domElements.referralLink?.select();
-             });
+         function copyUsingTelegramFallback(text) {
+             // Try using Telegram's clipboard as a fallback
+             if (telegram?.clipboard?.writeText && telegram.isVersionAtLeast('6.4')) { // Check version support for clipboard
+                 telegram.clipboard.writeText(text, (success) => {
+                     if (success) {
+                         showNotification('Referral link copied! (via TG)', 'success');
+                     } else {
+                         console.warn("Telegram clipboard write failed.");
+                         // Final fallback: alert user to copy manually
+                         alertManualCopy(text);
+                     }
+                 });
+             } else {
+                 // Final fallback if neither navigator nor TG works
+                 console.warn("Clipboard API not supported, falling back to manual copy prompt.");
+                 alertManualCopy(text);
+             }
+         }
+
+         function alertManualCopy(text) {
+             showNotification('Could not copy automatically. Please copy manually.', 'warning');
+              // Optionally select the text for easier manual copying
+             if(domElements.referralLink) {
+                try {
+                    domElements.referralLink.select();
+                    domElements.referralLink.setSelectionRange(0, 99999); // For mobile devices
+                } catch (e) { console.warn("Could not select referral link text."); }
+             }
+             // Optionally show the link in a prompt or alert for very old browsers
+             // window.prompt("Copy this link:", text);
          }
 
 
         // --- Event Listeners Setup ---
          function setupEventListeners() {
              console.log("Setting up event listeners...");
+             if (!domElements) {
+                 console.error("Cannot setup listeners: domElements not ready.");
+                 return;
+             }
 
              // Helper function to add listeners safely
-             const addListener = (element, event, handler) => {
-                 if (element) {
-                     element.addEventListener(event, handler);
+             const addListener = (element, event, handler, options = {}) => {
+                 if (element instanceof HTMLElement) { // Check if it's a valid element
+                     element.addEventListener(event, handler, options);
                  } else {
                     // Find the ID for the missing element for better debugging
-                    const elementId = Object.keys(domElements).find(key => domElements[key] === element);
-                    console.warn(`Event listener not attached: Element ${elementId || ''} not found.`);
+                    const elementId = Object.keys(domElements).find(key => domElements[key] === element); // Find key by value
+                    // Only warn if the element was expected to exist based on getDomElements
+                    if (elementId) {
+                        console.warn(`Event listener for '${event}' not attached: Element '${elementId}' not found or invalid.`);
+                    } else {
+                        // console.log(`Skipping listener for non-DOM element or null value for event '${event}'.`); // Less noise
+                    }
                  }
              };
 
@@ -2691,20 +3185,25 @@
              // Birthdate Form
              addListener(domElements.saveHoroscopeBtn, 'click', saveHoroscope);
 
-             // Wellness Manager (Challenge Selection) - Event Delegation
+             // Wellness Manager (Challenge Selection) - Use Event Delegation
              addListener(domElements.challengeOptions, 'click', (event) => {
-                 const btn = event.target.closest('button');
-                 if (!btn || !btn.dataset.days) return; // Ignore clicks not on a button with days data
+                 const btn = event.target.closest('button[data-days]'); // Target buttons with data-days
+                 if (!btn) return; // Ignore clicks not on a relevant button
 
                  const days = parseInt(btn.dataset.days);
+                 if (isNaN(days)) return; // Ignore if data-days is not a number
+
                  if (btn.classList.contains('start-challenge-btn')) {
-                     console.log(`Start challenge button clicked for ${days} days`); // DEBUG
+                     console.log(`Start challenge button clicked for ${days} days`);
                      state.currentChallengeDuration = days;
                      saveData(['currentChallengeDuration']);
                      showSection('dailyChallenges');
                  } else if (btn.classList.contains('view-challenge-btn')) {
-                     console.log(`View challenge button clicked for ${days} days`); // DEBUG
-                     showSection('dailyChallenges'); // Just navigate to the view
+                     console.log(`View challenge button clicked for ${days} days`);
+                     // Ensure duration is set if viewing an inactive challenge? No, just show it.
+                     state.currentChallengeDuration = days; // Set duration so displayDailyChallenges works correctly
+                     // saveData(['currentChallengeDuration']); // Optionally save if viewing should make it 'active'
+                     showSection('dailyChallenges');
                  } else if (btn.classList.contains('enroll-btn')) {
                      showEnrollModal(days);
                  } else if (btn.classList.contains('attended-btn')) {
@@ -2714,60 +3213,55 @@
 
              // Daily Challenge List (Start Day) - Event Delegation
              addListener(domElements.dailyChallengeList, 'click', (event) => {
-                 const btn = event.target.closest('button.start-day-btn');
-                 if (btn && btn.dataset.day) {
-                     console.log(`Start Day button clicked for day: ${btn.dataset.day}`); // DEBUG
-                     startChallenge(parseInt(btn.dataset.day));
-                 } else {
-                     // console.log("Clicked inside daily challenge list, but not on a start button."); // DEBUG Other clicks
+                 const btn = event.target.closest('button.start-day-btn[data-day]');
+                 if (btn) {
+                     const day = parseInt(btn.dataset.day);
+                     if (!isNaN(day)) {
+                        console.log(`Start Day button clicked for day: ${day}`);
+                        startChallenge(day);
+                     }
                  }
              });
 
-             // Energy Log Modal
+             // Energy Log Modal Controls
              addListener(domElements.energySlider, 'input', () => {
                  if(domElements.energySliderValue) domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
              });
              addListener(domElements.submitEnergyLog, 'click', submitEnergyLog);
 
-             // File Input Handling (Enable/Disable Submit Button)
-             [domElements.task1Proof, domElements.task2Proof].forEach(input => {
-                 addListener(input, 'change', () => {
-                     if (domElements.submitEnergyLog?.getAttribute('data-stage') === 'after') {
-                         const f1 = domElements.task1Proof?.files[0];
-                         const f2 = domElements.task2Proof?.files[0];
-                         const bothFilesProvided = f1 && f2;
-                         if(domElements.submitEnergyLog) domElements.submitEnergyLog.disabled = !bothFilesProvided;
-                         if(domElements.proofWarning) domElements.proofWarning.style.display = bothFilesProvided ? 'none' : 'block';
-                     }
-                 });
-             });
+             // File Input Handling (Enable/Disable Submit Button in 'after' stage)
+             const handleProofChange = () => {
+                 if (domElements.submitEnergyLog?.getAttribute('data-stage') === 'after') {
+                     const f1 = domElements.task1Proof?.files[0];
+                     const f2 = domElements.task2Proof?.files[0];
+                     const bothFilesProvided = f1 && f2;
+                     if(domElements.submitEnergyLog) domElements.submitEnergyLog.disabled = !bothFilesProvided;
+                     if(domElements.proofWarning) domElements.proofWarning.style.display = bothFilesProvided ? 'none' : 'block';
+                 }
+             };
+             addListener(domElements.task1Proof, 'change', handleProofChange);
+             addListener(domElements.task2Proof, 'change', handleProofChange);
+
 
              // Game Page Elements
              addListener(domElements.dailyCheckInBtn, 'click', dailyCheckIn);
              addListener(domElements.openMysteryBoxBtn, 'click', openMysteryBox);
 
-             // Wheel Buttons - Event Delegation on Grid Container
+             // Wheel Buttons - Event Delegation on Grid Container is safer
              const wheelGrid = document.querySelector('.wheel-button-grid');
              addListener(wheelGrid, 'click', (event) => {
-                  const btn = event.target.closest('button.wheel-button');
+                  const btn = event.target.closest('button.wheel-button[data-wheel]');
                   // Check if it's a valid button, has a wheel type, and is not disabled
-                  if (btn && btn.dataset.wheel && !btn.disabled) {
-                     console.log(`Wheel spin button clicked: ${btn.dataset.wheel}`); // DEBUG
+                  if (btn && !btn.disabled) {
+                     console.log(`Wheel spin button clicked: ${btn.dataset.wheel}`);
                      spinWheel(btn.dataset.wheel);
                   } else if (btn && btn.disabled) {
-                     console.log(`Disabled wheel button clicked: ${btn.dataset.wheel || 'Unknown'}`); // DEBUG Disabled clicks
-                     // Optionally show a specific message why it's disabled (e.g., no spins, check-in needed)
-                     if (!isSpinning) { // Don't show extra messages if disabled due to active spin
-                        if (state.wheelSpins[btn.dataset.wheel] <= 0) {
-                            showNotification(`No ${capitalizeFirstLetter(btn.dataset.wheel)} spins left.`, 'info');
-                        } else {
-                            showNotification(`Check-in required or spin limit reached.`, 'info');
-                        }
-                     }
+                     console.log(`Disabled wheel button clicked: ${btn.dataset.wheel || 'Unknown'}`);
+                     // Optionally show a specific message why it's disabled (handled by updateWheelButtons title)
                   }
              });
 
-             // Tasks Page
+             // Tasks Page Buttons
              addListener(domElements.claimReferralRewardBtn, 'click', simulateReferralCompletion);
              addListener(domElements.copyReferralBtn, 'click', copyReferralLink);
              addListener(domElements.telegramTaskBtn, 'click', () => completeTask('telegram'));
@@ -2775,7 +3269,7 @@
              addListener(domElements.instagramTaskBtn, 'click', () => completeTask('instagram'));
              addListener(domElements.youtubeTaskBtn, 'click', () => completeTask('youtube'));
 
-             // Profile Page Actions
+             // Profile Page Action Buttons
              addListener(domElements.deleteProgressBtn, 'click', deleteProgress);
              addListener(domElements.connectWalletBtn, 'click', () => showNotification('Wallet connection coming soon!', 'info'));
              addListener(domElements.airdropWithdrawBtn, 'click', () => showNotification('$twote withdrawal coming soon!', 'info'));
