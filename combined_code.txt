@@ -1,0 +1,3764 @@
+========================================
+File: README.md
+========================================
+# twote-wellness-mini-app
+**TWOTE Wellness Mini App**: A Telegram Mini App guiding users on wellness journeys with mindfulness, meditation, and lifestyle hacking. Features include daily wellness tips, meditation prompts, and interactive goal-setting sessions. Built with Telegram Mini Apps SDK and hosted on GitHub Pages.  --- Answer from Perplexity: pplx.ai/share
+
+
+
+========================================
+File: main.py
+========================================
+import os
+import random
+import asyncio
+from typing import List
+from telethon import TelegramClient, events, Button
+from dotenv import load_dotenv
+import nest_asyncio
+
+nest_asyncio.apply()
+
+# Load environment variables from the .env file
+load_dotenv()
+
+# Securely fetch the credentials
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# Validate environment variables
+if not all([API_ID, API_HASH, BOT_TOKEN]):
+    raise ValueError("Missing required environment variables (API_ID, API_HASH, or BOT_TOKEN) in .env file")
+
+# Bot configuration
+BOT_NAME = "TWOTE Wellness Bot"
+SESSION_NAME = f"{BOT_NAME}_session"
+
+# Content
+WELLNESS_TIPS: List[str] =[
+    "Take three deep breaths and center yourself.",
+    "Drink water to stay hydrated throughout the day.",
+    "Spend 5 minutes practicing mindfulness today.",
+    "Meditate to connect with your inner self.",
+    "Focus on your third eye chakra for spiritual clarity.",
+    "Ground yourself by walking barefoot in nature.",
+    "List three things you’re grateful for today."
+]
+
+MEDITATION_PROMPTS: List[str] =[
+    "Focus on your breath, letting thoughts drift like clouds.",
+    "Visualize a bright light at your third eye center.",
+    "Chant 'Om' and feel its vibrations resonate.",
+    "Scan your body from head to toe, releasing tension.",
+    "Imagine a healing white light enveloping you."
+]
+
+CHAKRA_INFO = (
+    "👁️ *The Third Eye Chakra (Ajna)* 👁️\n\n"
+    "Located between your eyebrows, it governs:\n"
+    "- Intuition\n- Wisdom\n- Spiritual awareness\n- Inner vision\n\n"
+    "*Tip*: Meditate on this chakra to deepen your spiritual connection."
+)
+
+# Initialize bot (Convert API_ID to int as required by Telethon)
+bot = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
+
+# Helper function to format messages
+def format_message(header: str, body: str) -> str:
+    return f"{header}\n\n{body}"
+
+# Command handlers
+@bot.on(events.NewMessage(pattern=r"^/start$"))
+async def start_handler(event):
+    welcome_message = format_message(
+        f"🧘‍♀️ Welcome to {BOT_NAME} 🧘‍♂️",
+        "I’m here to guide your wellness journey.\n"
+        "Available commands:\n"
+        "/meditate - Get a meditation prompt\n"
+        "/wellness - Receive a wellness tip\n"
+        "/chakra - Learn about the third eye chakra\n"
+        "/help - Show this menu"
+    )
+    await event.reply(welcome_message, parse_mode="markdown")
+
+@bot.on(events.NewMessage(pattern=r"^/meditate$"))
+async def meditate_handler(event):
+    prompt = random.choice(MEDITATION_PROMPTS)
+    await event.reply(format_message("🌟 *Meditation Prompt*", prompt), parse_mode="markdown")
+
+@bot.on(events.NewMessage(pattern=r"^/wellness$"))
+async def wellness_handler(event):
+    buttons =[
+        Button.url("Open Wellness Mini App", url="t.me/TWOTE_Bot/wellness")
+    ]
+    tip = random.choice(WELLNESS_TIPS)
+    await event.reply(
+        format_message("💫 *Wellness Tip*", tip),
+        buttons=buttons,
+        parse_mode="markdown"
+    )
+
+@bot.on(events.NewMessage(pattern=r"^/chakra$"))
+async def chakra_handler(event):
+    await event.reply(CHAKRA_INFO, parse_mode="markdown")
+
+@bot.on(events.NewMessage(pattern=r"^/help$"))
+async def help_handler(event):
+    await start_handler(event)
+
+# Error handling for unknown commands
+@bot.on(events.NewMessage)
+async def default_handler(event):
+    text = event.raw_text.strip()
+    if text.startswith("/") and not any(
+        text.startswith(cmd) for cmd in ["/start", "/meditate", "/wellness", "/chakra", "/help"]
+    ):
+        await event.reply(
+            format_message(
+                "🤔 *Unknown Command*",
+                "I didn’t recognize that command. Use /help to see what I can do!"
+            ),
+            parse_mode="markdown"
+        )
+
+# Main function to start the bot
+async def main():
+    try:
+        await bot.start(bot_token=BOT_TOKEN)
+        print(f"{BOT_NAME} is running...")
+        me = await bot.get_me()
+        print(f"Bot username: @{me.username}")
+        await bot.run_until_disconnected()
+    except Exception as e:
+        print(f"Failed to start bot: {e}")
+        raise
+
+# Run the bot
+if __name__ == "__main__":
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("Bot stopped by user.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
+
+========================================
+File: style.css
+========================================
+:root {
+    --bg-color: #4E342E;
+    --text-color: #FFF8E1;
+    --button-color: #FFD700;
+    --button-text-color: #3E2723;
+    --wellness-manager-color: #3E2723; /* Dark brown */
+    --warning-color: #d9534f; /* Bootstrap danger-ish red */
+    --challenge-description-color: #3E2723; /* Dark brown for challenge descriptions */
+    --level-color: #00bcd4; /* Cyan for level */
+    --achievement-color: #ff9800; /* Orange for achievements */
+    --wheel-pointer-color: #FF0000; /* Red pointer */
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    padding-bottom: 70px; /* Space for footer nav */
+}
+
+#backgroundVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3; /* Dim the video */
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.section {
+    background: rgba(62, 39, 35, 0.7); /* Darker brown, semi-transparent */
+    backdrop-filter: blur(8px);
+    padding: 20px; /* Reduced padding */
+    border-radius: 15px; /* Slightly smaller radius */
+    margin-bottom: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 248, 220, 0.2); /* Subtle border */
+}
+
+.challenge-div {
+    background: rgba(255, 255, 255, 0.9); /* Lighter background for contrast */
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: var(--challenge-description-color);
+}
+
+.challenge-div h3, .challenge-div h4 {
+    color: var(--challenge-description-color);
+    margin-bottom: 10px;
+    font-size: 1.1rem; /* Consistent size */
+}
+
+.challenge-div p {
+    color: var(--challenge-description-color);
+    font-size: 0.9rem; /* Slightly smaller */
+    margin-bottom: 8px;
+}
+
+.challenge-div .warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.challenge-icon {
+    font-size: 2em; /* Smaller */
+    margin-bottom: 8px;
+    color: var(--challenge-description-color); /* Match text */
+}
+
+/* Use icon inside the challenge-div specifically */
+.challenge-div > i.challenge-icon {
+    color: var(--wellness-manager-color); /* Darker icon */
+}
+
+.modal-content {
+    background: var(--bg-color);
+    color: var(--text-color);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+.btn-custom {
+    background-color: var(--button-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 8px 16px; /* Smaller padding */
+    border-radius: 8px;
+    font-weight: 600; /* Slightly bolder */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-custom:hover, .btn-custom:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: var(--button-text-color);
+    background-color: var(--button-color); /* Keep color on hover */
+}
+
+.btn-custom:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-custom:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background-color: var(--warning-color);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    background-color: var(--warning-color); /* Keep color */
+}
+
+.btn-danger:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.locked {
+    opacity: 0.6;
+    background: rgba(200, 200, 200, 0.7); /* Grey out locked challenges */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0; /* Reduced padding */
+    margin-bottom: 15px;
+}
+
+/* Style for the logo.webp */
+header img[src="logo.webp"] {
+    width: 35px; /* Smaller logo */
+    height: 35px;
+    margin-right: 8px;
+    vertical-align: middle; /* Align with text */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem; /* Smaller title */
+    color: var(--text-color);
+    font-weight: 700;
+    display: inline-block; /* Keep H1 on same line */
+    vertical-align: middle;
+}
+
+#profileLink { cursor: pointer; text-align: right; } /* Ensure text aligns right */
+
+#profilePhoto {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--button-color); /* Highlight profile pic */
+    vertical-align: middle; /* Align nicely if text wraps */
+    margin-left: 5px; /* Space between text and photo */
+}
+
+#profileInfoContainer { /* New container for better layout */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#profileNameDisplay, #profileLevelDisplay, #pointsDisplay, #energyHeaderDisplay { 
+    display: block; /* Make each span its own line */
+    font-size: 0.8rem; /* Smaller text */
+    line-height: 1.2;
+    text-align: right;
+    color: var(--text-color); /* Default color */
+}
+
+#profileNameDisplay { font-weight: bold; }
+#pointsDisplay { color: var(--button-color); font-weight: bold; }
+#profileLevelDisplay { color: var(--level-color); font-size: 0.75rem; }
+#energyHeaderDisplay { color: #87CEEB; font-weight: bold;} /* Specific color for energy */
+
+h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 15px; /* Reduced margin */
+    font-size: 1.4rem; /* Slightly smaller */
+    font-weight: 700;
+}
+
+h3 {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+h4 {
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(78, 52, 46, 0.9); /* Slightly less transparent */
+    padding: 8px 0; /* Reduced padding */
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+}
+
+.footer-nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 12px; /* Smaller font */
+    text-align: center;
+    transition: color 0.2s, transform 0.2s; /* Added color transition */
+    flex: 1;
+    padding: 4px 0;
+}
+
+.footer-nav a:hover {
+    color: var(--button-color); /* Highlight on hover */
+    transform: scale(1.1);
+}
+
+.footer-nav a.active { /* Style for the active tab */
+    color: var(--button-color);
+    transform: scale(1.1);
+    font-weight: bold;
+}
+
+.footer-nav a i {
+    display: block;
+    font-size: 18px; /* Smaller icons */
+    margin-bottom: 2px;
+}
+
+.task-icon {
+    font-size: 1.5em; /* Smaller */
+    margin-right: 8px;
+    color: var(--text-color);
+}
+
+#socialMediaTasks ul { list-style-type: none; padding: 0; }
+#socialMediaTasks li { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 8px; border-radius: 5px;}
+#socialMediaTasks li > div { display: flex; align-items: center; margin-right: 10px; margin-bottom: 5px; }
+#socialMediaTasks a { color: var(--text-color); text-decoration: underline; margin-left: 5px; font-weight: 600;}
+#socialMediaTasks a:hover { text-decoration: none; }
+#socialMediaTasks button { padding: 5px 10px; font-size: 0.8em; }
+
+#referralTask { margin-top: 20px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px; }
+#referralTask p { margin-bottom: 10px; font-size: 0.9rem;}
+#referralTask input[type="text"] { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: var(--text-color); padding: 8px; border-radius: 5px; font-size: 0.9rem;}
+#referralTask button { width: 80px; font-size: 0.9rem; padding: 6px 10px;}
+
+/* Game Page specific styles */
+.wheel-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); /* Further adjust min width */
+    gap: 8px; /* Slightly smaller gap */
+    margin-bottom: 15px;
+}
+
+.wheel-button {
+    padding: 8px 5px; /* Smaller padding */
+    font-size: 0.75em; /* Smaller font */
+    text-align: center;
+    display: flex; /* Flex layout for icon and text */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px; /* Ensure consistent height */
+    line-height: 1.1; /* Tighter line height */
+}
+
+.wheel-button i {
+    font-size: 1.3em; /* Smaller icon */
+    margin-bottom: 3px;
+}
+
+.wheel-button span.spins-left { /* Style for spin count */
+    display: block;
+    font-size: 0.85em; /* Slightly larger relative to button text */
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+.mystery-box-section {
+    text-align: center;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 248, 220, 0.2);
+    padding-top: 20px;
+    background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px;
+}
+
+.mystery-box-section .fa-box-open {
+    font-size: 2.5em; /* Smaller */
+    color: var(--button-color);
+    margin-bottom: 8px;
+}
+
+#mysteryBoxCount {
+    font-weight: bold;
+    color: var(--button-color);
+}
+
+/* Progression & Achievements */
+#levelDisplay {
+    font-size: 1rem; /* Smaller */
+    font-weight: bold;
+    color: var(--level-color);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#achievementsList {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#achievementsList li {
+    display: inline-block;
+    background: rgba(0,0,0, 0.4); /* Darker */
+    color: var(--achievement-color);
+    padding: 4px 8px; /* Smaller */
+    border-radius: 12px;
+    margin: 3px;
+    font-size: 0.8em; /* Smaller */
+    border: 1px solid var(--achievement-color);
+    cursor: default; /* Indicate it's clickable for title */
+}
+
+#achievementsList li i {
+    margin-right: 4px;
+}
+
+.subscription-info {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 248, 220, 0.3);
+    text-align: center;
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .container { padding: 0 10px; }
+    .section { padding: 15px; margin-bottom: 10px;}
+    .challenge-div { padding: 10px; }
+    .challenge-icon { font-size: 1.8em; }
+    h1 { font-size: 1.3rem; } h2 { font-size: 1.2rem; } h3 { font-size: 1.1rem; }
+    .challenge-div h3, .challenge-div h4 { font-size: 1rem; }
+    p { font-size: 0.85rem; }
+    .footer-nav a { font-size: 11px; } .footer-nav a i { font-size: 16px; }
+    header { flex-direction: row; /* Keep row on small screens */ align-items: center; }
+    header > div:first-child { flex-grow: 1; } /* Allow title to take space */
+    header > div#profileLink { margin-top: 0; text-align: right; flex-shrink: 0; /* Prevent shrinking */}
+    #profileInfoContainer { margin-right: 5px;}
+    #profilePhoto { margin-left: 0;}
+    
+    #socialMediaTasks li { flex-direction: column; align-items: flex-start;}
+    #socialMediaTasks li > div { margin-bottom: 8px; }
+    #socialMediaTasks button { width: 100%; margin-top: 5px; font-size: 0.8em;}
+    #referralTask { flex-direction: column; }
+    #referralTask input[type="text"] { width: 100%; margin-right: 0; margin-bottom: 10px;}
+    #referralTask button { width: 100%; }
+    .wheel-button-grid { grid-template-columns: repeat(2, 1fr); gap: 8px;} /* Force 2 columns */
+    .wheel-button { font-size: 0.7em; min-height: 55px;} /* Even smaller */
+    .wheel-button i { font-size: 1.2em;}
+    .table th, .table td { padding: 0.4rem 0.3rem; font-size: 0.8rem;} /* Smaller table text */
+    .table img { max-width: 30px; }
+}
+
+/* Table styling */
+.table { color: var(--text-color); background-color: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; margin-top: 15px; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;}
+.table th, .table td { border-top: 1px solid rgba(255, 248, 220, 0.15); padding: 0.5rem 0.4rem; vertical-align: middle; }
+.table thead th { color: var(--button-color); background-color: rgba(0, 0, 0, 0.5); border-top: none; border-bottom: 2px solid var(--button-color); font-weight: bold; text-align: center; }
+.table tbody tr:first-child td { border-top: none; }
+.table tbody tr:hover { background-color: rgba(255, 248, 220, 0.08); }
+.table img { max-width: 35px; height: auto; border-radius: 4px; }
+.table .table-primary td, .table tr.table-primary { background-color: rgba(var(--button-color), 0.2) !important; font-weight: bold; } /* Applied to TR */
+.table .rank-col { width: 50px; text-align: center;}
+.table .points-col { width: 100px; text-align: right;}
+.table-responsive { border-radius: 8px; }
+.table-sm th, .table-sm td { padding: 0.4rem 0.4rem; } /* Keep table-sm adjustments */
+.table .text-success { color: #28a745 !important; }
+.table .text-danger { color: var(--warning-color) !important; }
+
+/* Energy Log Modal Enhancements */
+.form-range::-webkit-slider-thumb { background-color: var(--button-color); }
+.form-range::-moz-range-thumb { background-color: var(--button-color); }
+#challengeTasks { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;}
+#challengeTasks p { font-size: 0.9rem; }
+#challengeTasks .form-control-sm { font-size: 0.8rem; padding: 0.3rem 0.6rem;}
+
+/* Wheel Modal Styles */
+#wheelModal .modal-dialog {
+    max-width: 90vw;
+    width: 320px; /* Slightly smaller */
+    margin: 1.75rem auto; /* Bootstrap default centering */
+}
+
+.wheel-outer-container {
+    padding: 15px;
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    flex-direction: column; /* Stack pointer and wheel */
+    background: rgba(0,0,0,0.2); /* Slight background in modal body */
+    border-radius: 10px;
+    min-height: 300px; /* Give it some space */
+}
+
+.wheel-pointer {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent; /* Smaller pointer */
+    border-right: 12px solid transparent;
+    border-top: 20px solid var(--wheel-pointer-color); /* Arrow pointing down */
+    position: relative; /* Keep relative positioning */
+    top: -8px; /* Position above the wheel */
+    z-index: 10;
+    margin-bottom: -12px; /* Adjust spacing */
+}
+
+.wheel-container {
+    width: 220px; /* Smaller wheel */
+    height: 220px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    border: 4px solid var(--button-color);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative; /* Needed for absolute positioning of segments */
+    background: conic-gradient( /* Slightly adjusted colors for visual */
+        #ffd700 0% 12.5%, #ffa500 12.5% 25%, /* Gold, Orange */
+        #ff7f50 25% 37.5%, #ff6347 37.5% 50%, /* Coral, Tomato */
+        #cd5c5c 50% 62.5%, #fa8072 62.5% 75%, /* IndianRed, Salmon */
+        #e9967a 75% 87.5%, #f0e68c 87.5% 100% /* DarkSalmon, Khaki */
+    );
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Spin animation */
+    transform: rotate(0deg); /* Initial position */
+}
+
+/* Emoji Segments */
+.wheel-segment {
+    position: absolute;
+    width: 50px; /* Adjust size as needed */
+    height: 50px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    margin-top: -25px; /* Half of height */
+    margin-left: -25px; /* Half of width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6em; /* Adjust emoji size */
+}
+
+/* Position each segment manually */
+.wheel-segment:nth-child(1) { transform: rotate(22.5deg) translateY(-85px) rotate(-22.5deg); }
+.wheel-segment:nth-child(2) { transform: rotate(67.5deg) translateY(-85px) rotate(-67.5deg); }
+.wheel-segment:nth-child(3) { transform: rotate(112.5deg) translateY(-85px) rotate(-112.5deg); }
+.wheel-segment:nth-child(4) { transform: rotate(157.5deg) translateY(-85px) rotate(-157.5deg); }
+.wheel-segment:nth-child(5) { transform: rotate(202.5deg) translateY(-85px) rotate(-202.5deg); }
+.wheel-segment:nth-child(6) { transform: rotate(247.5deg) translateY(-85px) rotate(-247.5deg); }
+.wheel-segment:nth-child(7) { transform: rotate(292.5deg) translateY(-85px) rotate(-292.5deg); }
+.wheel-segment:nth-child(8) { transform: rotate(337.5deg) translateY(-85px) rotate(-337.5deg); }
+
+#wheelResultDisplay {
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--button-color);
+    text-align: center;
+    min-height: 40px; /* Reserve space for multi-line messages */
+    font-size: 1.1em;
+    padding: 0 10px;
+}
+
+
+
+========================================
+File: api.py
+========================================
+import os
+import hmac
+import hashlib
+from urllib.parse import parse_qsl
+from fastapi import FastAPI, HTTPException, Header, Depends
+from pydantic import BaseModel
+from sqlalchemy import create_engine, Column, String, Integer, JSON
+from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+
+load_dotenv()
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+
+# --- Database Setup (SQLite) ---
+DATABASE_URL = "sqlite:///./twote_wellness.db"
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+Base = declarative_base()
+
+# --- Database Model ---
+class User(Base):
+    __tablename__ = "users"
+    
+    id = Column(String, primary_key=True, index=True) # Telegram User ID
+    first_name = Column(String)
+    points = Column(Integer, default=0)
+    energy_level = Column(Integer, default=50)
+    level = Column(String, default="Novice")
+    consecutive_days = Column(Integer, default=0)
+    mystery_boxes = Column(Integer, default=0)
+    game_state = Column(JSON, default={}) # Stores complex data like arrays/dicts
+
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI(title="TWOTE Wellness API")
+
+# --- CORS Middleware ---
+# Allows your frontend to make requests to this backend API
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], # In production, replace "*" with your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# --- Security: Verify Telegram WebApp initData ---
+def verify_telegram_data(init_data: str) -> dict:
+    """Validates the data received from the Telegram Mini App."""
+    try:
+        parsed_data = dict(parse_qsl(init_data))
+        if "hash" not in parsed_data:
+            raise ValueError("Missing hash")
+            
+        received_hash = parsed_data.pop("hash")
+        
+        # Sort data alphabetically by key
+        data_check_string = "\n".join(f"{k}={v}" for k, v in sorted(parsed_data.items()))
+        
+        if not BOT_TOKEN:
+            print("WARNING: BOT_TOKEN missing. Bypassing auth for local testing.")
+            import json
+            return json.loads(parsed_data.get("user", '{"id":"local_test","first_name":"Tester"}'))
+
+        # Create secret key using the bot token
+        secret_key = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+        calculated_hash = hmac.new(secret_key, data_check_string.encode(), hashlib.sha256).hexdigest()
+        
+        if calculated_hash != received_hash:
+            raise ValueError("Invalid hash")
+            
+        import json
+        return json.loads(parsed_data.get("user", "{}"))
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Unauthorized: Invalid Telegram Data")
+
+# --- Dependencies ---
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+def get_current_user(authorization: str = Header(None), db: Session = Depends(get_db)):
+    if not authorization or not authorization.startswith("tma "):
+        raise HTTPException(status_code=401, detail="Missing Telegram initData")
+    
+    init_data = authorization.split(" ")[1]
+    tg_user = verify_telegram_data(init_data)
+    user_id = str(tg_user.get("id"))
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        # Create new user if they don't exist
+        user = User(
+            id=user_id,
+            first_name=tg_user.get("first_name", "Guest"),
+            game_state={} 
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        
+    return user
+
+# --- API Endpoints ---
+class StateSyncPayload(BaseModel):
+    points: int
+    energy_level: int
+    level: str
+    consecutive_days: int
+    mystery_boxes: int
+    game_state: dict
+
+@app.get("/api/user/state")
+def get_user_state(current_user: User = Depends(get_current_user)):
+    """Fetches the user's secure state from the database."""
+    return {
+        "id": current_user.id,
+        "first_name": current_user.first_name,
+        "points": current_user.points,
+        "energyLevel": current_user.energy_level,
+        "level": current_user.level,
+        "consecutiveDays": current_user.consecutive_days,
+        "mysteryBoxes": current_user.mystery_boxes,
+        "gameState": current_user.game_state
+    }
+
+@app.post("/api/user/sync")
+def sync_user_state(payload: StateSyncPayload, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    """Saves the user's progress to the database."""
+    current_user.points = payload.points
+    current_user.energy_level = payload.energy_level
+    current_user.level = payload.level
+    current_user.consecutive_days = payload.consecutive_days
+    current_user.mystery_boxes = payload.mystery_boxes
+    
+    # Merge existing game state with the new one to preserve un-synced keys
+    existing_state = dict(current_user.game_state) if current_user.game_state else {}
+    existing_state.update(payload.game_state)
+    current_user.game_state = existing_state
+    
+    db.commit()
+    return {"status": "success", "message": "State synced securely."}
+
+
+
+========================================
+File: styles.css
+========================================
+:root {
+    --bg-color: #4E342E;
+    --text-color: #FFF8E1;
+    --button-color: #FFD700;
+    --button-text-color: #3E2723;
+    --wellness-manager-color: #3E2723;
+    --warning-color: #d9534f; 
+    --challenge-description-color: #3E2723; 
+    --level-color: #00bcd4; 
+    --achievement-color: #ff9800; 
+    --wheel-pointer-color: #FF0000; 
+}
+
+/* --- Custom Scrollbar for a Native App Feel --- */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1); 
+}
+::-webkit-scrollbar-thumb {
+    background: var(--button-color); 
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #e6c200; 
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    padding-bottom: 80px; /* Extra space for footer nav */
+}
+
+#backgroundVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.35; /* Slightly brightened for better visibility */
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+/* --- Smooth Fade-in Animation for Page Loads --- */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.section {
+    background: rgba(62, 39, 35, 0.65); /* Frosted glass effect */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px); /* Safari support */
+    padding: 20px; 
+    border-radius: 16px; 
+    margin-bottom: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 248, 220, 0.15); 
+    animation: fadeSlideUp 0.4s ease-out forwards; /* Applied animation */
+}
+
+.challenge-div {
+    background: rgba(255, 255, 255, 0.92); 
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 12px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    color: var(--challenge-description-color);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-div:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.challenge-div h3, .challenge-div h4 {
+    color: var(--challenge-description-color);
+    margin-bottom: 10px;
+    font-size: 1.1rem; 
+    font-weight: 700;
+}
+
+.challenge-div p {
+    color: var(--challenge-description-color);
+    font-size: 0.9rem; 
+    margin-bottom: 8px;
+}
+
+.challenge-div .warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.challenge-icon {
+    font-size: 2.2em; 
+    margin-bottom: 10px;
+    color: var(--wellness-manager-color); 
+}
+
+/* Modals */
+.modal-content {
+    background: rgba(78, 52, 46, 0.95);
+    color: var(--text-color);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+/* Buttons */
+.btn-custom {
+    background-color: var(--button-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 10px 18px; 
+    border-radius: 10px;
+    font-weight: 700; 
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.btn-custom:hover, .btn-custom:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    color: var(--button-text-color);
+    background-color: #ffd700; 
+}
+
+.btn-custom:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.btn-custom:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background-color: var(--warning-color);
+    color: #fff;
+    border: none;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    color: #fff;
+}
+
+.btn-danger:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.locked {
+    opacity: 0.6;
+    background: rgba(200, 200, 200, 0.7); 
+    filter: grayscale(40%);
+}
+
+/* Header */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0; 
+    margin-bottom: 10px;
+}
+
+header img[src="logo.webp"] {
+    width: 40px; 
+    height: 40px;
+    margin-right: 10px;
+    vertical-align: middle; 
+    border-radius: 8px; /* Slight rounding if logo isn't circular */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.6rem; 
+    color: var(--text-color);
+    font-weight: 800;
+    display: inline-block; 
+    vertical-align: middle;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Makes text pop over video */
+}
+
+#profileLink { cursor: pointer; text-align: right; } 
+
+#profilePhoto {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--button-color); 
+    vertical-align: middle; 
+    margin-left: 10px; 
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+#profileInfoContainer { 
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#profileNameDisplay, #profileLevelDisplay, #pointsDisplay, #energyHeaderDisplay { 
+    display: block; 
+    font-size: 0.85rem; 
+    line-height: 1.3;
+    text-align: right;
+    color: var(--text-color); 
+    text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+}
+
+#profileNameDisplay { font-weight: 800; font-size: 0.95rem; }
+#pointsDisplay { color: var(--button-color); font-weight: bold; }
+#profileLevelDisplay { color: var(--level-color); font-size: 0.75rem; font-weight: bold;}
+#energyHeaderDisplay { color: #87CEEB; font-weight: bold;} 
+
+h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 20px; 
+    font-size: 1.5rem; 
+    font-weight: 800;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+h3, h4 {
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+.warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+/* Footer Navigation */
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(46, 29, 25, 0.85); /* Darker and more blur */
+    padding: 10px 0; 
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.footer-nav a {
+    color: rgba(255, 248, 225, 0.6); /* Dimmed when inactive */
+    text-decoration: none;
+    font-size: 12px; 
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease; 
+    flex: 1;
+    padding: 5px 0;
+}
+
+.footer-nav a:hover {
+    color: var(--text-color); 
+}
+
+.footer-nav a.active { 
+    color: var(--button-color);
+    transform: translateY(-3px); /* Pop up slightly */
+    font-weight: 800;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+
+.footer-nav a i {
+    display: block;
+    font-size: 20px; 
+    margin-bottom: 4px;
+}
+
+/* Tasks UI */
+.task-icon {
+    font-size: 1.5em; 
+    margin-right: 8px;
+    color: var(--text-color);
+}
+
+#socialMediaTasks ul { list-style-type: none; padding: 0; }
+#socialMediaTasks li { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; background: rgba(0,0,0,0.2); padding: 12px; border-radius: 10px;}
+#socialMediaTasks li > div { display: flex; align-items: center; margin-right: 10px; margin-bottom: 5px; }
+#socialMediaTasks a { color: var(--button-color); text-decoration: none; margin-left: 5px; font-weight: 700;}
+#socialMediaTasks a:hover { text-decoration: underline; }
+
+#referralTask { margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; border: 1px dashed rgba(255,215,0,0.3); }
+#referralTask p { margin-bottom: 10px; font-size: 0.95rem;}
+#referralTask input[type="text"] { background-color: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--button-color); padding: 10px; border-radius: 8px; font-size: 0.9rem; font-family: monospace;}
+#referralTask button { width: 80px; font-size: 0.9rem;}
+
+/* Game Page specific styles */
+.wheel-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); 
+    gap: 10px; 
+    margin-bottom: 20px;
+}
+
+.wheel-button {
+    padding: 10px 5px; 
+    font-size: 0.8em; 
+    text-align: center;
+    display: flex; 
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70px; 
+    line-height: 1.2; 
+    border-radius: 12px;
+}
+
+.wheel-button i {
+    font-size: 1.5em; 
+    margin-bottom: 5px;
+}
+
+.wheel-button span.spins-left { 
+    display: block;
+    font-size: 0.9em; 
+    opacity: 0.9;
+    margin-top: 4px;
+    font-weight: 800;
+}
+
+/* --- Subtle Continuous Animation for Mystery Box --- */
+@keyframes gentlePulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+    100% { transform: scale(1); }
+}
+
+.mystery-box-section {
+    text-align: center;
+    margin-top: 25px;
+    border-top: 1px dashed rgba(255, 248, 220, 0.2);
+    padding-top: 20px;
+    background: rgba(0,0,0,0.15); 
+    padding: 20px; 
+    border-radius: 12px;
+}
+
+.mystery-box-section .fa-box-open {
+    font-size: 3em; 
+    color: var(--button-color);
+    margin-bottom: 12px;
+    animation: gentlePulse 2.5s infinite ease-in-out; /* Added Pulse */
+}
+
+#mysteryBoxCount {
+    font-weight: 800;
+    color: var(--button-color);
+    font-size: 1.2rem;
+}
+
+/* Progression & Achievements */
+#levelDisplay {
+    font-size: 1.1rem; 
+    font-weight: 800;
+    color: var(--level-color);
+    margin-bottom: 10px;
+    text-align: center;
+    background: rgba(0,0,0,0.2);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+#achievementsList {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#achievementsList li {
+    display: inline-block;
+    background: rgba(0,0,0, 0.5); 
+    color: var(--achievement-color);
+    padding: 6px 12px; 
+    border-radius: 15px;
+    margin: 4px;
+    font-size: 0.85em; 
+    font-weight: 600;
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: default; 
+}
+
+#achievementsList li i {
+    margin-right: 5px;
+}
+
+.subscription-info {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 248, 220, 0.3);
+    text-align: center;
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .container { padding: 0 10px; }
+    .section { padding: 15px; margin-bottom: 12px;}
+    .challenge-div { padding: 12px; }
+    .challenge-icon { font-size: 1.8em; }
+    h1 { font-size: 1.4rem; } h2 { font-size: 1.3rem; } h3 { font-size: 1.1rem; }
+    .challenge-div h3, .challenge-div h4 { font-size: 1rem; }
+    p { font-size: 0.9rem; }
+    .footer-nav a { font-size: 11px; } .footer-nav a i { font-size: 18px; }
+    header { flex-direction: row; align-items: center; padding: 10px 0;}
+    header > div:first-child { flex-grow: 1; } 
+    header > div#profileLink { margin-top: 0; text-align: right; flex-shrink: 0; }
+    #profileInfoContainer { margin-right: 5px;}
+    #profilePhoto { margin-left: 0; width: 40px; height: 40px;}
+    
+    #socialMediaTasks li { flex-direction: column; align-items: flex-start;}
+    #socialMediaTasks li > div { margin-bottom: 8px; }
+    #socialMediaTasks button { width: 100%; margin-top: 5px; font-size: 0.85em;}
+    #referralTask { flex-direction: column; }
+    #referralTask input[type="text"] { width: 100%; margin-right: 0; margin-bottom: 10px;}
+    #referralTask button { width: 100%; }
+    .wheel-button-grid { grid-template-columns: repeat(2, 1fr); gap: 10px;} 
+    .wheel-button { font-size: 0.75em; min-height: 65px;} 
+    .table th, .table td { padding: 0.5rem 0.3rem; font-size: 0.85rem;} 
+}
+
+/* Table styling */
+.table { color: var(--text-color); background-color: rgba(0, 0, 0, 0.4); border-radius: 10px; overflow: hidden; margin-top: 15px; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;}
+.table th, .table td { border-top: 1px solid rgba(255, 248, 220, 0.1); padding: 0.6rem 0.4rem; vertical-align: middle; }
+.table thead th { color: var(--button-color); background-color: rgba(0, 0, 0, 0.6); border-top: none; border-bottom: 2px solid var(--button-color); font-weight: 800; text-align: center; letter-spacing: 0.5px;}
+.table tbody tr:first-child td { border-top: none; }
+.table tbody tr:hover { background-color: rgba(255, 248, 220, 0.1); }
+.table img { max-width: 35px; height: auto; border-radius: 4px; }
+.table .table-primary td, .table tr.table-primary { background-color: rgba(255, 215, 0, 0.2) !important; font-weight: bold; } 
+.table .rank-col { width: 50px; text-align: center; font-weight: bold;}
+.table .points-col { width: 100px; text-align: right; color: var(--button-color); font-weight: bold;}
+.table-responsive { border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.2);}
+.table .text-success { color: #4ade80 !important; } /* Brighter green for dark bg */
+.table .text-danger { color: #f87171 !important; } /* Brighter red for dark bg */
+
+/* Energy Log Modal Enhancements */
+.form-range::-webkit-slider-thumb { background-color: var(--button-color); box-shadow: 0 0 10px rgba(255,215,0,0.5);}
+.form-range::-moz-range-thumb { background-color: var(--button-color); box-shadow: 0 0 10px rgba(255,215,0,0.5);}
+#challengeTasks { background: rgba(0,0,0,0.3); padding: 15px; border-radius: 12px; margin-top: 15px; border: 1px solid rgba(255,255,255,0.05);}
+#challengeTasks p { font-size: 0.95rem; }
+#challengeTasks .form-control-sm { font-size: 0.85rem; padding: 0.4rem 0.6rem; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); color: white;}
+
+/* Wheel Modal Styles */
+#wheelModal .modal-dialog {
+    max-width: 90vw;
+    width: 320px; 
+    margin: 1.75rem auto; 
+}
+
+.wheel-outer-container {
+    padding: 20px;
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column; 
+    background: rgba(0,0,0,0.3); 
+    border-radius: 15px;
+    min-height: 320px; 
+    box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+.wheel-pointer {
+    width: 0;
+    height: 0;
+    border-left: 15px solid transparent; 
+    border-right: 15px solid transparent;
+    border-top: 25px solid var(--wheel-pointer-color); 
+    position: relative; 
+    top: -5px; 
+    z-index: 10;
+    margin-bottom: -15px; 
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); /* Make pointer pop */
+}
+
+/* --- Added Magical Glow to the Wheel --- */
+.wheel-container {
+    width: 240px; 
+    height: 240px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    border: 6px solid var(--button-color);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.4), inset 0 0 10px rgba(0,0,0,0.5);
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative; 
+    background: conic-gradient( 
+        #ffd700 0% 12.5%, #ffa500 12.5% 25%, 
+        #ff7f50 25% 37.5%, #ff6347 37.5% 50%, 
+        #cd5c5c 50% 62.5%, #fa8072 62.5% 75%, 
+        #e9967a 75% 87.5%, #f0e68c 87.5% 100% 
+    );
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); 
+    transform: rotate(0deg); 
+}
+
+/* Emoji Segments */
+.wheel-segment {
+    position: absolute;
+    width: 60px; 
+    height: 60px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    margin-top: -30px; 
+    margin-left: -30px; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.8em; 
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3); /* Make emojis pop against colors */
+}
+
+.wheel-segment:nth-child(1) { transform: rotate(22.5deg) translateY(-90px) rotate(-22.5deg); }
+.wheel-segment:nth-child(2) { transform: rotate(67.5deg) translateY(-90px) rotate(-67.5deg); }
+.wheel-segment:nth-child(3) { transform: rotate(112.5deg) translateY(-90px) rotate(-112.5deg); }
+.wheel-segment:nth-child(4) { transform: rotate(157.5deg) translateY(-90px) rotate(-157.5deg); }
+.wheel-segment:nth-child(5) { transform: rotate(202.5deg) translateY(-90px) rotate(-202.5deg); }
+.wheel-segment:nth-child(6) { transform: rotate(247.5deg) translateY(-90px) rotate(-247.5deg); }
+.wheel-segment:nth-child(7) { transform: rotate(292.5deg) translateY(-90px) rotate(-292.5deg); }
+.wheel-segment:nth-child(8) { transform: rotate(337.5deg) translateY(-90px) rotate(-337.5deg); }
+
+#wheelResultDisplay {
+    margin-top: 20px;
+    font-weight: 800;
+    color: var(--button-color);
+    text-align: center;
+    min-height: 40px; 
+    font-size: 1.2em;
+    padding: 0 10px;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+
+
+
+========================================
+File: index.html
+========================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Third Eye - Game</title>
+    <<!-- Emoji Favicon to prevent 404 errors -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👁️</text></svg>">
+    
+    <!-- Bootstrap & FontAwesome -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Telegram Web App SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <!-- TON Connect SDK -->
+    <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+    
+    <!-- Link to your external CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Background video -->
+    <video id="backgroundVideo" autoplay muted loop playsinline>
+        <source src="cosmic.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div class="container">
+        <header>
+            <div class="d-flex align-items-center">
+                 <img src="logo.webp" alt="Third Eye Logo">
+                 <h1>Third Eye</h1>
+            </div>
+            <!-- Profile Area -->
+            <div id="profileLink" class="d-flex align-items-center">
+                <div id="profileInfoContainer">
+                    <span id="profileNameDisplay">Guest</span>
+                    <span id="profileLevelDisplay">Level: Novice</span>
+                    <span id="pointsDisplay">0 $twote</span>
+                    <span id="energyHeaderDisplay">NRG: 0%</span>
+                </div>
+                <img id="profilePhoto" src="https://via.placeholder.com/40" alt="Profile">
+            </div>
+        </header>
+
+        <!-- Sections -->
+        <div id="horoscopeForm" class="section" style="display: none;">
+            <h2>Enter Your Birthdate</h2>
+            <p style="text-align:center; font-size: 0.9rem;">To personalize your journey.</p>
+            <input type="date" id="birthdate" class="form-control mb-2" style="background: rgba(255,255,255,0.1); color: var(--text-color); border-color: rgba(255,255,255,0.3);">
+            <button class="btn btn-custom w-100 mt-2" id="saveHoroscopeBtn">Save & Continue</button>
+        </div>
+
+        <div id="wellnessManager" class="section" style="display: none;">
+            <h2>Mindfulness Journey</h2>
+            <p style="text-align: center; font-size: 0.9rem;">Select a challenge duration to begin.</p>
+            <div id="challengeOptions" class="mt-3"></div>
+        </div>
+
+        <div id="dailyChallenges" class="section" style="display: none;">
+            <h2 id="challengeTitle">Challenge</h2>
+            <div id="dailyChallengeList"></div>
+        </div>
+
+        <div id="tasksSection" class="section" style="display: none;">
+            <h2>Earn More $twote</h2>
+             <div id="socialMediaTasks">
+                 <h4 style="color: var(--button-color); margin-bottom: 15px; text-align:center;">Social Tasks (+10 $twote each)</h4>
+                 <ul>
+                     <li>
+                         <div><i class="fab fa-telegram-plane task-icon"></i>Join <a href="https://t.me/ThirdEyeXai" target="_blank">Telegram</a></div>
+                         <button class="btn btn-custom btn-sm" id="telegramTaskBtn">Verify</button>
+                     </li>
+                     <li>
+                         <div><i class="fab fa-twitter task-icon"></i>Follow <a href="https://twitter.com/ThirdEyeXai" target="_blank">Twitter</a></div>
+                         <button class="btn btn-custom btn-sm" id="twitterTaskBtn">Verify</button>
+                     </li>
+                     <li>
+                         <div><i class="fab fa-instagram task-icon"></i>Follow <a href="https://instagram.com/ThirdEyeXai" target="_blank">Instagram</a></div>
+                         <button class="btn btn-custom btn-sm" id="instagramTaskBtn">Verify</button>
+                     </li>
+                     <li>
+                         <div><i class="fab fa-youtube task-icon"></i>Subscribe <a href="https://youtube.com/@ThirdEyeXai" target="_blank">YouTube</a></div>
+                         <button class="btn btn-custom btn-sm" id="youtubeTaskBtn">Verify</button>
+                     </li>
+                 </ul>
+             </div>
+             <div id="referralTask" class="mt-3">
+                 <h4 style="color: var(--button-color); margin-bottom: 10px; text-align:center;">Referral Task (+Bonus Spins!)</h4>
+                 <p>Share your link! Both you and your friend earn $twote. You also get bonus spins!</p>
+                 <div class="d-flex mb-2">
+                     <input type="text" id="referralLink" class="form-control form-control-sm" readonly style="flex-grow: 1; margin-right: 10px;">
+                     <button class="btn btn-custom" id="copyReferralBtn">Copy</button>
+                 </div>
+                 <button class="btn btn-secondary btn-sm mt-2 w-100" id="claimReferralRewardBtn">Simulate Friend Joined (Dev)</button>
+             </div>
+        </div>
+
+        <div id="gamePage" class="section" style="display: none;">
+            <h2>Engage & Earn</h2>
+            <div class="text-center mb-3" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px;">
+                <button class="btn btn-custom w-75" id="dailyCheckInBtn">Daily Check-In</button>
+                <p id="countdownDisplay" style="color: var(--button-color); margin-top: 10px; font-size: 0.85em;"></p>
+            </div>
+
+            <h4 style="text-align:center; margin-bottom: 10px; color: var(--button-color);">Daily Bonus Wheels</h4>
+            <p id="spinInfo" class="text-center" style="font-size: 0.8em; margin-bottom: 15px;">Complete Daily Check-In to enable spins.</p>
+            <div class="wheel-button-grid">
+                <button class="btn btn-custom wheel-button" id="spinEnergyWheelBtn" data-wheel="energy">
+                    <i class="fas fa-bolt"></i>Energy <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinSigilWheelBtn" data-wheel="sigil">
+                    <i class="fas fa-magic"></i>Sigil <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinHappinessWheelBtn" data-wheel="happiness">
+                    <i class="fas fa-smile-beam"></i>Happiness <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinWellnessWheelBtn" data-wheel="wellness">
+                    <i class="fas fa-heartbeat"></i>Wellness <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinProsperityWheelBtn" data-wheel="prosperity">
+                    <i class="fas fa-coins"></i>Prosperity <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinManifestationWheelBtn" data-wheel="manifestation">
+                    <i class="fas fa-star"></i>Manifest <span class="spins-left">(0)</span>
+                </button>
+                <button class="btn btn-custom wheel-button" id="spinHealingWheelBtn" data-wheel="healing">
+                    <i class="fas fa-hand-holding-heart"></i>Healing <span class="spins-left">(0)</span>
+                </button>
+                 <button class="btn btn-info wheel-button" id="useReferralSpinBtn" data-wheel="referral">
+                    <i class="fas fa-gift"></i>Ref Spins <span id="referralSpinsCount" class="spins-left">(0)</span>
+                 </button>
+            </div>
+
+            <div class="mystery-box-section">
+                <i class="fas fa-box-open"></i>
+                <h4 style="color: var(--button-color);">Mystery Boxes</h4>
+                <p>Earn boxes from streaks & events!</p>
+                <p>You have <span id="mysteryBoxCount">0</span> boxes.</p>
+                <button class="btn btn-custom btn-sm" id="openMysteryBoxBtn" disabled>Open a Box</button>
+            </div>
+
+             <div class="subscription-info">
+                 <p>✨ Premium Tiers Coming Soon! Unlock better rewards, exclusive badges, and more spins!</p>
+             </div>
+             <div class="section" style="margin-top: 20px; background: rgba(0,0,0,0.2);">
+                 <h4 style="text-align: center; color: var(--button-color);">Limited-Time Events</h4>
+                 <p style="text-align: center; font-size: 0.9rem;">Check back soon for seasonal challenges and special events!</p>
+             </div>
+        </div>
+
+        <div id="playerProfile" class="section" style="display: none;">
+            <h2>Player Profile</h2>
+            <div class="text-center mb-3" style="background: rgba(0,0,0,0.1); padding: 15px; border-radius: 8px;">
+                <p style="font-size: 1.1rem;">Welcome, <strong id="profileNameDisplayInner" style="color: var(--button-color);">Guest</strong>!</p>
+                 <div id="levelDisplay">Level: <span id="levelName" style="color: var(--level-color); font-weight:bold;">Novice</span></div>
+                <div id="pointsProfileDisplay" style="font-size: 1rem;">Points: <span id="pointsValue" style="color: var(--button-color); font-weight:bold;">0</span> $twote</div>
+                <div id="energyLevel" style="font-size: 1rem;">Energy: <span id="energyValue" style="color: #87CEEB; font-weight:bold;">0</span>%</div>
+                <div id="consecutiveDaysDisplay" style="font-size: 0.9rem;">Daily Streak: <span id="consecutiveDaysValue" style="color: var(--button-color); font-weight:bold;">0</span> days</div>
+                <div id="weeklyStreakDisplay" style="font-size: 0.9rem;">Weekly Streak: <span id="weeklyStreakValue" style="color: var(--button-color); font-weight:bold;">0</span> weeks</div>
+            </div>
+            
+            <!-- Dual Wallet Integration Section -->
+            <div class="text-center mb-3 p-3" style="background: rgba(0,0,0,0.2); border-radius: 8px;">
+                <h5 style="color: var(--button-color); font-size: 1rem; margin-bottom: 10px;">Connect Wallets</h5>
+                
+                <!-- TON Connect (Handles Telegram Wallet & Tonkeeper) -->
+                <div id="tonConnectContainer" class="d-flex justify-content-center mb-2"></div>
+                
+                <!-- MetaMask Connect (Handles EVM) -->
+                <button class="btn btn-warning btn-sm w-100" id="metamaskConnectBtn" style="background-color: #F6851B; border-color: #F6851B; color: white; font-weight: bold;">
+                    <i class="fas fa-fox" style="margin-right: 5px;"></i> Connect MetaMask
+                </button>
+                <div id="evmAddressDisplay" class="mt-2" style="font-size: 0.85rem; color: #4ade80; display: none; font-weight: bold;"></div>
+            </div>
+
+            <div class="d-grid gap-2 mb-3">
+                 <button class="btn btn-secondary btn-sm" id="airdropWithdrawBtn">Withdraw $twote (Soon)</button>
+            </div>
+
+             <h4 class="mt-3 text-center" style="color: var(--button-color);">Achievements</h4>
+             <ul id="achievementsList" class="mb-3">
+                 <li><i class="fas fa-hourglass-start"></i> No achievements yet</li>
+             </ul>
+
+            <h4 class="mt-3" style="color: var(--button-color); text-align: center;">Challenge History (Last 15)</h4>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead><tr><th>Day</th><th>Goal</th><th>NRG In</th><th>NRG Out</th><th>T1 Proof</th><th>T2 Proof</th></tr></thead>
+                    <tbody id="profileHistory"></tbody>
+                </table>
+            </div>
+
+            <h4 class="mt-3" style="color: var(--button-color); text-align: center;">Leaderboard (Top 100)</h4>
+             <div class="table-responsive">
+                 <table class="table table-sm">
+                     <thead><tr><th class="rank-col">Rank</th><th>Name</th><th class="points-col">Points</th></tr></thead>
+                     <tbody id="leaderboard"></tbody>
+                 </table>
+             </div>
+             <div class="text-center mt-4">
+                 <button class="btn btn-danger mt-3 btn-sm" id="deleteProgressBtn">Delete All Progress</button>
+             </div>
+        </div>
+    </div>
+
+    <nav class="footer-nav">
+        <a href="#" id="navHome"><i class="fas fa-home"></i>Journey</a>
+        <a href="#" id="navTasks"><i class="fas fa-tasks"></i>Tasks</a>
+        <a href="#" id="navGame"><i class="fas fa-dice"></i>Engage</a>
+        <a href="#" id="navProfile"><i class="fas fa-user-astronaut"></i>Profile</a>
+    </nav>
+
+    <!-- Modals -->
+    <div class="modal fade" id="energyLogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="energyLogModalTitle">Energy Log</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="energyLogPrompt" style="font-size: 0.95rem;">How positive is your mind frame?</p>
+                    <div class="d-flex align-items-center my-3">
+                         <span style="font-size: 0.9rem; margin-right: 10px;">0%</span>
+                         <input type="range" min="0" max="100" value="50" class="form-range flex-grow-1 me-3" id="energySlider">
+                         <span id="energySliderValue" style="color: var(--button-color); font-weight: bold; min-width: 40px; text-align: right;">50%</span>
+                         <span style="font-size: 0.9rem; margin-left: 5px;">100%</span>
+                    </div>
+                    <div id="challengeTasks" style="display: none;">
+                        <p class="mb-2"><strong>Meditation:</strong> <span id="meditationTask" style="font-style: italic;"></span></p>
+                        <hr style="border-top: 1px solid rgba(255,248,220,0.3);">
+                        <p class="mb-1"><strong>Task 1:</strong> <span id="task1Text"></span></p>
+                        <input type="file" id="task1Proof" class="form-control form-control-sm mb-2" accept="image/*,video/*,.pdf">
+                        <p class="mb-1"><strong>Task 2:</strong> <span id="task2Text"></span></p>
+                        <input type="file" id="task2Proof" class="form-control form-control-sm" accept="image/*,video/*,.pdf">
+                        <p class="mt-3 text-center warning-text" id="proofWarning" style="display: none; font-size: 0.85em;">Please upload proof for both tasks.</p>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button class="btn btn-custom w-75" id="submitEnergyLog" disabled>Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="enrollModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Enroll in Workshop</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                     <p><strong>Name:</strong> <span id="enrollName"></span></p>
+                     <p><strong>Current Energy:</strong> <span id="enrollEnergy" style="color: #87CEEB; font-weight: bold;"></span>%</p>
+                     <p id="enrollRequirement" class="warning-text" style="font-size: 0.9em; display: none;">Requires 70% Energy</p>
+                     <button class="btn btn-custom mt-3 w-50" id="submitEnrollment" disabled>Enroll Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="codeModal" tabindex="-1" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h5 class="modal-title">Enter Workshop Code</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                 </div>
+                 <div class="modal-body">
+                     <input type="text" id="workshopCode" class="form-control mb-3" placeholder="Enter code" style="background: rgba(255,255,255,0.1); color: var(--text-color); border-color: rgba(255,255,255,0.3);">
+                      <div class="text-center">
+                          <button class="btn btn-custom w-50" id="submitCode">Submit</button>
+                      </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+     <!-- Wheel Modal -->
+    <div class="modal fade" id="wheelModal" tabindex="-1" aria-hidden="true">
+         <div class="modal-dialog modal-dialog-centered">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h5 class="modal-title" id="wheelModalTitle">Spin the Wheel!</h5>
+                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                 </div>
+                 <div class="modal-body wheel-outer-container">
+                     <div class="wheel-pointer"></div>
+                     <div class="wheel-container">
+                         <div class="wheel" id="modalWheel">
+                             <span class="wheel-segment">⚡</span>
+                             <span class="wheel-segment">✨</span>
+                             <span class="wheel-segment">😊</span>
+                             <span class="wheel-segment">💖</span>
+                             <span class="wheel-segment">💰</span>
+                             <span class="wheel-segment">⭐</span>
+                             <span class="wheel-segment">🌿</span>
+                             <span class="wheel-segment">🎁</span>
+                         </div>
+                     </div>
+                     <div id="wheelResultDisplay">Spinning...</div>
+                 </div>
+             </div>
+         </div>
+     </div>
+
+    <!-- Toast Container for Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1100">
+        <!-- Toasts will be appended here -->
+    </div>
+
+    <!-- Bootstrap Script -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+    
+    <!-- Link to your external JS -->
+    <script src="script.js"></script>
+</body>
+</html>
+
+
+
+========================================
+File: script.js
+========================================
+// --- Constants ---
+const API_BASE_URL = "http://127.0.0.1:8000/api";
+
+const dailyGoals =[ 
+    { goal: "Abundance", meditation: "Visualize abundance.", task1: "List 3 things you're financially grateful for.", task2: "Set one small financial goal for the week.", points: 5 },
+    { goal: "Inner Peace", meditation: "Focus on your breath.", task1: "5-minute silent meditation.", task2: "Write down 3 things causing stress and one action for each.", points: 5 },
+    { goal: "Clarity", meditation: "Visualize clear thoughts.", task1: "Mind dump: Write all thoughts for 5 mins.", task2: "Prioritize your top 3 tasks for tomorrow.", points: 5 },
+    { goal: "Inspiration", meditation: "Open yourself to ideas.", task1: "Spend 10 mins exploring something new (article, music, art).", task2: "Note down one inspiring idea.", points: 5 },
+    { goal: "Self-Love", meditation: "Affirm your worth.", task1: "List 3 qualities you admire about yourself.", task2: "Do one small kind thing for yourself.", points: 5 },
+    { goal: "Vitality", meditation: "Visualize vibrant energy.", task1: "5-minute stretching or gentle movement.", task2: "Drink an extra glass of water.", points: 5 },
+    { goal: "Connection", meditation: "Feel connected to others.", task1: "Send a positive message to a friend/family member.", task2: "Reflect on a positive interaction you had.", points: 5 }
+];
+const sections =['horoscopeForm', 'wellnessManager', 'dailyChallenges', 'tasksSection', 'gamePage', 'playerProfile'];
+const wheelTypes =['energy', 'sigil', 'happiness', 'wellness', 'prosperity', 'manifestation', 'healing', 'referral'];
+const levels =[
+    { name: "Novice", points: 0 },
+    { name: "Seeker", points: 100 },
+    { name: "Adept", points: 500 },
+    { name: "Guardian", points: 1500 },
+    { name: "Healer", points: 4000 },
+    { name: "Master", points: 10000 },
+    { name: "Sage", points: 25000 },
+];
+const achievementsConfig = {
+    'FIRST_CHECKIN': { name: "First Steps", icon: "fa-shoe-prints", description: "Completed your first daily check-in." },
+    '7_DAY_STREAK': { name: "Consistent Soul", icon: "fa-calendar-check", description: "Achieved a 7-day streak." },
+    'FIRST_REFERRAL': { name: "Community Builder", icon: "fa-users", description: "Successfully referred a friend." },
+    'LEVEL_ADEPT': { name: "Adept Achiever", icon: "fa-star", description: "Reached the Adept level." },
+    'CHALLENGE_7_COMPLETE': { name: "Foundation Complete", icon: "fa-sun", description: "Completed the 7-Day Foundation Challenge."},
+    'OPEN_MYSTERY_BOX': { name: "Curious Explorer", icon: "fa-box", description: "Opened your first Mystery Box." },
+};
+const DUBAI_TIMEZONE_OFFSET_MS = 4 * 60 * 60 * 1000;
+const WHEEL_SEGMENTS = 8;
+const YOUR_BOT_USERNAME = "TWOTE_Bot";
+
+// --- Global State & Variables ---
+let state = {};
+let sectionStack =['wellnessManager'];
+let domElements = {};
+let modalInstances = {};
+let activeWheelType = null;
+let isSpinning = false;
+let spinTimeoutId = null;
+let telegram = null;
+let tonConnectUI = null;
+
+// --- Helper Functions ---
+function getDomElements() {
+    const ids =[
+        'backgroundVideo', 'profilePhoto', 'profileNameDisplay', 'profileNameDisplayInner',
+        'pointsDisplay', 'profileLevelDisplay', 'energyHeaderDisplay', 'pointsValue',
+        'consecutiveDaysValue', 'weeklyStreakValue', 'energyValue', 'challengeOptions',
+        'dailyChallengeList', 'challengeTitle', 'energyLogPrompt', 'energySlider',
+        'energySliderValue', 'challengeTasks', 'meditationTask', 'task1Text',
+        'task2Text', 'task1Proof', 'task2Proof', 'submitEnergyLog', 'profileHistory',
+        'referralLink', 'copyReferralBtn', 'dailyCheckInBtn', 'countdownDisplay', 'leaderboard', 'enrollName',
+        'enrollEnergy', 'submitEnrollment', 'workshopCode',
+        'submitCode', 'proofWarning', 'enrollRequirement', 'energyLogModal',
+        'enrollModal', 'codeModal', 'wheelModal', 'modalWheel', 'wheelModalTitle', 'wheelResultDisplay',
+        'spinInfo', 'levelDisplay', 'levelName', 'achievementsList',
+        'mysteryBoxCount', 'openMysteryBoxBtn', 'referralSpinsCount', 'claimReferralRewardBtn',
+        'birthdate', 'saveHoroscopeBtn',
+        'telegramTaskBtn', 'twitterTaskBtn', 'instagramTaskBtn', 'youtubeTaskBtn',
+        'navHome', 'navTasks', 'navGame', 'navProfile',
+        'deleteProgressBtn', 'tonConnectContainer', 'airdropWithdrawBtn',
+        'energyLogModalTitle', 'profileInfoContainer',
+        'metamaskConnectBtn', 'evmAddressDisplay'
+    ];
+        
+    wheelTypes.forEach(type => {
+        const btnId = type === 'referral' ? 'useReferralSpinBtn' : `spin${capitalizeFirstLetter(type)}WheelBtn`;
+        if (!ids.includes(btnId)) { 
+            ids.push(btnId);
+        }
+    });
+
+    const elements = {};
+    const uniqueIds =[...new Set(ids)];
+    uniqueIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) console.warn(`[getDomElements] Element not found: #${id}`);
+        elements[id] = el;
+    });
+    return elements;
+}
+
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+function getCurrentDubaiDate() {
+    const now = Date.now();
+    const dubaiTime = new Date(now + DUBAI_TIMEZONE_OFFSET_MS);
+    return dubaiTime.toISOString().split('T')[0];
+}
+
+function showNotification(message, type = 'info') {
+    const toastContainer = document.querySelector('.toast-container');
+    if (!toastContainer) {
+        console.error("Toast container not found!");
+        alert(`${type.toUpperCase()}: ${message}`);
+        return;
+    }
+
+    const toastId = `toast-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const toast = document.createElement('div');
+    let bgClass = 'bg-primary';
+    if (type === 'success') bgClass = 'bg-success';
+    else if (type === 'warning') bgClass = 'bg-warning text-dark';
+    else if (type === 'error') bgClass = 'bg-danger';
+
+    toast.id = toastId;
+    toast.className = `toast align-items-center text-white ${bgClass} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    toast.innerHTML = `
+        <div class="d-flex">
+            <div class="toast-body">
+                ${escapeHtml(message)}
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+    `;
+    toastContainer.appendChild(toast);
+    try {
+        const bsToast = new bootstrap.Toast(toast, { delay: 3500 });
+        bsToast.show();
+        toast.addEventListener('hidden.bs.toast', () => {
+            toast.remove();
+        });
+    } catch (e) {
+        console.error("Error showing bootstrap toast:", e);
+        toast.remove();
+        alert(`${type.toUpperCase()}: ${message}`);
+    }
+}
+
+// --- Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM Loaded. Initializing App...");
+    telegram = window.Telegram?.WebApp;
+    domElements = getDomElements();
+
+    if (!domElements.navHome || !domElements.energyLogModalTitle) {
+        console.error("Failed to get crucial DOM elements. Aborting initialization.");
+        document.body.innerHTML = '<div style="color: white; padding: 20px; text-align: center;">Error: Could not load essential app components. Please try again later.</div>';
+        return;
+    }
+
+    try {
+        if (domElements.energyLogModal) modalInstances.energyLog = new bootstrap.Modal(domElements.energyLogModal); else console.error("Energy Log Modal DOM element missing!");
+        if (domElements.enrollModal) modalInstances.enroll = new bootstrap.Modal(domElements.enrollModal); else console.warn("Enroll Modal DOM element missing!"); 
+        if (domElements.codeModal) modalInstances.code = new bootstrap.Modal(domElements.codeModal); else console.warn("Code Modal DOM element missing!"); 
+        if (domElements.wheelModal) modalInstances.wheel = new bootstrap.Modal(domElements.wheelModal); else console.error("Wheel Modal DOM element missing!");
+
+        if (!modalInstances.energyLog) throw new Error("EnergyLog modal instance failed to create.");
+        if (!modalInstances.wheel) throw new Error("Wheel modal instance failed to create.");
+
+    } catch(e) {
+        console.error("Error initializing Bootstrap Modals:", e);
+        showNotification("Error initializing interface components.", "error");
+        return;
+    }
+
+    initializeApp();
+});
+
+async function initializeApp() {
+    console.log("Initializing App State...");
+    state = initializeState();
+    let telegramUser = null;
+
+    try {
+        if (telegram) {
+            telegram.ready();
+            telegram.expand();
+
+            telegram.onEvent('themeChanged', applyTheme);
+            
+            // Check version before using setHeaderColor (requires 6.1+)
+            if (telegram.setHeaderColor && telegram.isVersionAtLeast('6.1')) {
+                telegram.setHeaderColor('secondary_bg_color');
+            }
+
+            telegramUser = telegram.initDataUnsafe?.user;
+
+            if (telegramUser && telegramUser.id) {
+                state.userId = telegramUser.id.toString();
+                state.userName = telegramUser.first_name || telegramUser.username || `User ${telegramUser.id.toString().slice(-4)}`;
+                state.userPhoto = telegramUser.photo_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(state.userName)}&background=random&color=fff&size=40`;
+            }
+
+            // Check version before using BackButton (requires 6.1+)
+            if (telegram.BackButton && telegram.isVersionAtLeast('6.1')) {
+                telegram.BackButton.onClick(() => {
+                    if (sectionStack.length > 1) {
+                        sectionStack.pop();
+                        const previousSection = sectionStack[sectionStack.length - 1];
+                        showSection(previousSection, true);
+                    } else {
+                        telegram.BackButton.hide();
+                    }
+                });
+                telegram.BackButton.hide();
+            }
+
+        }
+    } catch (e) { console.error("[initializeApp] Error during Telegram setup:", e); }
+
+    const storageUserId = localStorage.getItem('userId');
+
+    if (state.userId && (!storageUserId || storageUserId !== state.userId)) {
+        if (storageUserId) clearLocalStorageForUser(storageUserId);
+        localStorage.setItem('userId', state.userId);
+    } else if (!state.userId && storageUserId) {
+        state.userId = storageUserId;
+    } else if (!state.userId && !storageUserId) {
+        state.userId = `local_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+        localStorage.setItem('userId', state.userId);
+    }
+    
+    if (state.userId && state.userId !== storageUserId) {
+        localStorage.setItem('userId', state.userId);
+    }
+    
+    await loadStateFromAPI(); 
+    
+    setupTonConnect();
+    applyTheme();
+    setupEventListeners();
+}
+
+function initializeState() {
+    const defaultLeaderboard =[
+        { userId: 'bot1', name: 'Cosmic Guide', points: 150 }, { userId: 'bot2', name: 'Zen Master', points: 120 },
+        { userId: 'bot3', name: 'Astro Explorer', points: 110 }, { userId: 'bot4', name: 'Mindful One', points: 95 },
+        { userId: 'bot5', name: 'Starlight', points: 80 },
+    ];
+    const initialSpins = {};
+    wheelTypes.forEach(type => initialSpins[type] = (type === 'referral' ? 0 : 1));
+
+    return {
+        userId: null, userName: "Guest", userPhoto: "https://ui-avatars.com/api/?name=Guest&background=4E342E&color=FFF8E1&size=40",
+        walletAddress: null, evmWalletAddress: null,
+        energyLevel: 50, points: 0, level: "Novice",
+        challenges: initializeChallenges(), challengeHistory:[], birthdate: null,
+        consecutiveDays: 0, weeklyStreak: 0, lastPlayedDate: null, lastCheckInTime: null,
+        completedTasks:[], workshopAccess: false, currentChallengeDuration: null,
+        currentChallengeDay: null, energyBefore: null, leaderboard: defaultLeaderboard,
+        achievements:[], mysteryBoxes: 0, wheelSpins: initialSpins, lastDailySpinReset: null,
+    };
+}
+
+function applyTheme() {
+    try {
+        if (telegram?.themeParams && Object.keys(telegram.themeParams).length > 0) {
+            const theme = telegram.themeParams;
+            document.documentElement.style.setProperty('--bg-color', theme.secondary_bg_color || '#4E342E');
+            document.documentElement.style.setProperty('--text-color', theme.text_color || '#FFF8E1');
+            document.documentElement.style.setProperty('--button-color', theme.button_color || '#FFD700');
+            document.documentElement.style.setProperty('--button-text-color', theme.button_text_color || '#3E2723');
+            
+            const colorScheme = telegram.colorScheme || 'light';
+            if(colorScheme === 'dark') {
+                document.documentElement.style.setProperty('--challenge-description-color', '#E0E0E0');
+                document.documentElement.style.setProperty('--warning-color', '#FF6B6B');
+            } else {
+                document.documentElement.style.setProperty('--challenge-description-color', '#3E2723');
+                document.documentElement.style.setProperty('--warning-color', '#d9534f');
+            }
+            
+            if (telegram.setHeaderColor && telegram.isVersionAtLeast('6.1')) {
+                try { telegram.setHeaderColor(theme.secondary_bg_color || '#4E342E'); } catch (e) {}
+            }
+        }
+    } catch (e) {
+        console.error("Error applying theme:", e);
+    }
+}
+
+function getStorageKey(key) {
+    if (!state.userId) return `ERROR_NO_USER_${key}`;
+    return `${state.userId}_${key}`;
+}
+
+function clearLocalStorageForUser(userIdToClear) {
+    if (!userIdToClear) return;
+    try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith(`${userIdToClear}_`)) {
+                localStorage.removeItem(key);
+            }
+        }
+        if (localStorage.getItem('userId') === userIdToClear) {
+            localStorage.removeItem('userId');
+        }
+    } catch (error) {
+        console.error(`Error clearing local storage:`, error);
+    }
+}
+
+async function loadStateFromAPI() {
+    console.log("Loading state from Backend API...");
+    if (telegram && telegram.initData) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/user/state`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `tma ${telegram.initData}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                const dbState = await response.json();
+                
+                state.points = dbState.points !== undefined ? dbState.points : state.points;
+                state.energyLevel = dbState.energyLevel !== undefined ? dbState.energyLevel : state.energyLevel;
+                state.level = dbState.level || state.level;
+                state.consecutiveDays = dbState.consecutiveDays !== undefined ? dbState.consecutiveDays : state.consecutiveDays;
+                state.mysteryBoxes = dbState.mysteryBoxes !== undefined ? dbState.mysteryBoxes : state.mysteryBoxes;
+
+                if (dbState.gameState) {
+                    Object.assign(state, dbState.gameState);
+                }
+
+                ensureUserInLeaderboard();
+                checkDailyReset();
+                updateUserLevel();
+                updateUI();
+                startCountdown();
+                showInitialSection();
+                return;
+            }
+        } catch (error) {}
+    }
+    loadStateFromLocal();
+}
+
+async function saveStateToAPI(keysToSave) {
+    if (!telegram || !telegram.initData) return;
+
+    const rootKeys =['points', 'energyLevel', 'level', 'consecutiveDays', 'mysteryBoxes'];
+    const fullGameStateObj = {};
+    
+    const complexKeys = Object.keys(state).filter(k => !rootKeys.includes(k) && k !== 'userId');
+    complexKeys.forEach(k => fullGameStateObj[k] = state[k]);
+
+    const payload = {
+        points: state.points || 0,
+        energy_level: state.energyLevel || 0,
+        level: state.level || "Novice",
+        consecutive_days: state.consecutiveDays || 0,
+        mystery_boxes: state.mysteryBoxes || 0,
+        game_state: fullGameStateObj
+    };
+
+    try {
+        await fetch(`${API_BASE_URL}/user/sync`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `tma ${telegram.initData}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {}
+}
+
+function loadStateFromLocal() {
+    try {
+        state.energyLevel = parseInt(localStorage.getItem(getStorageKey('energyLevel')) || state.energyLevel);
+        state.points = parseInt(localStorage.getItem(getStorageKey('points')) || state.points);
+        state.level = localStorage.getItem(getStorageKey('level')) || state.level;
+        state.walletAddress = localStorage.getItem(getStorageKey('walletAddress')) || state.walletAddress;
+        state.evmWalletAddress = localStorage.getItem(getStorageKey('evmWalletAddress')) || state.evmWalletAddress;
+
+        const storedName = localStorage.getItem(getStorageKey('userName'));
+        const storedPhoto = localStorage.getItem(getStorageKey('userPhoto'));
+        if (state.userName === "Guest" && storedName) state.userName = storedName;
+        if (state.userPhoto.includes("via.placeholder.com") && storedPhoto) state.userPhoto = storedPhoto;
+
+        const loadedBirthdate = localStorage.getItem(getStorageKey('birthdate'));
+        if (loadedBirthdate && /^\d{4}-\d{2}-\d{2}$/.test(loadedBirthdate)) {
+            state.birthdate = loadedBirthdate;
+        } else {
+            state.birthdate = null;
+        }
+
+        state.consecutiveDays = parseInt(localStorage.getItem(getStorageKey('consecutiveDays')) || state.consecutiveDays);
+        state.weeklyStreak = parseInt(localStorage.getItem(getStorageKey('weeklyStreak')) || state.weeklyStreak);
+        state.lastPlayedDate = localStorage.getItem(getStorageKey('lastPlayedDate')) || state.lastPlayedDate;
+        state.lastCheckInTime = localStorage.getItem(getStorageKey('lastCheckInTime')) ? parseInt(localStorage.getItem(getStorageKey('lastCheckInTime'))) : state.lastCheckInTime;
+        state.workshopAccess = localStorage.getItem(getStorageKey('workshopAccess')) === 'true' || state.workshopAccess;
+        state.mysteryBoxes = parseInt(localStorage.getItem(getStorageKey('mysteryBoxes')) || state.mysteryBoxes);
+        state.lastDailySpinReset = localStorage.getItem(getStorageKey('lastDailySpinReset')) || state.lastDailySpinReset;
+        state.currentChallengeDuration = localStorage.getItem(getStorageKey('currentChallengeDuration')) ? parseInt(localStorage.getItem(getStorageKey('currentChallengeDuration'))) : state.currentChallengeDuration;
+
+        state.completedTasks = JSON.parse(localStorage.getItem(getStorageKey('completedTasks')) || '[]') ||[];
+        state.achievements = JSON.parse(localStorage.getItem(getStorageKey('achievements')) || '[]') ||[];
+        state.challengeHistory = JSON.parse(localStorage.getItem(getStorageKey('challengeHistory')) || '[]') ||[];
+
+        const savedLeaderboard = JSON.parse(localStorage.getItem(getStorageKey('leaderboard')) || '[]') ||[];
+        state.leaderboard = mergeLeaderboards(initializeState().leaderboard, savedLeaderboard);
+        ensureUserInLeaderboard();
+
+        const savedSpins = JSON.parse(localStorage.getItem(getStorageKey('wheelSpins')) || '{}') || {};
+        wheelTypes.forEach(type => {
+            state.wheelSpins[type] = savedSpins[type] ?? state.wheelSpins[type];
+        });
+
+        const savedChallengesStatus = JSON.parse(localStorage.getItem(getStorageKey('challengesStatus')) || '{}') || {};
+        state.challenges.forEach(challenge => {
+            const status = savedChallengesStatus[challenge.day];
+            if (status) {
+                challenge.completed = status.completed || false;
+                challenge.completionDate = status.completionDate || null;
+            } else {
+                challenge.completed = false;
+                challenge.completionDate = null;
+            }
+        });
+
+        checkDailyReset();
+        updateUserLevel();
+        updateUI();
+        startCountdown();
+        showInitialSection();
+
+    } catch (error) {
+        showNotification('Failed to load saved data. Resetting to defaults.', 'error');
+        const userId = state.userId, userName = state.userName, userPhoto = state.userPhoto;
+        state = initializeState();
+        state.userId = userId; state.userName = userName; state.userPhoto = userPhoto;
+        ensureUserInLeaderboard();
+        updateUI();
+        showInitialSection();
+        saveData(Object.keys(state).filter(k => !['userId'].includes(k)));
+    }
+}
+
+function saveStateToLocal(keysToSave) {
+    if (!state.userId) return;
+    const validKeysToSave = keysToSave.filter(k => !['userId'].includes(k));
+    if (validKeysToSave.length === 0) return;
+
+    validKeysToSave.forEach(key => {
+        try {
+            let valueToSave;
+            const stateValue = state[key];
+
+            if (key === 'challenges') {
+                const challengesStatus = {};
+                state.challenges.forEach(ch => {
+                    if(ch.completed || ch.completionDate) {
+                        challengesStatus[ch.day] = {
+                            completed: ch.completed,
+                            completionDate: ch.completionDate
+                        };
+                    }
+                });
+                valueToSave = JSON.stringify(challengesStatus);
+                key = 'challengesStatus';
+            }
+            else if (typeof stateValue === 'object' && stateValue !== null) {
+                valueToSave = JSON.stringify(stateValue);
+            } else if (typeof stateValue === 'boolean') {
+                valueToSave = stateValue ? 'true' : 'false';
+            } else if (stateValue !== null && stateValue !== undefined) {
+                valueToSave = String(stateValue);
+            } else {
+                valueToSave = null;
+            }
+
+            const storageKey = getStorageKey(key);
+            if (valueToSave !== null) {
+                localStorage.setItem(storageKey, valueToSave);
+            } else {
+                localStorage.removeItem(storageKey);
+            }
+        } catch (error) {}
+    });
+}
+
+function saveData(keys =[]) {
+    if (!Array.isArray(keys) || keys.length === 0) return;
+    const uniqueKeys =[...new Set(keys)];
+    if (uniqueKeys.includes('points') && !uniqueKeys.includes('level')) uniqueKeys.push('level');
+    if (uniqueKeys.includes('points') && !uniqueKeys.includes('leaderboard')) uniqueKeys.push('leaderboard');
+    if (uniqueKeys.includes('challenges') && !uniqueKeys.includes('challengeHistory')) uniqueKeys.push('challengeHistory');
+
+    saveStateToLocal(uniqueKeys);
+    saveStateToAPI(uniqueKeys);
+}
+
+function mergeLeaderboards(defaultBoard, savedBoard) {
+    const mergedMap = new Map();
+    defaultBoard.forEach(p => {
+        if (p && p.userId) {
+            mergedMap.set(p.userId, { ...p, points: p.points || 0, name: p.name || 'Bot' });
+        }
+    });
+    savedBoard.forEach(p => {
+        if (!p || !p.userId) return;
+        const existing = mergedMap.get(p.userId);
+        const pointsToUse = Math.max(existing ? existing.points : 0, p.points || 0);
+        const nameToUse = (p.name || existing?.name || 'Anonymous').trim();
+
+        mergedMap.set(p.userId, { userId: p.userId, name: nameToUse || 'Anonymous', points: pointsToUse });
+    });
+    return Array.from(mergedMap.values());
+}
+
+function ensureUserInLeaderboard() {
+    if (!state.userId) return;
+    let userEntry = state.leaderboard.find(p => p.userId === state.userId);
+    if (!userEntry) {
+        userEntry = { userId: state.userId, name: state.userName, points: state.points };
+        state.leaderboard.push(userEntry);
+    } else {
+        userEntry.points = state.points;
+        if (state.userName && userEntry.name !== state.userName) {
+            userEntry.name = state.userName;
+        }
+    }
+}
+
+// --- UI Update Functions ---
+function updateUI() {
+    if (!domElements) return;
+    
+    domElements.profilePhoto?.setAttribute('src', state.userPhoto ?? 'https://ui-avatars.com/api/?name=Guest&background=4E342E&color=FFF8E1&size=40');
+    if(domElements.profileNameDisplay) domElements.profileNameDisplay.textContent = state.userName ?? 'Guest';
+    if(domElements.pointsDisplay) domElements.pointsDisplay.textContent = `${state.points ?? 0} $twote`;
+    if(domElements.profileLevelDisplay) domElements.profileLevelDisplay.textContent = `Level: ${state.level ?? 'Novice'}`;
+    if(domElements.energyHeaderDisplay) domElements.energyHeaderDisplay.textContent = `NRG: ${state.energyLevel ?? 0}%`;
+
+    if(domElements.profileNameDisplayInner) domElements.profileNameDisplayInner.textContent = state.userName ?? 'Guest';
+    if(domElements.pointsValue) domElements.pointsValue.textContent = state.points ?? 0;
+    if(domElements.energyValue) domElements.energyValue.textContent = state.energyLevel ?? 0;
+    if(domElements.levelName) domElements.levelName.textContent = state.level ?? 'Novice';
+    if(domElements.consecutiveDaysValue) domElements.consecutiveDaysValue.textContent = state.consecutiveDays ?? 0;
+    if(domElements.weeklyStreakValue) domElements.weeklyStreakValue.textContent = state.weeklyStreak ?? 0;
+
+    if (domElements.referralLink) {
+        if (state.userId) { 
+            domElements.referralLink.value = `https://t.me/${YOUR_BOT_USERNAME}?start=${state.userId}`;
+        } else {
+            domElements.referralLink.value = "Link unavailable";
+            if (domElements.copyReferralBtn) domElements.copyReferralBtn.disabled = true;
+        }
+    }
+
+    // MetaMask UI
+    if (state.evmWalletAddress && domElements.evmAddressDisplay && domElements.metamaskConnectBtn) {
+        domElements.evmAddressDisplay.textContent = `EVM: ${state.evmWalletAddress.slice(0, 6)}...${state.evmWalletAddress.slice(-4)}`;
+        domElements.evmAddressDisplay.style.display = 'block';
+        domElements.metamaskConnectBtn.style.display = 'none';
+    } else if (domElements.evmAddressDisplay && domElements.metamaskConnectBtn) {
+        domElements.evmAddressDisplay.style.display = 'none';
+        domElements.metamaskConnectBtn.style.display = 'block';
+        domElements.metamaskConnectBtn.innerHTML = '<i class="fas fa-fox" style="margin-right: 5px;"></i> Connect MetaMask';
+    }
+
+    updateDailyCheckInButtonState();
+    updateLeaderboardUI();
+    updateTaskButtons();
+    updateWheelButtons();
+    updateAchievementsUI();
+    updateMysteryBoxUI();
+    updateActiveNav();
+}
+
+function updateActiveNav() {
+    const currentSection = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : null;
+    const navMap = {
+        'wellnessManager': domElements.navHome,
+        'dailyChallenges': domElements.navHome,
+        'tasksSection': domElements.navTasks,
+        'gamePage': domElements.navGame,
+        'playerProfile': domElements.navProfile,
+        'horoscopeForm': null
+    };
+    const allNavItems =[domElements.navHome, domElements.navTasks, domElements.navGame, domElements.navProfile];
+    allNavItems.forEach(nav => nav?.classList.remove('active'));
+
+    if (currentSection && navMap[currentSection]) {
+        navMap[currentSection].classList.add('active');
+    }
+}
+
+function updateDailyCheckInButtonState() {
+    if (!domElements.dailyCheckInBtn) return;
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    const canCheckIn = !state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours);
+
+    domElements.dailyCheckInBtn.disabled = !canCheckIn;
+    if (canCheckIn) {
+        domElements.dailyCheckInBtn.textContent = "Daily Check-In";
+        if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = 'Check-in available!';
+        if(domElements.spinInfo) domElements.spinInfo.textContent = 'Complete Daily Check-In to enable spins.';
+    } else {
+        domElements.dailyCheckInBtn.textContent = "Checked In Today";
+        if(domElements.spinInfo) domElements.spinInfo.textContent = 'Spins enabled for today!';
+        startCountdown();
+    }
+    updateWheelButtons();
+}
+
+function startCountdown() {
+    if (window.checkinCountdownInterval) clearInterval(window.checkinCountdownInterval);
+    if (!state.lastCheckInTime || !domElements.countdownDisplay) {
+        if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = 'Check-in available!';
+        updateDailyCheckInButtonState();
+        return;
+    }
+
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    const endTime = state.lastCheckInTime + twentyFourHours;
+
+    function updateCountdownDisplay() {
+        const now = Date.now();
+        const timeLeft = endTime - now;
+
+        if (timeLeft <= 0) {
+            if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = 'Check-in available!';
+            updateDailyCheckInButtonState();
+            clearInterval(window.checkinCountdownInterval);
+            window.checkinCountdownInterval = null;
+            return;
+        }
+
+        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+        const displayMinutes = String(minutes).padStart(2, '0');
+        const displaySeconds = String(seconds).padStart(2, '0');
+
+        if(domElements.countdownDisplay) domElements.countdownDisplay.textContent = `Next check-in: ${hours}h ${displayMinutes}m ${displaySeconds}s`;
+
+        if (domElements.dailyCheckInBtn && !domElements.dailyCheckInBtn.disabled) {
+            domElements.dailyCheckInBtn.disabled = true;
+            domElements.dailyCheckInBtn.textContent = "Checked In Today";
+        }
+    }
+
+    updateCountdownDisplay();
+    window.checkinCountdownInterval = setInterval(updateCountdownDisplay, 1000);
+}
+
+function updateWheelButtons() {
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+    const checkedInToday = state.lastCheckInTime && (now - state.lastCheckInTime < twentyFourHours);
+
+    wheelTypes.forEach(type => {
+        const isReferral = type === 'referral';
+        const btnId = isReferral ? 'useReferralSpinBtn' : `spin${capitalizeFirstLetter(type)}WheelBtn`;
+        const button = domElements[btnId];
+        if (!button) return;
+
+        const spinsLeft = state.wheelSpins[type] || 0;
+        const canSpin = isReferral ? (spinsLeft > 0) : (checkedInToday && spinsLeft > 0);
+
+        button.disabled = !canSpin || isSpinning;
+
+        const spinsLeftSpan = button.querySelector('.spins-left');
+        if (spinsLeftSpan) {
+            spinsLeftSpan.textContent = `(${spinsLeft})`;
+            if (isReferral && domElements.referralSpinsCount && spinsLeftSpan !== domElements.referralSpinsCount) {
+                domElements.referralSpinsCount.textContent = `(${spinsLeft})`;
+            }
+        }
+
+        if (!canSpin && !isSpinning) { 
+            if (isReferral) {
+                button.title = spinsLeft <= 0 ? "No referral spins left" : ""; 
+            } else {
+                button.title = !checkedInToday ? "Complete daily check-in first" : spinsLeft <= 0 ? "No spins left for today" : ""; 
+            }
+        } else if (isSpinning) {
+            button.title = "Spin in progress...";
+        } else { 
+            button.title = `Click to spin (${spinsLeft} left)`;
+        }
+    });
+}
+
+function updateTaskButtons() {['telegram', 'twitter', 'instagram', 'youtube'].forEach(taskKey => {
+        const button = domElements[`${taskKey}TaskBtn`];
+        if (!button) return; 
+        const isCompleted = state.completedTasks?.includes(taskKey); 
+        button.disabled = isCompleted;
+        button.textContent = isCompleted ? 'Done' : 'Verify';
+        button.classList.toggle('btn-success', isCompleted); 
+        button.classList.toggle('btn-custom', !isCompleted); 
+    });
+}
+
+function updateAchievementsUI() {
+    if (!domElements.achievementsList) return;
+    const achievements = state.achievements ||[]; 
+    if (achievements.length === 0) {
+        domElements.achievementsList.innerHTML = '<li><i class="fas fa-hourglass-start"></i> No achievements yet</li>';
+        return;
+    }
+    domElements.achievementsList.innerHTML = achievements.map(key => {
+        const ach = achievementsConfig[key];
+        if (!ach) return ''; 
+        return `<li title="${escapeHtml(ach.description || '')}"><i class="fas ${ach.icon || 'fa-question-circle'}"></i> ${escapeHtml(ach.name || 'Unknown')}</li>`;
+    }).join('');
+}
+
+function updateMysteryBoxUI() {
+    if (domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes ?? 0;
+    if (domElements.openMysteryBoxBtn) {
+        domElements.openMysteryBoxBtn.disabled = (state.mysteryBoxes ?? 0) <= 0 || isSpinning;
+    }
+}
+
+function updateLeaderboardUI() {
+    if (!domElements.leaderboard) return;
+    ensureUserInLeaderboard(); 
+    const sortedLeaderboard =[...(state.leaderboard || [])].sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    const top100 = sortedLeaderboard.slice(0, 100);
+
+    domElements.leaderboard.innerHTML = top100.map((p, i) => {
+        const rank = i + 1;
+        const name = escapeHtml(p.name || 'Anonymous');
+        const points = p.points || 0;
+        const isCurrentUser = p.userId === state.userId;
+
+        return `
+            <tr class="${isCurrentUser ? 'table-primary' : ''}">
+                <td class="rank-col">${rank}</td>
+                <td>${name}</td>
+                <td class="points-col">${points}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="3" class="text-center text-muted">Leaderboard is empty.</td></tr>';
+}
+
+function escapeHtml(unsafe) {
+    if (typeof unsafe !== 'string') {
+        if (unsafe === null || unsafe === undefined) return '';
+        try { return String(unsafe); } catch (e) { return ''; }
+    }
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+// --- Navigation ---
+function showInitialSection() {
+    const hasBirthdate = state.birthdate && /^\d{4}-\d{2}-\d{2}$/.test(state.birthdate);
+    const firstSection = hasBirthdate ? 'wellnessManager' : 'horoscopeForm';
+    sectionStack =[firstSection];
+    showSection(firstSection, true);
+}
+
+function showSection(sectionId, isNavigatingBackOrInitial = false) {
+    if (!sections.includes(sectionId)) return;
+
+    const currentTopSection = sectionStack.length > 0 ? sectionStack[sectionStack.length - 1] : null;
+
+    if (!isNavigatingBackOrInitial && sectionId === currentTopSection) return;
+
+    if (!isNavigatingBackOrInitial) {
+        sectionStack.push(sectionId);
+    } else if (isNavigatingBackOrInitial && sectionStack[sectionStack.length - 1] !== sectionId) {
+        if (sectionStack.length === 0 || sectionId === sectionStack[0]) {
+            sectionStack = [sectionId];
+        }
+    }
+
+    sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+    });
+    const targetElement = document.getElementById(sectionId);
+    if (targetElement) {
+        targetElement.style.display = 'block';
+    } else {
+        if (sectionId !== 'wellnessManager') showSection('wellnessManager');
+        return; 
+    }
+
+    try {
+        if (telegram?.BackButton && telegram.isVersionAtLeast('6.1')) {
+            if (sectionStack.length > 1) {
+                telegram.BackButton.show();
+            } else {
+                telegram.BackButton.hide();
+            }
+        }
+    } catch (e) {}
+
+    switch (sectionId) {
+        case 'wellnessManager': loadChallenges(); break;
+        case 'dailyChallenges': displayDailyChallenges(state.currentChallengeDuration); break;
+        case 'playerProfile': loadProfileHistory(); updateLeaderboardUI(); updateAchievementsUI(); break;
+        case 'gamePage': updateWheelButtons(); updateMysteryBoxUI(); break;
+        case 'tasksSection': updateTaskButtons(); break;
+    }
+    updateActiveNav();
+    window.scrollTo(0, 0); 
+}
+
+// --- Core Logic Functions ---
+function saveHoroscope() {
+    const birthdateInput = domElements.birthdate;
+    if (!birthdateInput) return showNotification("Error saving birthdate.", "error");
+    const birthdate = birthdateInput.value;
+
+    if (!birthdate) {
+        showNotification('Please enter your birthdate.', 'warning');
+        birthdateInput.focus();
+        return;
+    }
+
+    try {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(birthdate)) {
+            throw new Error("Invalid date format. Use YYYY-MM-DD.");
+        }
+
+        const [yyyy, mm, dd] = birthdate.split('-');
+        const d = new Date(yyyy, mm - 1, dd);
+        
+        if (isNaN(d.getTime()) || d.getFullYear() != yyyy || d.getMonth() + 1 != mm || d.getDate() != dd) {
+            throw new Error("Invalid date value.");
+        }
+
+        const year = parseInt(yyyy, 10);
+        const currentYear = new Date().getFullYear();
+        if (year < 1900 || year > currentYear) {
+            throw new Error(`Year ${year} is out of range.`);
+        }
+
+        state.birthdate = birthdate;
+        saveData(['birthdate']); 
+        showNotification('Birthdate saved!', 'success');
+        showSection('wellnessManager'); 
+
+    } catch (e) {
+        showNotification(`Invalid birthdate: ${e.message}`, 'warning');
+        birthdateInput.focus();
+    }
+}
+
+function checkDailyReset() {
+    const today = getCurrentDubaiDate();
+    resetDailySpinsIfNeeded(today); 
+
+    if (!state.lastPlayedDate) { 
+        state.consecutiveDays = 0;
+        state.weeklyStreak = 0;
+        updateDailyCheckInButtonState();
+        return;
+    }
+
+    if (state.lastPlayedDate === today) {
+        updateDailyCheckInButtonState(); 
+        return; 
+    }
+
+    try {
+        const todayDate = new Date(today + 'T00:00:00'); 
+        const lastPlayedDateObj = new Date(state.lastPlayedDate + 'T00:00:00');
+
+        const diffTime = todayDate.getTime() - lastPlayedDateObj.getTime();
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+        if (diffDays > 1) {
+            state.consecutiveDays = 0;
+            state.weeklyStreak = 0;
+            saveData(['consecutiveDays', 'weeklyStreak']);
+        } else if (diffDays <= 0) {
+            state.consecutiveDays = 0;
+            state.weeklyStreak = 0;
+            saveData(['consecutiveDays', 'weeklyStreak']);
+        }
+    } catch(e) {
+        state.consecutiveDays = 0;
+        state.weeklyStreak = 0;
+        saveData(['consecutiveDays', 'weeklyStreak']);
+    }
+
+    updateDailyCheckInButtonState();
+}
+
+function resetDailySpinsIfNeeded(today) {
+    if (state.lastDailySpinReset !== today) {
+        let spinsChanged = false;
+        wheelTypes.forEach(type => {
+            if (type !== 'referral') {
+                if (state.wheelSpins[type] !== 1) {
+                    state.wheelSpins[type] = 1;
+                    spinsChanged = true;
+                }
+            }
+        });
+        state.lastDailySpinReset = today;
+
+        if (spinsChanged) {
+            saveData(['wheelSpins', 'lastDailySpinReset']);
+        } else {
+            saveData(['lastDailySpinReset']); 
+        }
+        updateWheelButtons(); 
+    }
+}
+
+function dailyCheckIn() {
+    const now = Date.now();
+    const twentyFourHours = 24 * 60 * 60 * 1000;
+
+    if (state.lastCheckInTime && (now - state.lastCheckInTime < twentyFourHours)) {
+        showNotification('Cooldown active. Next check-in available later.', 'warning');
+        startCountdown();
+        return;
+    }
+
+    const today = getCurrentDubaiDate();
+    if (state.lastPlayedDate === today && state.lastCheckInTime) { 
+        showNotification("Already checked in today.", "info");
+        updateDailyCheckInButtonState(); 
+        return;
+    }
+
+    if (domElements.dailyCheckInBtn) {
+        domElements.dailyCheckInBtn.disabled = true;
+        domElements.dailyCheckInBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Checking In...';
+    }
+
+    let pointsAwarded = 5; 
+    let streakBonusPoints = 0;
+    let newWeeklyStreak = false;
+
+    if (state.lastPlayedDate) {
+        try {
+            const lastPlayedDateObj = new Date(state.lastPlayedDate + 'T00:00:00');
+            const todayDate = new Date(today + 'T00:00:00');
+            const diffTime = todayDate.getTime() - lastPlayedDateObj.getTime();
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays === 1) { 
+                state.consecutiveDays++;
+                streakBonusPoints = Math.min(state.consecutiveDays, 7); 
+
+                if (state.consecutiveDays > 0 && state.consecutiveDays % 7 === 0) {
+                    state.weeklyStreak++;
+                    newWeeklyStreak = true;
+                    awardMysteryBox(1, "Weekly Streak"); 
+                }
+                if (state.consecutiveDays >= 7) {
+                    checkAndGrantAchievement('7_DAY_STREAK');
+                }
+            } else if (diffDays > 1) { 
+                state.consecutiveDays = 1; 
+                state.weeklyStreak = 0; 
+            } else if (diffDays <= 0) {
+                state.consecutiveDays = 1;
+                state.weeklyStreak = 0;
+                pointsAwarded = 0; 
+                streakBonusPoints = 0;
+            }
+        } catch (e) {
+            state.consecutiveDays = 1; 
+            state.weeklyStreak = 0;
+        }
+    } else {
+        state.consecutiveDays = 1;
+        state.weeklyStreak = 0;
+    }
+
+    if (pointsAwarded > 0 && !state.achievements?.includes('FIRST_CHECKIN')) {
+        checkAndGrantAchievement('FIRST_CHECKIN');
+    }
+
+    const totalPoints = pointsAwarded + streakBonusPoints;
+    if (totalPoints > 0) {
+        state.lastPlayedDate = today; 
+        state.lastCheckInTime = now; 
+        awardPoints(totalPoints, "Daily Check-in"); 
+
+        let msg = `Checked in! Day ${state.consecutiveDays}. +${totalPoints} $twote!`;
+        if (newWeeklyStreak) {
+            msg += ` Weekly Streak: ${state.weeklyStreak}! +1 Box!`;
+        }
+        showNotification(msg, 'success');
+
+        saveData(['lastPlayedDate', 'lastCheckInTime', 'consecutiveDays', 'weeklyStreak', 'points', 'level', 'leaderboard', 'achievements', 'mysteryBoxes']);
+    } else {
+        state.lastCheckInTime = now;
+        saveData(['lastCheckInTime']); 
+        showNotification("Already checked in today.", "info");
+    }
+
+    updateUI(); 
+}
+
+function awardPoints(amount, reason = "") {
+    if (!Number.isInteger(amount) || amount <= 0) {
+        return;
+    }
+    state.points = (state.points || 0) + amount; 
+
+    ensureUserInLeaderboard(); 
+    const previousLevel = state.level;
+    updateUserLevel(); 
+
+    const keysToSave =['points', 'leaderboard'];
+    if (state.level !== previousLevel) {
+        keysToSave.push('level'); 
+        keysToSave.push('achievements'); 
+    }
+
+    saveData(keysToSave);
+    updateUI(); 
+    showNotification(`+${amount} $twote! ✨ (${reason})`, 'success');
+}
+
+function awardEnergy(amount, reason = "") {
+    if (!Number.isInteger(amount) || amount === 0) return;
+    const oldEnergy = state.energyLevel || 0; 
+    state.energyLevel = Math.min(100, Math.max(0, oldEnergy + amount));
+
+    if (state.energyLevel !== oldEnergy) {
+        saveData(['energyLevel']);
+        updateUI(); 
+        showNotification(`${amount > 0 ? '+' : ''}${amount}% Energy!⚡️ (${reason})`, 'info');
+    }
+}
+
+function updateUserLevel() {
+    let currentLevelName = state.level || levels[0].name;
+    let newLevelData = levels[0]; 
+
+    for (let i = levels.length - 1; i >= 0; i--) {
+        if (state.points >= levels[i].points) {
+            newLevelData = levels[i];
+            break; 
+        }
+    }
+
+    if (newLevelData.name !== currentLevelName) {
+        state.level = newLevelData.name;
+        showNotification(`Level Up: ${state.level}! 🎉`, 'success');
+        if (state.level === "Adept") checkAndGrantAchievement('LEVEL_ADEPT');
+        updateUI(); 
+    }
+}
+
+function checkAndGrantAchievement(key) {
+    if (!achievementsConfig[key]) return false; 
+    
+    state.achievements = state.achievements ||[];
+
+    if (!state.achievements.includes(key)) {
+        state.achievements.push(key);
+        const ach = achievementsConfig[key];
+        showNotification(`Achievement: ${ach.name}! 🏅`, 'success');
+        saveData(['achievements']);
+        updateAchievementsUI(); 
+        return true; 
+    }
+    return false; 
+}
+
+// --- Challenge Logic ---
+function initializeChallenges() {
+    return Array.from({ length: 150 }, (_, i) => {
+        const goalIndex = i % dailyGoals.length; 
+        const goalData = dailyGoals[goalIndex];
+        return {
+            day: i + 1,
+            goal: goalData.goal,
+            meditation: goalData.meditation,
+            task1: goalData.task1,
+            task2: goalData.task2,
+            points: goalData.points,
+            completed: false, 
+            completionDate: null 
+        };
+    });
+}
+
+function getCompletedDaysCount(maxDay) {
+    if (!state.challenges || maxDay <= 0) return 0;
+    return state.challenges.slice(0, maxDay).filter(ch => ch.completed).length;
+}
+
+function isChallengeUnlocked(days) {
+    switch (days) {
+        case 7: return true; 
+        case 21: return getCompletedDaysCount(7) === 7; 
+        case 41: return getCompletedDaysCount(21) === 21; 
+        case 66: return state.workshopAccess && getCompletedDaysCount(41) === 41; 
+        case 150: return state.workshopAccess && getCompletedDaysCount(66) === 66; 
+        default: return false; 
+    }
+}
+
+function loadChallenges() {
+    const durations =[7, 21, 41, 66, 150];
+    const icons = { 7: 'fa-sun', 21: 'fa-seedling', 41: 'fa-star', 66: 'fa-moon', 150: 'fa-crown' };
+    const titles = { 7: 'Foundation', 21: 'Habit Building', 41: 'Deepening', 66: 'Integration', 150: 'Mastery' };
+
+    if (!domElements.challengeOptions) return;
+    domElements.challengeOptions.innerHTML = ''; 
+
+    durations.forEach(days => {
+        const unlocked = isChallengeUnlocked(days);
+        const icon = icons[days] || 'fa-question-circle';
+        const title = titles[days] || `${days}-Day`;
+        const reqWorkshop = days >= 66; 
+        const prevDays = days === 21 ? 7 : (days === 41 ? 21 : (days === 66 ? 41 : (days === 150 ? 66 : 0)));
+        const prevTitle = titles[prevDays] || `${prevDays}-Day`;
+        const prevComplete = prevDays === 0 || getCompletedDaysCount(prevDays) === prevDays;
+
+        const div = document.createElement('div');
+        div.className = `challenge-div ${unlocked ? '' : 'locked'}`;
+        let content = `<i class="fas ${icon} challenge-icon"></i><h3>${days}-Day: ${title}</h3>`;
+
+        if (unlocked) {
+            if (state.currentChallengeDuration === days) {
+                content += `<button class="btn btn-info view-challenge-btn mt-2 btn-sm" data-days="${days}">View Progress</button>`;
+            } else {
+                content += `<button class="btn btn-custom start-challenge-btn mt-2 btn-sm" data-days="${days}">Begin ${title}</button>`;
+            }
+        } else {
+            if (!prevComplete && prevDays > 0) {
+                content += `<p class="warning-text">Complete the ${prevTitle} challenge first.</p>`;
+            } else if (reqWorkshop && !state.workshopAccess) {
+                content += `<p class="warning-text">Requires Workshop Access</p>
+                            <div class="d-flex justify-content-center gap-2 mt-2">
+                                <button class="btn btn-info enroll-btn btn-sm" data-days="${days}">Enroll Info</button>
+                                <button class="btn btn-secondary attended-btn btn-sm" data-days="${days}">Enter Code</button>
+                            </div>`;
+            } else {
+                content += `<p class="warning-text">Locked</p><p class="fs-sm">(Requirement not met)</p>`;
+            }
+        }
+        div.innerHTML = content;
+        domElements.challengeOptions.appendChild(div);
+    });
+}
+
+function displayDailyChallenges(days) {
+    if (!days || !domElements.dailyChallengeList || !domElements.challengeTitle) return;
+
+    const titles = { 7: 'Foundation', 21: 'Habit Building', 41: 'Deepening', 66: 'Integration', 150: 'Mastery' };
+    domElements.challengeTitle.textContent = `${days}-Day Challenge: ${titles[days] || ''}`;
+    domElements.dailyChallengeList.innerHTML = ''; 
+    const dubaiDate = getCurrentDubaiDate();
+    let firstUncompletedIdx = -1;
+
+    for(let i = 0; i < days; i++) {
+        if (!state.challenges[i]?.completed) {
+            firstUncompletedIdx = i;
+            break; 
+        }
+    }
+
+    const allDurationCompleted = (firstUncompletedIdx === -1 && getCompletedDaysCount(days) === days);
+    if (allDurationCompleted) {
+        firstUncompletedIdx = days; 
+        const completionMsg = document.createElement('div');
+        completionMsg.className = 'alert alert-success text-center';
+        completionMsg.innerHTML = `🎉 Congratulations! You completed the ${days}-Day ${titles[days] || ''} Challenge! 🎉`;
+        domElements.dailyChallengeList.appendChild(completionMsg);
+        if (days === 7) checkAndGrantAchievement('CHALLENGE_7_COMPLETE');
+    }
+
+    let startableDayIndex = -1;
+    if (firstUncompletedIdx !== -1 && firstUncompletedIdx < days) { 
+        if (firstUncompletedIdx === 0) {
+            startableDayIndex = 0;
+        } else {
+            const prevCh = state.challenges[firstUncompletedIdx - 1];
+            if (prevCh?.completed && prevCh.completionDate && prevCh.completionDate < dubaiDate) {
+                startableDayIndex = firstUncompletedIdx;
+            }
+        }
+    }
+
+    state.challenges.slice(0, days).forEach((ch, idx) => {
+        if (!ch) return; 
+
+        const card = document.createElement('div');
+        card.className = 'challenge-div mb-2';
+        const isStartable = idx === startableDayIndex;
+
+        let content = `<h4>Day ${ch.day}: ${escapeHtml(ch.goal)}</h4>`;
+
+        if (ch.completed) {
+            content += `<p style="color: green; font-weight: bold;"><i class="fas fa-check-circle"></i> Completed (+${ch.points} $twote)</p>`;
+            if(ch.completionDate) content += `<p class="text-muted fs-sm">(${ch.completionDate})</p>`;
+            card.classList.add('completed');
+        } else if (isStartable) {
+            content += `<button class="btn btn-custom btn-sm mt-1 start-day-btn" data-day="${ch.day}">Start Day ${ch.day}</button>`;
+            card.classList.add('startable');
+        } else {
+            card.classList.add('locked');
+            if (idx < firstUncompletedIdx) {
+                content += `<p class="warning-text fs-sm"><i class="fas fa-exclamation-triangle"></i> Error: Should be completed?</p>`;
+            } else if (idx === firstUncompletedIdx) {
+                const prevCh = idx > 0 ? state.challenges[idx - 1] : null;
+                if (prevCh?.completed && prevCh.completionDate === dubaiDate) {
+                    content += `<p class="text-muted fs-sm"><i class="fas fa-clock"></i> Unlocks tomorrow (Dubai Time)</p>`;
+                } else if (idx > 0 && !prevCh?.completed) {
+                    content += `<p class="warning-text fs-sm"><i class="fas fa-lock"></i> Complete Day ${ch.day - 1}</p>`;
+                } else {
+                    content += `<p class="text-muted fs-sm"><i class="fas fa-lock"></i> Locked</p>`;
+                }
+            } else {
+                content += `<p class="text-muted fs-sm"><i class="fas fa-lock"></i> Complete Day ${firstUncompletedIdx + 1}</p>`;
+            }
+        }
+        card.innerHTML = content;
+        domElements.dailyChallengeList.appendChild(card);
+    });
+}
+
+function startChallenge(day) {
+    const challenge = state.challenges.find(c => c.day === day);
+    if (!challenge) return;
+    if (challenge.completed) return;
+
+    if (!modalInstances.energyLog) return;
+
+    state.currentChallengeDay = day;
+    state.energyBefore = null; 
+
+    try {
+        domElements.energyLogModalTitle.textContent = `Day ${day}: ${escapeHtml(challenge.goal)} - Before`;
+        domElements.energyLogPrompt.textContent = "Log your current energy level (0-100%).";
+        domElements.energySlider.value = state.energyLevel ?? 50; 
+        domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
+        domElements.challengeTasks.style.display = 'none'; 
+        if(domElements.proofWarning) domElements.proofWarning.style.display = 'none'; 
+
+        if(domElements.task1Proof) domElements.task1Proof.value = '';
+        if(domElements.task2Proof) domElements.task2Proof.value = '';
+
+        domElements.submitEnergyLog.textContent = 'Confirm Energy & View Tasks';
+        domElements.submitEnergyLog.setAttribute('data-stage', 'before');
+        domElements.submitEnergyLog.disabled = false; 
+
+        modalInstances.energyLog.show();
+    } catch (e) {
+        state.currentChallengeDay = null;
+    }
+}
+
+async function submitEnergyLog() {
+    if (!domElements.energySlider || !domElements.submitEnergyLog || !modalInstances.energyLog) return;
+
+    const sliderValue = parseInt(domElements.energySlider.value);
+    const stage = domElements.submitEnergyLog.getAttribute('data-stage');
+    const challenge = state.challenges.find(c => c.day === state.currentChallengeDay);
+
+    if (!challenge) return;
+
+    domElements.submitEnergyLog.disabled = true;
+    domElements.submitEnergyLog.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+
+    if (stage === 'before') {
+        state.energyBefore = sliderValue; 
+
+        domElements.energyLogModalTitle.textContent = `Day ${state.currentChallengeDay}: ${escapeHtml(challenge.goal)} - After`;
+        domElements.energyLogPrompt.textContent = "Complete tasks & log energy post-challenge.";
+        domElements.challengeTasks.style.display = 'block'; 
+        domElements.meditationTask.textContent = escapeHtml(challenge.meditation);
+        domElements.task1Text.textContent = escapeHtml(challenge.task1);
+        domElements.task2Text.textContent = escapeHtml(challenge.task2);
+
+        domElements.energySlider.value = state.energyLevel ?? 50;
+        if(domElements.energySliderValue) domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
+
+        domElements.task1Proof.value = '';
+        domElements.task2Proof.value = '';
+        domElements.proofWarning.style.display = 'block'; 
+
+        domElements.submitEnergyLog.textContent = 'Submit Completion';
+        domElements.submitEnergyLog.setAttribute('data-stage', 'after');
+        domElements.submitEnergyLog.disabled = true;
+
+    } else if (stage === 'after') {
+        const energyAfter = sliderValue;
+        const task1File = domElements.task1Proof?.files[0];
+        const task2File = domElements.task2Proof?.files[0];
+
+        if (!task1File || !task2File) {
+            showNotification('Please upload proof for both tasks.', 'warning');
+            domElements.submitEnergyLog.textContent = 'Submit Completion';
+            domElements.submitEnergyLog.disabled = false; 
+            if(domElements.proofWarning) domElements.proofWarning.style.display = 'block'; 
+            return; 
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
+        try {
+            challenge.completed = true;
+            challenge.completionDate = getCurrentDubaiDate(); 
+
+            state.challengeHistory = state.challengeHistory ||[]; 
+            state.challengeHistory.push({
+                day: state.currentChallengeDay,
+                goal: challenge.goal,
+                energyBefore: state.energyBefore,
+                energyAfter,
+                task1ProofProvided: !!task1File,
+                task2ProofProvided: !!task2File,
+                completionTimestamp: Date.now()
+            });
+            if (state.challengeHistory.length > 50) {
+                state.challengeHistory = state.challengeHistory.slice(-50); 
+            }
+
+            updateEnergyLevel(state.energyBefore, energyAfter); 
+            awardPoints(challenge.points, `Challenge Day ${state.currentChallengeDay}`);
+
+            if (state.currentChallengeDuration) {
+                const completedCount = getCompletedDaysCount(state.currentChallengeDuration);
+                if (completedCount === 7 && state.currentChallengeDuration === 7) {
+                    checkAndGrantAchievement('CHALLENGE_7_COMPLETE');
+                }
+            }
+
+            saveData(['challenges', 'challengeHistory', 'energyLevel']);
+
+            modalInstances.energyLog.hide();
+            showNotification(`Day ${state.currentChallengeDay} completed! 🎉`, 'success');
+            displayDailyChallenges(state.currentChallengeDuration); 
+
+        } catch (error) {
+            showNotification('Error submitting completion. Please try again.', 'error');
+            domElements.submitEnergyLog.textContent = 'Submit Completion';
+            domElements.submitEnergyLog.disabled = false;
+        } finally {
+            state.currentChallengeDay = null;
+            state.energyBefore = null;
+        }
+    }
+}
+
+function updateEnergyLevel(before, after) {
+    if (after !== null && after !== undefined && Number.isInteger(after)) {
+        const oldEnergy = state.energyLevel ?? 0;
+        const newEnergy = Math.min(100, Math.max(0, after)); 
+
+        if (newEnergy !== oldEnergy) {
+            awardEnergy(newEnergy - oldEnergy, `Challenge Day ${state.currentChallengeDay || ''} Log`);
+        }
+    }
+}
+
+function showEnrollModal(days) {
+    if (!modalInstances.enroll) return;
+    domElements.enrollName.textContent = state.userName ?? 'User';
+    domElements.enrollEnergy.textContent = state.energyLevel ?? 0;
+    const canEnroll = (state.energyLevel ?? 0) >= 70;
+    domElements.submitEnrollment.disabled = !canEnroll;
+    domElements.enrollRequirement.style.display = canEnroll ? 'none' : 'block';
+    domElements.submitEnrollment.onclick = () => enroll(days);
+    modalInstances.enroll.show();
+}
+
+function enroll(daysContext) { 
+    if ((state.energyLevel ?? 0) < 70) return;
+    if (state.workshopAccess) return modalInstances.enroll.hide();
+
+    state.workshopAccess = true;
+    saveData(['workshopAccess']); 
+    modalInstances.enroll.hide();
+    showNotification(`Enrollment successful! Workshop access granted.`, 'success');
+
+    if (sectionStack[sectionStack.length-1] === 'wellnessManager') {
+        loadChallenges(); 
+    } else {
+        showSection('wellnessManager'); 
+    }
+}
+
+function showCodeModal(days) {
+    if (!modalInstances.code) return;
+    domElements.workshopCode.value = ''; 
+    domElements.submitCode.onclick = () => submitCode(days);
+    modalInstances.code.show();
+}
+
+function submitCode(daysContext) { 
+    const codeInput = domElements.workshopCode;
+    if (!codeInput) return; 
+
+    const code = codeInput.value.trim();
+    const correctCode = "WELLNESS"; 
+
+    if (!code) return codeInput.focus();
+
+    if (code.toUpperCase() === correctCode) {
+        if (!state.workshopAccess) {
+            state.workshopAccess = true;
+            saveData(['workshopAccess']); 
+            showNotification(`Code accepted! Workshop access granted.`, 'success');
+            if (sectionStack[sectionStack.length-1] === 'wellnessManager') {
+                loadChallenges(); 
+            } else {
+                showSection('wellnessManager'); 
+            }
+        }
+        modalInstances.code.hide();
+    } else {
+        showNotification('Invalid workshop code.', 'error');
+        codeInput.focus(); 
+        codeInput.select(); 
+    }
+}
+
+// --- Game Page Logic (Wheels, Boxes) ---
+function spinWheel(wheelType) {
+    if (isSpinning) return;
+    if (!wheelType || !wheelTypes.includes(wheelType)) return;
+
+    const spinsLeft = state.wheelSpins[wheelType] || 0;
+    if (spinsLeft <= 0) return;
+
+    if (wheelType !== 'referral') {
+        const now = Date.now();
+        const twentyFourHours = 24 * 60 * 60 * 1000;
+        if (!state.lastCheckInTime || (now - state.lastCheckInTime >= twentyFourHours)) {
+            showNotification('Complete your Daily Check-In first to spin this wheel!', 'warning');
+            return;
+        }
+    }
+
+    if (!modalInstances.wheel) return;
+
+    isSpinning = true;
+    activeWheelType = wheelType;
+    if (spinTimeoutId) clearTimeout(spinTimeoutId); 
+
+    state.wheelSpins[wheelType]--;
+    saveData(['wheelSpins']); 
+    updateWheelButtons(); 
+    updateMysteryBoxUI(); 
+
+    domElements.wheelModalTitle.textContent = `Spinning: ${capitalizeFirstLetter(wheelType)}!`;
+    domElements.wheelResultDisplay.textContent = "Spinning...";
+    domElements.modalWheel.style.transition = 'none'; 
+    domElements.modalWheel.style.transform = 'rotate(0deg)'; 
+
+    modalInstances.wheel.show();
+
+    void domElements.modalWheel.offsetWidth; 
+
+    const randomSpins = Math.floor(Math.random() * 5) + 5; 
+    const randomStopAngle = Math.random() * 360; 
+    const targetRotation = (randomSpins * 360) + randomStopAngle;
+
+    const animationDuration = 4000; 
+    const failsafeDelay = animationDuration + 1500; 
+    spinTimeoutId = setTimeout(() => {
+        if (isSpinning) { 
+            handleSpinEnd(null); 
+        }
+    }, failsafeDelay);
+
+    domElements.modalWheel.style.transition = `transform ${animationDuration / 1000}s cubic-bezier(0.25, 0.1, 0.25, 1)`;
+    domElements.modalWheel.style.transform = `rotate(${targetRotation}deg)`;
+
+    domElements.modalWheel.addEventListener('transitionend', handleSpinEnd, { once: true });
+}
+
+function handleSpinEnd(event) {
+    if (event instanceof TransitionEvent && event.propertyName !== 'transform') return; 
+    if (!isSpinning) return;
+
+    if (spinTimeoutId) {
+        clearTimeout(spinTimeoutId); 
+        spinTimeoutId = null;
+    }
+
+    let finalAngle = 0;
+    try {
+        const wheelElement = domElements.modalWheel;
+        const currentTransform = window.getComputedStyle(wheelElement).transform;
+        if (currentTransform && currentTransform !== 'none') {
+            const matrixValues = currentTransform.match(/matrix.*\((.+)\)/);
+            if (matrixValues && matrixValues[1]) {
+                const v = matrixValues[1].split(',').map(s => parseFloat(s.trim())); 
+                finalAngle = Math.atan2(v[1], v[0]) * (180 / Math.PI);
+                finalAngle = (finalAngle % 360 + 360) % 360; 
+            }
+        }
+
+        const segmentAngle = 360 / WHEEL_SEGMENTS;
+        let winningSegmentIndex = Math.floor(((360 - finalAngle + (segmentAngle / 100)) % 360) / segmentAngle); 
+
+        const rewards =[ 
+            { type: 'energy', value: 10, message: "+10% Energy!", icon: '⚡' },       
+            { type: 'points', value: 5, message: "+5 $twote!", icon: '💰' },         
+            { type: 'energy', value: 15, message: "+15% Energy!", icon: '⚡' },       
+            { type: 'mystery_box', value: 1, message: "+1 Mystery Box!", icon: '🎁' },
+            { type: 'energy', value: 5, message: "+5% Energy!", icon: '⚡' },        
+            { type: 'points', value: 10, message: "+10 $twote!", icon: '💰' },        
+            { type: 'referral_spin', value: 1, message: "+1 Referral Spin!", icon: '✨' }, 
+            { type: 'points', value: 2, message: "+2 $twote!", icon: '💰' },         
+        ];
+
+        const reward = rewards[winningSegmentIndex];
+
+        const prefix = getWheelResultMessagePrefix(activeWheelType);
+        const fullMessage = `${reward.icon} ${prefix} ${reward.message}`;
+        domElements.wheelResultDisplay.textContent = fullMessage;
+
+        if (reward.type === 'energy') {
+            awardEnergy(reward.value, `${capitalizeFirstLetter(activeWheelType)} Wheel`);
+        } else if (reward.type === 'points') {
+            awardPoints(reward.value, `${capitalizeFirstLetter(activeWheelType)} Wheel`);
+        } else if (reward.type === 'mystery_box') {
+            awardMysteryBox(reward.value, `${capitalizeFirstLetter(activeWheelType)} Wheel`);
+        } else if (reward.type === 'referral_spin') {
+            state.wheelSpins.referral = (state.wheelSpins.referral || 0) + reward.value;
+            saveData(['wheelSpins']); 
+            updateWheelButtons(); 
+        }
+
+        setTimeout(() => {
+            if(modalInstances.wheel) modalInstances.wheel.hide();
+        }, 2500); 
+
+    } catch (error) {
+        if(domElements.wheelResultDisplay) domElements.wheelResultDisplay.textContent = "Spin Error! Awarding default.";
+        awardEnergy(5, "Spin Error Fallback"); 
+        setTimeout(() => { if(modalInstances.wheel) modalInstances.wheel.hide(); }, 2500);
+    } finally {
+        setTimeout(() => {
+            if (isSpinning) { 
+                isSpinning = false;
+                activeWheelType = null;
+                updateWheelButtons(); 
+                updateMysteryBoxUI(); 
+            }
+        }, 2600); 
+    }
+}
+
+function getWheelResultMessagePrefix(wheelType) {
+    const prefixes = {
+        energy: "Feel the power!",
+        sigil: "Symbols align!",
+        happiness: "Spread the joy!",
+        wellness: "Nurture your being!",
+        prosperity: "Attract abundance!",
+        manifestation: "Your wish is heard!",
+        healing: "Embrace restoration!",
+        referral: "A special gift!",
+    };
+    return prefixes[wheelType] || "The wheel turns!";
+}
+
+function awardMysteryBox(count = 1, reason = "") {
+    if (!Number.isInteger(count) || count <= 0) return;
+    state.mysteryBoxes = (state.mysteryBoxes || 0) + count; 
+    saveData(['mysteryBoxes']);
+    showNotification(`Received ${count} Mystery Box! 🎁`, 'success');
+    updateMysteryBoxUI(); 
+}
+
+function openMysteryBox() {
+    if (isSpinning) return;
+    if ((state.mysteryBoxes ?? 0) <= 0) return;
+    if (!domElements.openMysteryBoxBtn) return;
+
+    domElements.openMysteryBoxBtn.disabled = true;
+    domElements.openMysteryBoxBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Opening...';
+    state.mysteryBoxes--; 
+    if(domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes;
+
+    setTimeout(() => {
+        try {
+            const rewards =[
+                { type: 'points', value: 15, weight: 4 },
+                { type: 'points', value: 25, weight: 3 },
+                { type: 'points', value: 50, weight: 1 },
+                { type: 'spin', wheel: 'referral', value: 1, weight: 3 }, 
+                { type: 'spin', wheel: 'energy', value: 1, weight: 1 }, 
+                { type: 'energy', value: 10, weight: 3 },
+                { type: 'energy', value: 20, weight: 1 },
+            ];
+            const totalWeight = rewards.reduce((sum, reward) => sum + reward.weight, 0);
+            let randomWeight = Math.random() * totalWeight;
+            let chosenReward = rewards[rewards.length - 1]; 
+
+            for(const reward of rewards) {
+                if (randomWeight < reward.weight) {
+                    chosenReward = reward;
+                    break;
+                }
+                randomWeight -= reward.weight;
+            }
+
+            let message = "Opened Box: ";
+            if (chosenReward.type === 'points') {
+                message += `+${chosenReward.value} $twote!`;
+                awardPoints(chosenReward.value, "Mystery Box");
+            } else if (chosenReward.type === 'spin' && wheelTypes.includes(chosenReward.wheel)) {
+                message += `+${chosenReward.value} ${capitalizeFirstLetter(chosenReward.wheel)} spin!`;
+                state.wheelSpins[chosenReward.wheel] = (state.wheelSpins[chosenReward.wheel] || 0) + chosenReward.value;
+                saveData(['wheelSpins']);
+                updateWheelButtons(); 
+            } else if (chosenReward.type === 'energy') {
+                message += `+${chosenReward.value}% Energy boost!`;
+                awardEnergy(chosenReward.value, "Mystery Box");
+            }
+
+            checkAndGrantAchievement('OPEN_MYSTERY_BOX'); 
+
+            saveData(['mysteryBoxes', 'achievements']);
+            showNotification(message, 'success');
+
+        } catch (error) {
+            state.mysteryBoxes++; 
+            if(domElements.mysteryBoxCount) domElements.mysteryBoxCount.textContent = state.mysteryBoxes;
+        } finally {
+            if (domElements.openMysteryBoxBtn) {
+                domElements.openMysteryBoxBtn.innerHTML = 'Open a Box';
+                domElements.openMysteryBoxBtn.disabled = (state.mysteryBoxes ?? 0) <= 0 || isSpinning;
+            }
+            updateUI(); 
+        }
+
+    }, 1500); 
+}
+
+// --- Profile & History ---
+function loadProfileHistory() {
+    if (!domElements.profileHistory) return;
+
+    const history =[...(state.challengeHistory || [])].reverse().slice(0, 15); 
+
+    if (history.length === 0) {
+        domElements.profileHistory.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No challenge history yet.</td></tr>';
+        return;
+    }
+
+    domElements.profileHistory.innerHTML = history.map(entry => {
+        const energyBeforeText = (entry.energyBefore !== null && entry.energyBefore !== undefined) ? `${entry.energyBefore}%` : '-';
+        const energyAfterText = (entry.energyAfter !== null && entry.energyAfter !== undefined) ? `${entry.energyAfter}%` : '-';
+        const task1ProofIcon = entry.task1ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+        const task2ProofIcon = entry.task2ProofProvided ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>';
+
+        return `
+        <tr>
+            <td class="text-center">${entry.day ?? '-'}</td>
+            <td>${escapeHtml(entry.goal ?? 'N/A')}</td>
+            <td class="text-center">${energyBeforeText}</td>
+            <td class="text-center">${energyAfterText}</td>
+            <td class="text-center">${task1ProofIcon}</td>
+            <td class="text-center">${task2ProofIcon}</td>
+        </tr>`;
+    }).join('');
+}
+
+function deleteProgress() {
+    const confirmationMessage = 'ARE YOU SURE?\n\nThis action will delete ALL your game progress for this user ID, including points, levels, streaks, challenge completions, tasks, achievements, spins, and mystery boxes.\n\nThis cannot be undone!';
+
+    const performDeletion = () => {
+        const overlay = document.createElement('div');
+        overlay.id = 'temp-loading-delete';
+        overlay.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: flex; justify-content: center; align-items: center; z-index: 9999; color: white; font-size: 1.2em; text-align: center; padding: 20px;';
+        overlay.innerHTML = 'Deleting Progress...<br>Please wait.';
+        document.body.appendChild(overlay);
+
+        const userId = state.userId, userName = state.userName, userPhoto = state.userPhoto;
+
+        try {
+            clearLocalStorageForUser(userId);
+            state = initializeState();
+            state.userId = userId;
+            state.userName = userName;
+            state.userPhoto = userPhoto;
+            state.leaderboard = initializeState().leaderboard; 
+            ensureUserInLeaderboard(); 
+
+            const allInitialKeys = Object.keys(initializeState());
+            saveStateToLocal(allInitialKeys.filter(k => !['userId'].includes(k)));
+
+            showNotification('All progress has been reset.', 'success');
+            updateUI(); 
+            showInitialSection(); 
+        } catch (error) {
+            showNotification('An error occurred while resetting progress.', 'error');
+        } finally {
+            setTimeout(() => overlay.remove(), 1500);
+        }
+    };
+
+    try {
+        if (telegram?.showConfirm && telegram.isVersionAtLeast('6.1')) { 
+            telegram.showConfirm(confirmationMessage, (confirmed) => {
+                if (confirmed) performDeletion();
+            });
+        } else {
+            if (window.confirm(confirmationMessage)) performDeletion();
+        }
+    } catch (e) {
+        if (window.confirm(confirmationMessage)) performDeletion();
+    }
+}
+
+// --- Task Management ---
+function completeTask(taskKey) {
+    state.completedTasks = state.completedTasks ||[]; 
+    if (state.completedTasks.includes(taskKey)) return;
+
+    const button = domElements[`${taskKey}TaskBtn`];
+    if (button) {
+        button.disabled = true; 
+        button.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Verifying...';
+    }
+
+    setTimeout(() => {
+        if (!state.completedTasks.includes(taskKey)) {
+            state.completedTasks.push(taskKey);
+            awardPoints(10, `Task: ${capitalizeFirstLetter(taskKey)}`); 
+            saveData(['completedTasks']);
+        }
+        updateTaskButtons();
+    }, 1500); 
+}
+
+// --- Referral Simulation ---
+function simulateReferralCompletion() {
+    const referralPoints = 20;
+    const referralSpins = 3;
+
+    awardPoints(referralPoints, "Referral Bonus (Simulated)");
+    state.wheelSpins.referral = (state.wheelSpins.referral || 0) + referralSpins;
+    checkAndGrantAchievement('FIRST_REFERRAL'); 
+
+    saveData(['wheelSpins', 'achievements']);
+    updateUI(); 
+}
+
+function copyReferralLink() {
+    const input = domElements.referralLink;
+    if (!input || !input.value || input.value === "Link unavailable") return;
+
+    const textToCopy = input.value;
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showNotification('Referral link copied!', 'success');
+        }).catch(err => {
+            copyUsingTelegramFallback(textToCopy);
+        });
+    } else {
+        copyUsingTelegramFallback(textToCopy);
+    }
+}
+
+function copyUsingTelegramFallback(text) {
+    if (telegram?.clipboard?.writeText && telegram.isVersionAtLeast('6.4')) { 
+        telegram.clipboard.writeText(text, (success) => {
+            if (success) {
+                showNotification('Referral link copied! (via TG)', 'success');
+            } else {
+                alertManualCopy(text);
+            }
+        });
+    } else {
+        alertManualCopy(text);
+    }
+}
+
+function alertManualCopy(text) {
+    showNotification('Could not copy automatically. Please copy manually.', 'warning');
+    if(domElements.referralLink) {
+        try {
+            domElements.referralLink.select();
+            domElements.referralLink.setSelectionRange(0, 99999); 
+        } catch (e) {}
+    }
+}
+
+// --- Multi-Wallet Integration ---
+
+function setupTonConnect() {
+    try {
+        tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://raw.githubusercontent.com/ton-community/tutorials/main/03-client/test/public/tonconnect-manifest.json',
+            buttonRootId: 'tonConnectContainer'
+        });
+
+        tonConnectUI.onStatusChange(wallet => {
+            if (wallet) {
+                const rawAddress = wallet.account.address;
+                state.walletAddress = rawAddress;
+                saveData(['walletAddress']);
+                showNotification("TON Wallet Connected Successfully!", "success");
+            } else {
+                state.walletAddress = null;
+                saveData(['walletAddress']);
+            }
+        });
+    } catch (e) {
+        console.error("TON Connect UI initialization failed:", e);
+    }
+}
+
+async function connectMetaMask() {
+    if (typeof window.ethereum !== 'undefined') {
+        try {
+            if (domElements.metamaskConnectBtn) {
+                domElements.metamaskConnectBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Connecting...';
+            }
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            
+            if (accounts.length > 0) {
+                state.evmWalletAddress = accounts[0];
+                saveData(['evmWalletAddress']);
+                showNotification("MetaMask Connected Successfully!", "success");
+                updateUI();
+            }
+        } catch (error) {
+            if (error.code === 4001) {
+                showNotification("User rejected the MetaMask connection.", "warning");
+            } else {
+                showNotification("MetaMask connection failed.", "error");
+            }
+            if (domElements.metamaskConnectBtn) {
+                domElements.metamaskConnectBtn.innerHTML = '<i class="fas fa-fox" style="margin-right: 5px;"></i> Connect MetaMask';
+            }
+        }
+    } else {
+        showNotification("MetaMask is not installed. Please install it to continue.", "warning");
+        window.open('https://metamask.io/download/', '_blank');
+    }
+}
+
+async function requestAirdropWithdrawal() {
+    if (!tonConnectUI || !tonConnectUI.connected) {
+        showNotification("Please connect your TON Wallet first.", "warning");
+        return;
+    }
+
+    if ((state.points || 0) < 100) {
+        showNotification("You need at least 100 $twote to request a withdrawal.", "warning");
+        return;
+    }
+
+    try {
+        if(domElements.airdropWithdrawBtn) {
+            domElements.airdropWithdrawBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processing...';
+            domElements.airdropWithdrawBtn.disabled = true;
+        }
+
+        const transactionPayload = {
+            validUntil: Math.floor(Date.now() / 1000) + 60,
+            messages:[
+                {
+                    address: "EQBvW8Z5huPtPNg8Q3XG0vHhN_A_oQ3hLxg8kK3mO-fWc5b7",
+                    amount: "10000000",
+                }
+            ]
+        };
+
+        const result = await tonConnectUI.sendTransaction(transactionPayload);
+        
+        showNotification(`Successfully claimed ${state.points} $TWOTE on-chain!`, "success");
+        state.points = 0;
+        saveData(['points']);
+        updateUI();
+
+    } catch (error) {
+        showNotification("Transaction cancelled or failed.", "error");
+    } finally {
+        if (domElements.airdropWithdrawBtn) {
+            domElements.airdropWithdrawBtn.innerHTML = 'Withdraw $twote (Soon)';
+            domElements.airdropWithdrawBtn.disabled = false;
+        }
+    }
+}
+
+// --- Event Listeners Setup ---
+function setupEventListeners() {
+    const addListener = (element, event, handler, options = {}) => {
+        if (element instanceof HTMLElement) { 
+            element.addEventListener(event, handler, options);
+        }
+    };
+
+    addListener(domElements.profileLink, 'click', () => showSection('playerProfile'));
+    addListener(domElements.navHome, 'click', (e) => { e.preventDefault(); showSection('wellnessManager'); });
+    addListener(domElements.navTasks, 'click', (e) => { e.preventDefault(); showSection('tasksSection'); });
+    addListener(domElements.navGame, 'click', (e) => { e.preventDefault(); showSection('gamePage'); });
+    addListener(domElements.navProfile, 'click', (e) => { e.preventDefault(); showSection('playerProfile'); });
+
+    addListener(domElements.saveHoroscopeBtn, 'click', saveHoroscope);
+
+    addListener(domElements.challengeOptions, 'click', (event) => {
+        const btn = event.target.closest('button[data-days]'); 
+        if (!btn) return; 
+
+        const days = parseInt(btn.dataset.days);
+        if (isNaN(days)) return; 
+
+        if (btn.classList.contains('start-challenge-btn')) {
+            state.currentChallengeDuration = days;
+            saveData(['currentChallengeDuration']);
+            showSection('dailyChallenges');
+        } else if (btn.classList.contains('view-challenge-btn')) {
+            state.currentChallengeDuration = days; 
+            showSection('dailyChallenges');
+        } else if (btn.classList.contains('enroll-btn')) {
+            showEnrollModal(days);
+        } else if (btn.classList.contains('attended-btn')) {
+            showCodeModal(days);
+        }
+    });
+
+    addListener(domElements.dailyChallengeList, 'click', (event) => {
+        const btn = event.target.closest('button.start-day-btn[data-day]');
+        if (btn) {
+            const day = parseInt(btn.dataset.day);
+            if (!isNaN(day)) startChallenge(day);
+        }
+    });
+
+    addListener(domElements.energySlider, 'input', () => {
+        if(domElements.energySliderValue) domElements.energySliderValue.textContent = `${domElements.energySlider.value}%`;
+    });
+    addListener(domElements.submitEnergyLog, 'click', submitEnergyLog);
+
+    const handleProofChange = () => {
+        if (domElements.submitEnergyLog?.getAttribute('data-stage') === 'after') {
+            const f1 = domElements.task1Proof?.files[0];
+            const f2 = domElements.task2Proof?.files[0];
+            const bothFilesProvided = f1 && f2;
+            if(domElements.submitEnergyLog) domElements.submitEnergyLog.disabled = !bothFilesProvided;
+            if(domElements.proofWarning) domElements.proofWarning.style.display = bothFilesProvided ? 'none' : 'block';
+        }
+    };
+    addListener(domElements.task1Proof, 'change', handleProofChange);
+    addListener(domElements.task2Proof, 'change', handleProofChange);
+
+    addListener(domElements.dailyCheckInBtn, 'click', dailyCheckIn);
+    addListener(domElements.openMysteryBoxBtn, 'click', openMysteryBox);
+
+    const wheelGrid = document.querySelector('.wheel-button-grid');
+    addListener(wheelGrid, 'click', (event) => {
+        const btn = event.target.closest('button.wheel-button[data-wheel]');
+        if (btn && !btn.disabled) spinWheel(btn.dataset.wheel);
+    });
+
+    addListener(domElements.claimReferralRewardBtn, 'click', simulateReferralCompletion);
+    addListener(domElements.copyReferralBtn, 'click', copyReferralLink);
+    addListener(domElements.telegramTaskBtn, 'click', () => completeTask('telegram'));
+    addListener(domElements.twitterTaskBtn, 'click', () => completeTask('twitter'));
+    addListener(domElements.instagramTaskBtn, 'click', () => completeTask('instagram'));
+    addListener(domElements.youtubeTaskBtn, 'click', () => completeTask('youtube'));
+
+    addListener(domElements.deleteProgressBtn, 'click', deleteProgress);
+    addListener(domElements.airdropWithdrawBtn, 'click', requestAirdropWithdrawal);
+    
+    // MetaMask Listener
+    addListener(domElements.metamaskConnectBtn, 'click', connectMetaMask);
+    
+    if (typeof window.ethereum !== 'undefined') {
+        window.ethereum.on('accountsChanged', function (accounts) {
+            if (accounts.length > 0) {
+                state.evmWalletAddress = accounts[0];
+                saveData(['evmWalletAddress']);
+                updateUI();
+                showNotification("MetaMask account switched.", "info");
+            } else {
+                state.evmWalletAddress = null;
+                saveData(['evmWalletAddress']);
+                updateUI();
+                showNotification("MetaMask disconnected.", "warning");
+            }
+        });
+    }
+}
+
+
+

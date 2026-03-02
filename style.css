@@ -1,0 +1,532 @@
+:root {
+    --bg-color: #4E342E;
+    --text-color: #FFF8E1;
+    --button-color: #FFD700;
+    --button-text-color: #3E2723;
+    --wellness-manager-color: #3E2723; /* Dark brown */
+    --warning-color: #d9534f; /* Bootstrap danger-ish red */
+    --challenge-description-color: #3E2723; /* Dark brown for challenge descriptions */
+    --level-color: #00bcd4; /* Cyan for level */
+    --achievement-color: #ff9800; /* Orange for achievements */
+    --wheel-pointer-color: #FF0000; /* Red pointer */
+}
+
+body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+    padding-bottom: 70px; /* Space for footer nav */
+}
+
+#backgroundVideo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -1;
+    opacity: 0.3; /* Dim the video */
+}
+
+.container {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.section {
+    background: rgba(62, 39, 35, 0.7); /* Darker brown, semi-transparent */
+    backdrop-filter: blur(8px);
+    padding: 20px; /* Reduced padding */
+    border-radius: 15px; /* Slightly smaller radius */
+    margin-bottom: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 248, 220, 0.2); /* Subtle border */
+}
+
+.challenge-div {
+    background: rgba(255, 255, 255, 0.9); /* Lighter background for contrast */
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 10px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    color: var(--challenge-description-color);
+}
+
+.challenge-div h3, .challenge-div h4 {
+    color: var(--challenge-description-color);
+    margin-bottom: 10px;
+    font-size: 1.1rem; /* Consistent size */
+}
+
+.challenge-div p {
+    color: var(--challenge-description-color);
+    font-size: 0.9rem; /* Slightly smaller */
+    margin-bottom: 8px;
+}
+
+.challenge-div .warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+    font-size: 0.85rem;
+}
+
+.challenge-icon {
+    font-size: 2em; /* Smaller */
+    margin-bottom: 8px;
+    color: var(--challenge-description-color); /* Match text */
+}
+
+/* Use icon inside the challenge-div specifically */
+.challenge-div > i.challenge-icon {
+    color: var(--wellness-manager-color); /* Darker icon */
+}
+
+.modal-content {
+    background: var(--bg-color);
+    color: var(--text-color);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 15px;
+}
+
+.modal-header, .modal-footer {
+    border: none;
+}
+
+.btn-close-white { filter: invert(1) grayscale(100%) brightness(200%); }
+
+.btn-custom {
+    background-color: var(--button-color);
+    color: var(--button-text-color);
+    border: none;
+    padding: 8px 16px; /* Smaller padding */
+    border-radius: 8px;
+    font-weight: 600; /* Slightly bolder */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-custom:hover, .btn-custom:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: var(--button-text-color);
+    background-color: var(--button-color); /* Keep color on hover */
+}
+
+.btn-custom:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.btn-custom:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.btn-danger {
+    background-color: var(--warning-color);
+    color: #fff;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    color: #fff;
+    background-color: var(--warning-color); /* Keep color */
+}
+
+.btn-danger:active {
+    transform: translateY(0px);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.locked {
+    opacity: 0.6;
+    background: rgba(200, 200, 200, 0.7); /* Grey out locked challenges */
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0; /* Reduced padding */
+    margin-bottom: 15px;
+}
+
+/* Style for the logo.webp */
+header img[src="logo.webp"] {
+    width: 35px; /* Smaller logo */
+    height: 35px;
+    margin-right: 8px;
+    vertical-align: middle; /* Align with text */
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.5rem; /* Smaller title */
+    color: var(--text-color);
+    font-weight: 700;
+    display: inline-block; /* Keep H1 on same line */
+    vertical-align: middle;
+}
+
+#profileLink { cursor: pointer; text-align: right; } /* Ensure text aligns right */
+
+#profilePhoto {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid var(--button-color); /* Highlight profile pic */
+    vertical-align: middle; /* Align nicely if text wraps */
+    margin-left: 5px; /* Space between text and photo */
+}
+
+#profileInfoContainer { /* New container for better layout */
+    display: inline-block;
+    vertical-align: middle;
+}
+
+#profileNameDisplay, #profileLevelDisplay, #pointsDisplay, #energyHeaderDisplay { 
+    display: block; /* Make each span its own line */
+    font-size: 0.8rem; /* Smaller text */
+    line-height: 1.2;
+    text-align: right;
+    color: var(--text-color); /* Default color */
+}
+
+#profileNameDisplay { font-weight: bold; }
+#pointsDisplay { color: var(--button-color); font-weight: bold; }
+#profileLevelDisplay { color: var(--level-color); font-size: 0.75rem; }
+#energyHeaderDisplay { color: #87CEEB; font-weight: bold;} /* Specific color for energy */
+
+h2 {
+    color: var(--text-color);
+    text-align: center;
+    margin-bottom: 15px; /* Reduced margin */
+    font-size: 1.4rem; /* Slightly smaller */
+    font-weight: 700;
+}
+
+h3 {
+    color: var(--text-color);
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+h4 {
+    color: var(--text-color);
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.warning-text {
+    color: var(--warning-color);
+    font-weight: bold;
+}
+
+.footer-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: rgba(78, 52, 46, 0.9); /* Slightly less transparent */
+    padding: 8px 0; /* Reduced padding */
+    z-index: 1000;
+    display: flex;
+    justify-content: space-around;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+    backdrop-filter: blur(5px);
+}
+
+.footer-nav a {
+    color: var(--text-color);
+    text-decoration: none;
+    font-size: 12px; /* Smaller font */
+    text-align: center;
+    transition: color 0.2s, transform 0.2s; /* Added color transition */
+    flex: 1;
+    padding: 4px 0;
+}
+
+.footer-nav a:hover {
+    color: var(--button-color); /* Highlight on hover */
+    transform: scale(1.1);
+}
+
+.footer-nav a.active { /* Style for the active tab */
+    color: var(--button-color);
+    transform: scale(1.1);
+    font-weight: bold;
+}
+
+.footer-nav a i {
+    display: block;
+    font-size: 18px; /* Smaller icons */
+    margin-bottom: 2px;
+}
+
+.task-icon {
+    font-size: 1.5em; /* Smaller */
+    margin-right: 8px;
+    color: var(--text-color);
+}
+
+#socialMediaTasks ul { list-style-type: none; padding: 0; }
+#socialMediaTasks li { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; background: rgba(0,0,0,0.1); padding: 8px; border-radius: 5px;}
+#socialMediaTasks li > div { display: flex; align-items: center; margin-right: 10px; margin-bottom: 5px; }
+#socialMediaTasks a { color: var(--text-color); text-decoration: underline; margin-left: 5px; font-weight: 600;}
+#socialMediaTasks a:hover { text-decoration: none; }
+#socialMediaTasks button { padding: 5px 10px; font-size: 0.8em; }
+
+#referralTask { margin-top: 20px; background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px; }
+#referralTask p { margin-bottom: 10px; font-size: 0.9rem;}
+#referralTask input[type="text"] { background-color: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.3); color: var(--text-color); padding: 8px; border-radius: 5px; font-size: 0.9rem;}
+#referralTask button { width: 80px; font-size: 0.9rem; padding: 6px 10px;}
+
+/* Game Page specific styles */
+.wheel-button-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); /* Further adjust min width */
+    gap: 8px; /* Slightly smaller gap */
+    margin-bottom: 15px;
+}
+
+.wheel-button {
+    padding: 8px 5px; /* Smaller padding */
+    font-size: 0.75em; /* Smaller font */
+    text-align: center;
+    display: flex; /* Flex layout for icon and text */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px; /* Ensure consistent height */
+    line-height: 1.1; /* Tighter line height */
+}
+
+.wheel-button i {
+    font-size: 1.3em; /* Smaller icon */
+    margin-bottom: 3px;
+}
+
+.wheel-button span.spins-left { /* Style for spin count */
+    display: block;
+    font-size: 0.85em; /* Slightly larger relative to button text */
+    opacity: 0.8;
+    margin-top: 2px;
+}
+
+.mystery-box-section {
+    text-align: center;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 248, 220, 0.2);
+    padding-top: 20px;
+    background: rgba(0,0,0,0.1); padding: 15px; border-radius: 5px;
+}
+
+.mystery-box-section .fa-box-open {
+    font-size: 2.5em; /* Smaller */
+    color: var(--button-color);
+    margin-bottom: 8px;
+}
+
+#mysteryBoxCount {
+    font-weight: bold;
+    color: var(--button-color);
+}
+
+/* Progression & Achievements */
+#levelDisplay {
+    font-size: 1rem; /* Smaller */
+    font-weight: bold;
+    color: var(--level-color);
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#achievementsList {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#achievementsList li {
+    display: inline-block;
+    background: rgba(0,0,0, 0.4); /* Darker */
+    color: var(--achievement-color);
+    padding: 4px 8px; /* Smaller */
+    border-radius: 12px;
+    margin: 3px;
+    font-size: 0.8em; /* Smaller */
+    border: 1px solid var(--achievement-color);
+    cursor: default; /* Indicate it's clickable for title */
+}
+
+#achievementsList li i {
+    margin-right: 4px;
+}
+
+.subscription-info {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(255, 248, 220, 0.3);
+    text-align: center;
+    font-size: 0.85em;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .container { padding: 0 10px; }
+    .section { padding: 15px; margin-bottom: 10px;}
+    .challenge-div { padding: 10px; }
+    .challenge-icon { font-size: 1.8em; }
+    h1 { font-size: 1.3rem; } h2 { font-size: 1.2rem; } h3 { font-size: 1.1rem; }
+    .challenge-div h3, .challenge-div h4 { font-size: 1rem; }
+    p { font-size: 0.85rem; }
+    .footer-nav a { font-size: 11px; } .footer-nav a i { font-size: 16px; }
+    header { flex-direction: row; /* Keep row on small screens */ align-items: center; }
+    header > div:first-child { flex-grow: 1; } /* Allow title to take space */
+    header > div#profileLink { margin-top: 0; text-align: right; flex-shrink: 0; /* Prevent shrinking */}
+    #profileInfoContainer { margin-right: 5px;}
+    #profilePhoto { margin-left: 0;}
+    
+    #socialMediaTasks li { flex-direction: column; align-items: flex-start;}
+    #socialMediaTasks li > div { margin-bottom: 8px; }
+    #socialMediaTasks button { width: 100%; margin-top: 5px; font-size: 0.8em;}
+    #referralTask { flex-direction: column; }
+    #referralTask input[type="text"] { width: 100%; margin-right: 0; margin-bottom: 10px;}
+    #referralTask button { width: 100%; }
+    .wheel-button-grid { grid-template-columns: repeat(2, 1fr); gap: 8px;} /* Force 2 columns */
+    .wheel-button { font-size: 0.7em; min-height: 55px;} /* Even smaller */
+    .wheel-button i { font-size: 1.2em;}
+    .table th, .table td { padding: 0.4rem 0.3rem; font-size: 0.8rem;} /* Smaller table text */
+    .table img { max-width: 30px; }
+}
+
+/* Table styling */
+.table { color: var(--text-color); background-color: rgba(0, 0, 0, 0.3); border-radius: 8px; overflow: hidden; margin-top: 15px; border-collapse: separate; border-spacing: 0; font-size: 0.9rem;}
+.table th, .table td { border-top: 1px solid rgba(255, 248, 220, 0.15); padding: 0.5rem 0.4rem; vertical-align: middle; }
+.table thead th { color: var(--button-color); background-color: rgba(0, 0, 0, 0.5); border-top: none; border-bottom: 2px solid var(--button-color); font-weight: bold; text-align: center; }
+.table tbody tr:first-child td { border-top: none; }
+.table tbody tr:hover { background-color: rgba(255, 248, 220, 0.08); }
+.table img { max-width: 35px; height: auto; border-radius: 4px; }
+.table .table-primary td, .table tr.table-primary { background-color: rgba(var(--button-color), 0.2) !important; font-weight: bold; } /* Applied to TR */
+.table .rank-col { width: 50px; text-align: center;}
+.table .points-col { width: 100px; text-align: right;}
+.table-responsive { border-radius: 8px; }
+.table-sm th, .table-sm td { padding: 0.4rem 0.4rem; } /* Keep table-sm adjustments */
+.table .text-success { color: #28a745 !important; }
+.table .text-danger { color: var(--warning-color) !important; }
+
+/* Energy Log Modal Enhancements */
+.form-range::-webkit-slider-thumb { background-color: var(--button-color); }
+.form-range::-moz-range-thumb { background-color: var(--button-color); }
+#challengeTasks { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 10px; margin-top: 15px;}
+#challengeTasks p { font-size: 0.9rem; }
+#challengeTasks .form-control-sm { font-size: 0.8rem; padding: 0.3rem 0.6rem;}
+
+/* Wheel Modal Styles */
+#wheelModal .modal-dialog {
+    max-width: 90vw;
+    width: 320px; /* Slightly smaller */
+    margin: 1.75rem auto; /* Bootstrap default centering */
+}
+
+.wheel-outer-container {
+    padding: 15px;
+    display: flex; /* Use flexbox */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    flex-direction: column; /* Stack pointer and wheel */
+    background: rgba(0,0,0,0.2); /* Slight background in modal body */
+    border-radius: 10px;
+    min-height: 300px; /* Give it some space */
+}
+
+.wheel-pointer {
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent; /* Smaller pointer */
+    border-right: 12px solid transparent;
+    border-top: 20px solid var(--wheel-pointer-color); /* Arrow pointing down */
+    position: relative; /* Keep relative positioning */
+    top: -8px; /* Position above the wheel */
+    z-index: 10;
+    margin-bottom: -12px; /* Adjust spacing */
+}
+
+.wheel-container {
+    width: 220px; /* Smaller wheel */
+    height: 220px;
+    border-radius: 50%;
+    position: relative;
+    overflow: hidden;
+    border: 4px solid var(--button-color);
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+.wheel {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    position: relative; /* Needed for absolute positioning of segments */
+    background: conic-gradient( /* Slightly adjusted colors for visual */
+        #ffd700 0% 12.5%, #ffa500 12.5% 25%, /* Gold, Orange */
+        #ff7f50 25% 37.5%, #ff6347 37.5% 50%, /* Coral, Tomato */
+        #cd5c5c 50% 62.5%, #fa8072 62.5% 75%, /* IndianRed, Salmon */
+        #e9967a 75% 87.5%, #f0e68c 87.5% 100% /* DarkSalmon, Khaki */
+    );
+    transition: transform 4s cubic-bezier(0.25, 0.1, 0.25, 1); /* Spin animation */
+    transform: rotate(0deg); /* Initial position */
+}
+
+/* Emoji Segments */
+.wheel-segment {
+    position: absolute;
+    width: 50px; /* Adjust size as needed */
+    height: 50px;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    margin-top: -25px; /* Half of height */
+    margin-left: -25px; /* Half of width */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6em; /* Adjust emoji size */
+}
+
+/* Position each segment manually */
+.wheel-segment:nth-child(1) { transform: rotate(22.5deg) translateY(-85px) rotate(-22.5deg); }
+.wheel-segment:nth-child(2) { transform: rotate(67.5deg) translateY(-85px) rotate(-67.5deg); }
+.wheel-segment:nth-child(3) { transform: rotate(112.5deg) translateY(-85px) rotate(-112.5deg); }
+.wheel-segment:nth-child(4) { transform: rotate(157.5deg) translateY(-85px) rotate(-157.5deg); }
+.wheel-segment:nth-child(5) { transform: rotate(202.5deg) translateY(-85px) rotate(-202.5deg); }
+.wheel-segment:nth-child(6) { transform: rotate(247.5deg) translateY(-85px) rotate(-247.5deg); }
+.wheel-segment:nth-child(7) { transform: rotate(292.5deg) translateY(-85px) rotate(-292.5deg); }
+.wheel-segment:nth-child(8) { transform: rotate(337.5deg) translateY(-85px) rotate(-337.5deg); }
+
+#wheelResultDisplay {
+    margin-top: 15px;
+    font-weight: bold;
+    color: var(--button-color);
+    text-align: center;
+    min-height: 40px; /* Reserve space for multi-line messages */
+    font-size: 1.1em;
+    padding: 0 10px;
+}
