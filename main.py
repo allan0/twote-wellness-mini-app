@@ -3,11 +3,16 @@ import random
 import asyncio
 from typing import List
 from telethon import TelegramClient, events, Button
+<<<<<<< HEAD
+=======
+from telethon.errors import SessionPasswordNeededError
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
 from dotenv import load_dotenv
 import nest_asyncio
 
 nest_asyncio.apply()
 
+<<<<<<< HEAD
 # Load environment variables from the .env file
 load_dotenv()
 
@@ -26,6 +31,25 @@ SESSION_NAME = f"{BOT_NAME}_session"
 
 # Content
 WELLNESS_TIPS: List[str] =[
+=======
+# Load environment variables
+load_dotenv()
+
+API_ID = 21782566
+API_HASH = '2ea431d7840a2d9ef6c6715bfa4645de'
+BOT_TOKEN = '7666210082:AAG30FFCpgQVtvtcKXEp6vi423DhbmlFEMQ'
+
+# Validate environment variables
+if not all([API_ID, API_HASH, BOT_TOKEN]):
+    raise ValueError("Missing required environment variables (API_ID, API_HASH, or BOT_TOKEN)")
+
+# Bot configuration
+BOT_NAME = "TWOTE Wellness Bot"
+SESSION_NAME = f"{BOT_NAME}_session"  # Use a unique session name
+
+# Content
+WELLNESS_TIPS: List[str] = [
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
     "Take three deep breaths and center yourself.",
     "Drink water to stay hydrated throughout the day.",
     "Spend 5 minutes practicing mindfulness today.",
@@ -35,7 +59,11 @@ WELLNESS_TIPS: List[str] =[
     "List three things you’re grateful for today."
 ]
 
+<<<<<<< HEAD
 MEDITATION_PROMPTS: List[str] =[
+=======
+MEDITATION_PROMPTS: List[str] = [
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
     "Focus on your breath, letting thoughts drift like clouds.",
     "Visualize a bright light at your third eye center.",
     "Chant 'Om' and feel its vibrations resonate.",
@@ -50,7 +78,11 @@ CHAKRA_INFO = (
     "*Tip*: Meditate on this chakra to deepen your spiritual connection."
 )
 
+<<<<<<< HEAD
 # Initialize bot (Convert API_ID to int as required by Telethon)
+=======
+# Initialize bot
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
 bot = TelegramClient(SESSION_NAME, int(API_ID), API_HASH)
 
 # Helper function to format messages
@@ -78,7 +110,11 @@ async def meditate_handler(event):
 
 @bot.on(events.NewMessage(pattern=r"^/wellness$"))
 async def wellness_handler(event):
+<<<<<<< HEAD
     buttons =[
+=======
+    buttons = [
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
         Button.url("Open Wellness Mini App", url="t.me/TWOTE_Bot/wellness")
     ]
     tip = random.choice(WELLNESS_TIPS)

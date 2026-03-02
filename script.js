@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // --- Constants ---
 const API_BASE_URL = "http://127.0.0.1:8000/api";
 
@@ -1994,3 +1995,6 @@ function setupEventListeners() {
         });
     }
 }
+=======
+
+>>>>>>> 362e40aa13d9cdc6a6a29aa642509abb78f07db5
